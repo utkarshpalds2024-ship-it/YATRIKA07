@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Flight Results</title>
+    <style>
+        body { font-family: Arial, sans-serif; background: #f5f5f5; padding: 20px; }
+        .container { max-width: 1200px; margin: 0 auto; }
+        .back-btn {
+            background: #6c757d;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-bottom: 20px;
+        }
+        .flight-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            transition: transform 0.2s;
+        }
+        .flight-card:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+        .airline { font-size: 20px; font-weight: bold; color: #667eea; }
+        .flight-number { color: #666; font-size: 14px; margin: 5px 0; }
+        .aircraft { background: #f0f0f0; padding: 5px 10px; border-radius: 20px; display: inline-block; font-size: 12px; }
+        .time-info { margin: 15px 0; padding: 15px 0; border-top: 1px solid #eee; border-bottom: 1px solid #eee; }
+        .departure, .arrival { display: inline-block; width: 45%; }
+        .status { 
+            display: inline-block; 
+            padding: 5px 12px; 
+            border-radius: 20px; 
+            font-size: 12px;
+            font-weight: bold;
+        }
+        .status.on-time { background: #d4edda; color: #155724; }
+        .status.delayed { background: #fff3cd; color: #856404; }
+        .status.cancelled { background: #f8d7da; color: #721c24; }
+        .price { font-size: 24px; color: #28a745; font-weight: bold; margin-top: 10px; }
+        .badge {
+            background: #e9ecef;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            margin-right: 8px;
+        }
+        hr { margin: 15px 0; }
+        .no-results {
+            text-align: center;
+            padding: 50px;
+            background: white;
+            border-radius: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <button class="back-btn" onclick="window.location.href='/booking?type=flight'">← Back to Search</button>
+        <h1>✈️ Flight Results</h1>
+        <p>Found {{ count }} flight(s)</p>
+        
+        {% if flights %}
+            {% for flight in flights %}
+            <div class="flight-card">
+                <div class="airline">{{ flight.airline }} ({{ flight.airline_iata }})</div>
+                <div class="flight-number">
+                    Flight {{ flight.flight_number }}
+                    <span class="aircraft">✈️ {{ flight.aircraft }}</span>
+                </div>
+                
+                <div class="time-info">
+                    <div class="departure">
+                        <strong>🛫 Departure</strong><br>
+                        {{ flight.departure_airport }} ({{ flight.departure_iata }})<br>
+                        {{ flight.departure_time[:16] if flight.departure_time else 'Time TBD' }}<br>
+                        <span class="badge">Gate: {{ flight.gate }}</span>
+                        <span class="badge">Terminal: {{ flight.terminal }}</span>
+                    </div>
+                    <div class="arrival" style="float: right; text-align: right;">
+                        <strong>🛬 Arrival</strong><br>
+                        {{ flight.arrival_airport }} ({{ flight.arrival_iata }})<br>
+                        {{ flight.arrival_time[:16] if flight.arrival_time else 'Time TBD' }}
+                    </div>
+                    <div style="clear: both;"></div>
+                </div>
+                
+                <div>
+                    <span class="status {{ 'on-time' if flight.status == 'scheduled' else 'delayed' if flight.status == 'active' else 'cancelled' }}">
+                        {{ flight.status.upper() if flight.status else 'SCHEDULED' }}
+                    </span>
+                </div>
+                
+                <div class="price">
+                    💰 Price: Contact airline for current pricing
+                </div>
+                <small style="color: #666;">Note: AviationStack provides flight schedules. For live pricing, upgrade to production API.</small>
+            </div>
+            {% endfor %}
+        {% else %}
+            <div class="no-results">
+                <h3>No flights found</h3>
+                <p>Try a different airline or flight number. AviationStack's free tier includes live flight data.</p>
+            </div>
+        {% endif %}
+    </div>
+</body>
+</html>

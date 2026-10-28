@@ -1,0 +1,1224 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 py-8">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Header -->
+        <div class="text-center mb-12" data-aos="fade-down">
+            <h1 class="text-4xl font-bold text-gray-900 mb-4">Book Your Dream Trip</h1>
+            <p class="text-xl text-gray-600">Search and book flights, hotels, trains, buses, cabs, and cruises with real-time availability</p>
+        </div>
+
+        <div class="grid lg:grid-cols-3 gap-8">
+            <!-- Booking Form -->
+            <div class="lg:col-span-2" data-aos="fade-right">
+                <div class="bg-white rounded-2xl shadow-xl overflow-hidden">
+                    <div class="bg-gradient-to-r from-blue-600 to-purple-600 px-6 py-4">
+                        <h2 class="text-xl font-semibold text-white">Book Your Trip</h2>
+                        <p class="text-blue-100 text-sm mt-1">Search live options and book instantly</p>
+                    </div>
+                    
+                    <!-- Search Section -->
+                    <div class="p-6 border-b border-gray-200">
+                        <div class="mb-4">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                <i class="fas fa-ticket-alt text-blue-600 mr-2"></i>Travel Type
+                            </label>
+                            <div class="grid grid-cols-3 md:grid-cols-6 gap-2">
+                                <button type="button" onclick="selectType('flight')" id="flightBtn" class="type-btn p-3 rounded-lg bg-blue-100 border-2 border-blue-500 transition">
+                                    <i class="fas fa-plane text-blue-600 text-xl"></i>
+                                    <p class="text-xs mt-1">Flight</p>
+                                </button>
+                                <button type="button" onclick="selectType('cruise')" id="cruiseBtn" class="type-btn p-3 rounded-lg bg-gray-100 hover:bg-blue-100 transition">
+                                    <i class="fas fa-ship text-cyan-600 text-xl"></i>
+                                    <p class="text-xs mt-1">Cruise</p>
+                                </button>
+                                <button type="button" onclick="selectType('train')" id="trainBtn" class="type-btn p-3 rounded-lg bg-gray-100 hover:bg-blue-100 transition">
+                                    <i class="fas fa-train text-orange-600 text-xl"></i>
+                                    <p class="text-xs mt-1">Train</p>
+                                </button>
+                                <button type="button" onclick="selectType('hotel')" id="hotelBtn" class="type-btn p-3 rounded-lg bg-gray-100 hover:bg-blue-100 transition">
+                                    <i class="fas fa-hotel text-green-600 text-xl"></i>
+                                    <p class="text-xs mt-1">Hotel</p>
+                                </button>
+                                <button type="button" onclick="selectType('bus')" id="busBtn" class="type-btn p-3 rounded-lg bg-gray-100 hover:bg-blue-100 transition">
+                                    <i class="fas fa-bus text-purple-600 text-xl"></i>
+                                    <p class="text-xs mt-1">Bus</p>
+                                </button>
+                                <button type="button" onclick="selectType('cab')" id="cabBtn" class="type-btn p-3 rounded-lg bg-gray-100 hover:bg-blue-100 transition">
+                                    <i class="fas fa-taxi text-yellow-600 text-xl"></i>
+                                    <p class="text-xs mt-1">Cab</p>
+                                </button>
+                            </div>
+                            <input type="hidden" id="booking_type" value="flight">
+                        </div>
+                        
+                        <!-- Flight Search Form -->
+                        <div id="flightSearchForm" class="search-form">
+                            <div class="grid grid-cols-2 gap-4 mb-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">From (City)</label>
+                                    <input type="text" id="flight_from" list="majorCityList" placeholder="e.g., Mumbai, Delhi" 
+                                           class="w-full px-4 py-2 border border-gray-300 rounded-lg">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">To (City)</label>
+                                    <input type="text" id="flight_to" list="majorCityList" placeholder="e.g., Goa, Bangalore"
+                                           class="w-full px-4 py-2 border border-gray-300 rounded-lg">
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-3 gap-4 mb-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Departure Date</label>
+                                    <input type="date" id="flight_departure" class="w-full px-4 py-2 border border-gray-300 rounded-lg">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Return Date (optional)</label>
+                                    <input type="date" id="flight_return" class="w-full px-4 py-2 border border-gray-300 rounded-lg">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Passengers</label>
+                                    <select id="flight_adults" class="w-full px-4 py-2 border border-gray-300 rounded-lg">
+                                        <option value="1">1 Passenger</option>
+                                        <option value="2">2 Passengers</option>
+                                        <option value="3">3 Passengers</option>
+                                        <option value="4">4 Passengers</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <button onclick="searchFlights()" class="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition">
+                                <i class="fas fa-search mr-2"></i>Search Flights
+                            </button>
+                        </div>
+                        
+                        <!-- Cruise Search Form -->
+                        <div id="cruiseSearchForm" class="search-form hidden">
+                            <div class="grid grid-cols-2 gap-4 mb-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Route</label>
+                                    <select id="cruise_route" class="w-full px-4 py-2 border border-gray-300 rounded-lg">
+                                        <option value="Mumbai-Goa">Mumbai → Goa</option>
+                                        <option value="Chennai-Singapore">Chennai → Singapore</option>
+                                        <option value="Mumbai-Dubai">Mumbai → Dubai</option>
+                                        <option value="Kochi-Maldives">Kochi → Maldives</option>
+                                        <option value="Mumbai-Kochi">Mumbai → Kochi</option>
+                                        <option value="Goa-Lakshadweep">Goa → Lakshadweep</option>
+                                        <option value="Singapore-Phuket">Singapore → Phuket</option>
+                                        <option value="Dubai-Abu Dhabi">Dubai → Abu Dhabi</option>
+                                        <option value="Barcelona-Rome">Barcelona → Rome</option>
+                                        <option value="Athens-Santorini">Athens → Santorini</option>
+                                        <option value="Miami-Bahamas">Miami → Bahamas</option>
+                                        <option value="Seattle-Alaska">Seattle → Alaska</option>
+                                        <option value="Sydney-Auckland">Sydney → Auckland</option>
+                                        <option value="Hong Kong-Ha Long Bay">Hong Kong → Ha Long Bay</option>
+                                        <option value="Istanbul-Greek Isles">Istanbul → Greek Isles</option>
+                                        <option value="Cape Town-Walvis Bay">Cape Town → Walvis Bay</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Departure Date</label>
+                                    <input type="date" id="cruise_date" class="w-full px-4 py-2 border border-gray-300 rounded-lg">
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-2 gap-4 mb-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Cabin Type</label>
+                                    <select id="cruise_cabin" class="w-full px-4 py-2 border border-gray-300 rounded-lg">
+                                        <option value="Interior">Interior Cabin</option>
+                                        <option value="Ocean View">Ocean View</option>
+                                        <option value="Balcony">Balcony Cabin</option>
+                                        <option value="Suite">Suite</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Guests</label>
+                                    <select id="cruise_guests" class="w-full px-4 py-2 border border-gray-300 rounded-lg">
+                                        <option value="1">1 Guest</option>
+                                        <option value="2">2 Guests</option>
+                                        <option value="3">3 Guests</option>
+                                        <option value="4">4 Guests</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <button onclick="searchCruises()" class="w-full bg-cyan-600 text-white py-2 rounded-lg hover:bg-cyan-700 transition">
+                                <i class="fas fa-search mr-2"></i>Search Cruises
+                            </button>
+                        </div>
+                        
+                        <!-- Train Search Form -->
+                        <div id="trainSearchForm" class="search-form hidden">
+                            <div class="grid grid-cols-2 gap-4 mb-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">From Station</label>
+                                    <input type="text" id="train_from" list="majorCityList" placeholder="e.g., Mumbai Central" 
+                                           class="w-full px-4 py-2 border border-gray-300 rounded-lg">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">To Station</label>
+                                    <input type="text" id="train_to" list="majorCityList" placeholder="e.g., Delhi"
+                                           class="w-full px-4 py-2 border border-gray-300 rounded-lg">
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-2 gap-4 mb-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Travel Date</label>
+                                    <input type="date" id="train_date" class="w-full px-4 py-2 border border-gray-300 rounded-lg">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Class</label>
+                                    <select id="train_class" class="w-full px-4 py-2 border border-gray-300 rounded-lg">
+                                        <option value="Sleeper">Sleeper (SL)</option>
+                                        <option value="3AC">AC 3 Tier (3A)</option>
+                                        <option value="2AC">AC 2 Tier (2A)</option>
+                                        <option value="1AC">AC First Class (1A)</option>
+                                        <option value="CC">Chair Car (CC)</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <button onclick="searchTrains()" class="w-full bg-orange-600 text-white py-2 rounded-lg hover:bg-orange-700 transition">
+                                <i class="fas fa-search mr-2"></i>Search Trains
+                            </button>
+                        </div>
+                        
+                        <!-- Hotel Search Form -->
+                        <div id="hotelSearchForm" class="search-form hidden">
+                            <div class="grid grid-cols-2 gap-4 mb-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">City</label>
+                                    <input type="text" id="hotel_city" list="majorCityList" placeholder="e.g., Mumbai, Delhi, Goa" 
+                                           class="w-full px-4 py-2 border border-gray-300 rounded-lg">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Guests</label>
+                                    <select id="hotel_guests" class="w-full px-4 py-2 border border-gray-300 rounded-lg">
+                                        <option value="1">1 Guest</option>
+                                        <option value="2">2 Guests</option>
+                                        <option value="3">3 Guests</option>
+                                        <option value="4">4 Guests</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-2 gap-4 mb-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Check-in Date</label>
+                                    <input type="date" id="hotel_checkin" class="w-full px-4 py-2 border border-gray-300 rounded-lg">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Check-out Date</label>
+                                    <input type="date" id="hotel_checkout" class="w-full px-4 py-2 border border-gray-300 rounded-lg">
+                                </div>
+                            </div>
+                            <button onclick="searchHotels()" class="w-full bg-green-600 text-white py-2 rounded-lg hover:bg-green-700 transition">
+                                <i class="fas fa-search mr-2"></i>Search Hotels
+                            </button>
+                        </div>
+                        
+                        <!-- Bus Search Form -->
+                        <div id="busSearchForm" class="search-form hidden">
+                            <div class="grid grid-cols-2 gap-4 mb-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">From</label>
+                                    <input type="text" id="bus_from" list="majorCityList" placeholder="Departure city" 
+                                           class="w-full px-4 py-2 border border-gray-300 rounded-lg">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">To</label>
+                                    <input type="text" id="bus_to" list="majorCityList" placeholder="Destination city"
+                                           class="w-full px-4 py-2 border border-gray-300 rounded-lg">
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-2 gap-4 mb-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Travel Date</label>
+                                    <input type="date" id="bus_date" class="w-full px-4 py-2 border border-gray-300 rounded-lg">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Bus Type</label>
+                                    <select id="bus_type" class="w-full px-4 py-2 border border-gray-300 rounded-lg">
+                                        <option value="Standard">Standard</option>
+                                        <option value="AC">AC</option>
+                                        <option value="Sleeper">Sleeper</option>
+                                        <option value="Volvo">Volvo</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <button onclick="searchBuses()" class="w-full bg-purple-600 text-white py-2 rounded-lg hover:bg-purple-700 transition">
+                                <i class="fas fa-search mr-2"></i>Search Buses
+                            </button>
+                        </div>
+                        
+                        <!-- Cab Search Form -->
+                        <div id="cabSearchForm" class="search-form hidden">
+                            <div class="grid grid-cols-2 gap-4 mb-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">City</label>
+                                    <input type="text" id="cab_city" list="majorCityList" placeholder="e.g., Mumbai, Delhi" 
+                                           class="w-full px-4 py-2 border border-gray-300 rounded-lg">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Date</label>
+                                    <input type="date" id="cab_date" class="w-full px-4 py-2 border border-gray-300 rounded-lg">
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-2 gap-4 mb-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Cab Type</label>
+                                    <select id="cab_type" class="w-full px-4 py-2 border border-gray-300 rounded-lg">
+                                        <option value="Micro">Micro (4 Seats)</option>
+                                        <option value="Mini">Mini (4 Seats)</option>
+                                        <option value="Sedan">Sedan (4 Seats)</option>
+                                        <option value="SUV">SUV (6 Seats)</option>
+                                        <option value="Luxury">Luxury (4 Seats)</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Trip Type</label>
+                                    <select id="cab_trip_type" class="w-full px-4 py-2 border border-gray-300 rounded-lg">
+                                        <option value="local">Local</option>
+                                        <option value="outstation">Outstation</option>
+                                        <option value="airport">Airport Transfer</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <button onclick="searchCabs()" class="w-full bg-yellow-600 text-white py-2 rounded-lg hover:bg-yellow-700 transition">
+                                <i class="fas fa-search mr-2"></i>Search Cabs
+                            </button>
+                        </div>
+                    </div>
+
+                    <datalist id="majorCityList">
+                        <option value="Delhi"></option><option value="Mumbai"></option><option value="Bangalore"></option><option value="Chennai"></option>
+                        <option value="Kolkata"></option><option value="Hyderabad"></option><option value="Pune"></option><option value="Ahmedabad"></option>
+                        <option value="Goa"></option><option value="Jaipur"></option><option value="Lucknow"></option><option value="Chandigarh"></option>
+                        <option value="Kochi"></option><option value="Varanasi"></option><option value="Srinagar"></option><option value="Indore"></option>
+                        <option value="Bhubaneswar"></option><option value="Nagpur"></option><option value="Surat"></option><option value="Amritsar"></option>
+                        <option value="Dubai"></option><option value="Singapore"></option><option value="Bangkok"></option><option value="London"></option>
+                        <option value="Paris"></option><option value="New York"></option><option value="Tokyo"></option><option value="Sydney"></option>
+                        <option value="Toronto"></option><option value="Istanbul"></option><option value="Rome"></option><option value="Barcelona"></option>
+                        <option value="Amsterdam"></option><option value="Zurich"></option><option value="Berlin"></option><option value="Vienna"></option>
+                        <option value="Prague"></option><option value="Seoul"></option><option value="Kuala Lumpur"></option><option value="Cape Town"></option>
+                    </datalist>
+                    
+                    <!-- Search Results Section -->
+                    <div id="searchResults" class="p-6 hidden">
+                        <h3 class="text-lg font-semibold text-gray-900 mb-4">
+                            <i class="fas fa-list mr-2 text-blue-600"></i>Search Results
+                        </h3>
+                        <div id="resultsList" class="space-y-3 max-h-96 overflow-y-auto">
+                            <!-- Results will be dynamically inserted here -->
+                        </div>
+                    </div>
+                    
+                    <!-- Booking Form (shown after selecting a result) -->
+                    <div id="bookingFormSection" class="p-6 border-t border-gray-200 hidden">
+                        <h3 class="text-lg font-semibold text-gray-900 mb-4">
+                            <i class="fas fa-credit-card mr-2 text-blue-600"></i>Complete Booking
+                        </h3>
+                        <form id="bookingForm">
+                            <input type="hidden" id="selected_type">
+                            <input type="hidden" id="selected_provider">
+                            <input type="hidden" id="selected_from">
+                            <input type="hidden" id="selected_to">
+                            <input type="hidden" id="selected_date">
+                            <input type="hidden" id="selected_price">
+                            <input type="hidden" id="selected_details">
+                            
+                            <div class="grid grid-cols-2 gap-4 mb-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Full Name</label>
+                                    <input type="text" id="passenger_name" required 
+                                           class="w-full px-4 py-2 border border-gray-300 rounded-lg">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Email</label>
+                                    <input type="email" id="passenger_email" required 
+                                           class="w-full px-4 py-2 border border-gray-300 rounded-lg">
+                                </div>
+                            </div>
+                            
+                            <div class="grid grid-cols-2 gap-4 mb-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Phone</label>
+                                    <input type="tel" id="passenger_phone" required 
+                                           class="w-full px-4 py-2 border border-gray-300 rounded-lg">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Number of Travelers</label>
+                                    <select id="travelers_count" class="w-full px-4 py-2 border border-gray-300 rounded-lg">
+                                        <option value="1">1 Traveler</option>
+                                        <option value="2">2 Travelers</option>
+                                        <option value="3">3 Travelers</option>
+                                        <option value="4">4 Travelers</option>
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-4">
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Special Requests</label>
+                                <textarea id="special_requests" rows="2" 
+                                          class="w-full px-4 py-2 border border-gray-300 rounded-lg"
+                                          placeholder="Any special requirements?"></textarea>
+                            </div>
+                            
+                            <div class="bg-blue-50 rounded-lg p-4 mb-4">
+                                <div class="flex justify-between items-center">
+                                    <span class="font-semibold text-gray-700">Total Amount:</span>
+                                    <span id="display_total" class="text-2xl font-bold text-blue-600">₹0.00</span>
+                                </div>
+                            </div>
+                            
+                            <button type="submit" id="bookButton" 
+                                    class="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-3 rounded-lg font-semibold hover:from-blue-700 hover:to-purple-700 transition shadow-lg">
+                                <i class="fas fa-credit-card mr-2"></i>Proceed to Payment
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Booking Info & Tips -->
+            <div class="space-y-6" data-aos="fade-left">
+                <!-- Live API Status -->
+                <div class="bg-white rounded-2xl shadow-xl p-6">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4">
+                        <i class="fas fa-plug text-green-600 mr-2"></i>Booking Services
+                    </h3>
+                    <div class="space-y-2 text-sm">
+                        <div class="flex items-center justify-between">
+                            <span><i class="fas fa-plane text-blue-600 mr-2"></i>Flights</span>
+                            <span class="text-green-600"><i class="fas fa-check-circle"></i> Mock Engine</span>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <span><i class="fas fa-ship text-cyan-600 mr-2"></i>Cruises</span>
+                            <span class="text-green-600"><i class="fas fa-check-circle"></i> Mock Engine</span>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <span><i class="fas fa-train text-orange-600 mr-2"></i>Trains</span>
+                            <span class="text-green-600"><i class="fas fa-check-circle"></i> Mock Engine</span>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <span><i class="fas fa-hotel text-green-600 mr-2"></i>Hotels</span>
+                            <span class="text-green-600"><i class="fas fa-check-circle"></i> Mock Engine</span>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <span><i class="fas fa-bus text-purple-600 mr-2"></i>Buses</span>
+                            <span class="text-green-600"><i class="fas fa-check-circle"></i> Mock Engine</span>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <span><i class="fas fa-taxi text-yellow-600 mr-2"></i>Cabs</span>
+                            <span class="text-green-600"><i class="fas fa-check-circle"></i> Mock Engine</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Price Summary Card -->
+                <div class="bg-white rounded-2xl shadow-xl p-6">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4">Price Summary</h3>
+                    <div class="space-y-3">
+                        <div class="flex justify-between text-gray-600">
+                            <span>Base Price</span>
+                            <span id="basePrice">₹0.00</span>
+                        </div>
+                        <div class="flex justify-between text-gray-600">
+                            <span>Taxes & Fees (12%)</span>
+                            <span id="taxes">₹0.00</span>
+                        </div>
+                        <div class="border-t border-gray-200 pt-3 mt-3">
+                            <div class="flex justify-between font-semibold text-gray-900">
+                                <span>Total</span>
+                                <span id="totalPrice" class="text-2xl text-blue-600">₹0.00</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Booking Tips -->
+                <div class="bg-gradient-to-r from-blue-50 to-purple-50 rounded-2xl shadow-xl p-6">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-3">Booking Tips</h3>
+                    <ul class="space-y-2 text-sm text-gray-700">
+                        <li class="flex items-start">
+                            <i class="fas fa-check-circle text-green-500 mt-0.5 mr-2"></i>
+                            Book flights at least 2-3 weeks in advance for best prices
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-check-circle text-green-500 mt-0.5 mr-2"></i>
+                            Train tickets available 120 days in advance
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-check-circle text-green-500 mt-0.5 mr-2"></i>
+                            Compare prices across different providers
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-check-circle text-green-500 mt-0.5 mr-2"></i>
+                            Check cancellation policies before booking
+                        </li>
+                    </ul>
+                </div>
+                
+                <!-- Payment Methods -->
+                <div class="bg-white rounded-2xl shadow-xl p-6">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4">Secure Payment</h3>
+                    <div class="flex justify-around text-3xl text-gray-400">
+                        <i class="fab fa-cc-visa hover:text-blue-600 transition"></i>
+                        <i class="fab fa-cc-mastercard hover:text-orange-600 transition"></i>
+                        <i class="fab fa-cc-amex hover:text-blue-500 transition"></i>
+                        <i class="fab fa-cc-paypal hover:text-blue-700 transition"></i>
+                        <i class="fab fa-google-pay hover:text-gray-700 transition"></i>
+                    </div>
+                    <p class="text-xs text-gray-500 text-center mt-4">
+                        <i class="fas fa-lock mr-1"></i> Secure SSL encrypted payment
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+<script>
+let currentTotal = 0;
+let isLoading = false;
+let currentType = 'flight';
+let selectedResult = null;
+
+// Initialize dates
+const today = new Date().toISOString().split('T')[0];
+
+function showToast(message, type = 'info') {
+    if (typeof window.showNotification === 'function') {
+        window.showNotification(message, type);
+    } else {
+        alert(message);
+    }
+}
+
+function showSearchLoading(message) {
+    const resultsDiv = document.getElementById('resultsList');
+    if (!resultsDiv) return;
+    resultsDiv.innerHTML = `
+        <div class="text-center py-8">
+            <i class="fas fa-spinner fa-spin text-3xl text-blue-600 mb-3"></i>
+            <p class="text-gray-600">${message}</p>
+        </div>
+    `;
+    document.getElementById('searchResults').classList.remove('hidden');
+}
+
+function hideSearchLoading() {}
+
+function escapeHtml(text) {
+    if (!text) return '';
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+// Select booking type
+function selectType(type) {
+    currentType = type;
+    document.getElementById('booking_type').value = type;
+    
+    const buttons = ['flight', 'cruise', 'train', 'hotel', 'bus', 'cab'];
+    buttons.forEach(t => {
+        const btn = document.getElementById(t + 'Btn');
+        if (btn) {
+            if (t === type) {
+                btn.classList.add('bg-blue-100', 'border-2', 'border-blue-500');
+                btn.classList.remove('bg-gray-100');
+            } else {
+                btn.classList.remove('bg-blue-100', 'border-2', 'border-blue-500');
+                btn.classList.add('bg-gray-100');
+            }
+        }
+    });
+    
+    const forms = ['flightSearchForm', 'cruiseSearchForm', 'trainSearchForm', 'hotelSearchForm', 'busSearchForm', 'cabSearchForm'];
+    forms.forEach(formId => {
+        const form = document.getElementById(formId);
+        if (form) form.classList.add('hidden');
+    });
+    
+    document.getElementById('searchResults').classList.add('hidden');
+    document.getElementById('bookingFormSection').classList.add('hidden');
+    
+    const activeForm = document.getElementById(type + 'SearchForm');
+    if (activeForm) activeForm.classList.remove('hidden');
+}
+
+// ========== FLIGHT SEARCH ==========
+async function searchFlights() {
+    const origin = document.getElementById('flight_from').value;
+    const destination = document.getElementById('flight_to').value;
+    const date = document.getElementById('flight_departure').value;
+    
+    if (!origin || !destination || !date) {
+        showToast('Please fill in all fields', 'error');
+        return;
+    }
+    
+    showSearchLoading('Searching for flights...');
+    
+    try {
+        const response = await fetch(`/api/engine/flights?origin=${encodeURIComponent(origin)}&destination=${encodeURIComponent(destination)}&date=${date}`);
+        const data = await response.json();
+        
+        if (data.success && data.results && data.results.length > 0) {
+            displayFlightResults(data.results);
+        } else {
+            showToast('No flights found. Try different cities or dates.', 'info');
+            document.getElementById('searchResults').classList.add('hidden');
+        }
+    } catch (error) {
+        console.error('Flight search error:', error);
+        showToast('Failed to search flights', 'error');
+    } finally {
+        hideSearchLoading();
+    }
+}
+
+function displayFlightResults(flights) {
+    const resultsDiv = document.getElementById('resultsList');
+    resultsDiv.innerHTML = '';
+    
+    flights.forEach(flight => {
+        const card = document.createElement('div');
+        card.className = 'border rounded-lg p-4 hover:shadow-lg transition cursor-pointer';
+        card.onclick = () => selectFlight(flight);
+        card.innerHTML = `
+            <div class="flex justify-between items-start">
+                <div>
+                    <div class="flex items-center mb-2">
+                        <i class="fas fa-plane text-blue-600 mr-2"></i>
+                        <span class="font-semibold text-lg">${escapeHtml(flight.airline)}</span>
+                        <span class="text-sm text-gray-500 ml-2">${escapeHtml(flight.flight_number)}</span>
+                    </div>
+                    <div class="text-sm text-gray-600">
+                        <i class="fas fa-plane-departure mr-1"></i> ${escapeHtml(flight.departure_time)}<br>
+                        <i class="fas fa-plane-arrival mr-1"></i> ${escapeHtml(flight.arrival_time)}<br>
+                        <i class="fas fa-clock mr-1"></i> Duration: ${flight.duration} min
+                    </div>
+                </div>
+                <div class="text-right">
+                    <div class="text-2xl font-bold text-blue-600">₹${flight.price}</div>
+                    <div class="text-xs text-gray-500">per person</div>
+                    <div class="mt-2 px-2 py-1 bg-green-100 text-green-700 rounded text-xs">
+                        ${flight.available_seats || flight.seats} seats left
+                    </div>
+                </div>
+            </div>
+        `;
+        resultsDiv.appendChild(card);
+    });
+    
+    document.getElementById('searchResults').classList.remove('hidden');
+}
+
+function selectFlight(flight) {
+    selectedResult = flight;
+    selectedResult.type = 'flight';
+    
+    document.getElementById('selected_type').value = 'flight';
+    document.getElementById('selected_provider').value = flight.airline;
+    document.getElementById('selected_from').value = flight.origin || document.getElementById('flight_from').value;
+    document.getElementById('selected_to').value = flight.destination || document.getElementById('flight_to').value;
+    document.getElementById('selected_date').value = document.getElementById('flight_departure').value;
+    document.getElementById('selected_price').value = flight.price;
+    
+    updatePriceDisplay(flight.price);
+    document.getElementById('bookingFormSection').classList.remove('hidden');
+    document.getElementById('searchResults').classList.add('hidden');
+}
+
+// ========== CRUISE SEARCH ==========
+async function searchCruises() {
+    const route = document.getElementById('cruise_route').value;
+    const date = document.getElementById('cruise_date').value;
+    
+    if (!route || !date) {
+        showToast('Please fill in all fields', 'error');
+        return;
+    }
+    
+    showSearchLoading('Searching for cruises...');
+    
+    try {
+        const response = await fetch(`/api/engine/cruises?route=${encodeURIComponent(route)}&date=${date}`);
+        const data = await response.json();
+        
+        if (data.success && data.results && data.results.length > 0) {
+            displayCruiseResults(data.results);
+        } else {
+            showToast('No cruises found. Try different route or date.', 'info');
+            document.getElementById('searchResults').classList.add('hidden');
+        }
+    } catch (error) {
+        console.error('Cruise search error:', error);
+        showToast('Failed to search cruises', 'error');
+    } finally {
+        hideSearchLoading();
+    }
+}
+
+function displayCruiseResults(cruises) {
+    const resultsDiv = document.getElementById('resultsList');
+    resultsDiv.innerHTML = '';
+    
+    cruises.forEach(cruise => {
+        const card = document.createElement('div');
+        card.className = 'border rounded-lg p-4 hover:shadow-lg transition cursor-pointer';
+        card.onclick = () => selectCruise(cruise);
+        card.innerHTML = `
+            <div class="flex justify-between items-start">
+                <div>
+                    <div class="flex items-center mb-2">
+                        <i class="fas fa-ship text-cyan-600 mr-2"></i>
+                        <span class="font-semibold text-lg">${escapeHtml(cruise.name)}</span>
+                    </div>
+                    <div class="text-sm text-gray-600">
+                        <i class="fas fa-clock mr-1"></i> Duration: ${cruise.duration_days} days<br>
+                        <i class="fas fa-bed mr-1"></i> Cabins: ${cruise.available_cabins || cruise.cabins} available
+                    </div>
+                </div>
+                <div class="text-right">
+                    <div class="text-2xl font-bold text-cyan-600">₹${cruise.price}</div>
+                    <div class="text-xs text-gray-500">per person</div>
+                </div>
+            </div>
+        `;
+        resultsDiv.appendChild(card);
+    });
+    
+    document.getElementById('searchResults').classList.remove('hidden');
+}
+
+function selectCruise(cruise) {
+    selectedResult = cruise;
+    selectedResult.type = 'cruise';
+    
+    document.getElementById('selected_type').value = 'cruise';
+    document.getElementById('selected_provider').value = cruise.name;
+    document.getElementById('selected_from').value = document.getElementById('cruise_route').value;
+    document.getElementById('selected_to').value = document.getElementById('cruise_route').value;
+    document.getElementById('selected_date').value = document.getElementById('cruise_date').value;
+    document.getElementById('selected_price').value = cruise.price;
+    
+    updatePriceDisplay(cruise.price);
+    document.getElementById('bookingFormSection').classList.remove('hidden');
+    document.getElementById('searchResults').classList.add('hidden');
+}
+
+// ========== TRAIN SEARCH ==========
+async function searchTrains() {
+    const origin = document.getElementById('train_from').value;
+    const destination = document.getElementById('train_to').value;
+    const date = document.getElementById('train_date').value;
+    
+    if (!origin || !destination || !date) {
+        showToast('Please fill in all fields', 'error');
+        return;
+    }
+    
+    showSearchLoading('Searching for trains...');
+    
+    try {
+        const response = await fetch(`/api/engine/trains?origin=${encodeURIComponent(origin)}&destination=${encodeURIComponent(destination)}&date=${date}`);
+        const data = await response.json();
+        
+        if (data.success && data.results && data.results.length > 0) {
+            displayTrainResults(data.results);
+        } else {
+            showToast('No trains found. Try different stations.', 'info');
+            document.getElementById('searchResults').classList.add('hidden');
+        }
+    } catch (error) {
+        console.error('Train search error:', error);
+        showToast('Failed to search trains', 'error');
+    } finally {
+        hideSearchLoading();
+    }
+}
+
+function displayTrainResults(trains) {
+    const resultsDiv = document.getElementById('resultsList');
+    resultsDiv.innerHTML = '';
+    
+    trains.forEach(train => {
+        const card = document.createElement('div');
+        card.className = 'border rounded-lg p-4 hover:shadow-lg transition cursor-pointer';
+        card.onclick = () => selectTrain(train);
+        card.innerHTML = `
+            <div class="flex justify-between items-start">
+                <div>
+                    <div class="flex items-center mb-2">
+                        <i class="fas fa-train text-orange-600 mr-2"></i>
+                        <span class="font-semibold text-lg">${escapeHtml(train.train_name)}</span>
+                        <span class="text-sm text-gray-500 ml-2">${escapeHtml(train.train_number)}</span>
+                    </div>
+                    <div class="text-sm text-gray-600">
+                        <i class="fas fa-clock mr-1"></i> Dep: ${train.departure_time} | Arr: ${train.arrival_time}<br>
+                        <i class="fas fa-hourglass-half mr-1"></i> Duration: ${train.duration} min
+                    </div>
+                </div>
+                <div class="text-right">
+                    <div class="text-2xl font-bold text-orange-600">₹${train.price}</div>
+                    <div class="text-xs text-gray-500">per person</div>
+                    <div class="mt-2 px-2 py-1 bg-green-100 text-green-700 rounded text-xs">
+                        ${train.available_seats || train.seats} seats left
+                    </div>
+                </div>
+            </div>
+        `;
+        resultsDiv.appendChild(card);
+    });
+    
+    document.getElementById('searchResults').classList.remove('hidden');
+}
+
+function selectTrain(train) {
+    selectedResult = train;
+    selectedResult.type = 'train';
+    
+    document.getElementById('selected_type').value = 'train';
+    document.getElementById('selected_provider').value = 'Indian Railways';
+    document.getElementById('selected_from').value = document.getElementById('train_from').value;
+    document.getElementById('selected_to').value = document.getElementById('train_to').value;
+    document.getElementById('selected_date').value = document.getElementById('train_date').value;
+    document.getElementById('selected_price').value = train.price;
+    
+    updatePriceDisplay(train.price);
+    document.getElementById('bookingFormSection').classList.remove('hidden');
+    document.getElementById('searchResults').classList.add('hidden');
+}
+
+// ========== HOTEL SEARCH ==========
+async function searchHotels() {
+    const city = document.getElementById('hotel_city').value;
+    const checkIn = document.getElementById('hotel_checkin').value;
+    const checkOut = document.getElementById('hotel_checkout').value;
+    const guests = document.getElementById('hotel_guests').value;
+    
+    if (!city || !checkIn || !checkOut) {
+        showToast('Please fill in all fields', 'error');
+        return;
+    }
+    
+    showSearchLoading('Searching for hotels...');
+    
+    try {
+        const response = await fetch(`/api/engine/hotels?city=${encodeURIComponent(city)}&check_in=${checkIn}&check_out=${checkOut}&guests=${guests}`);
+        const data = await response.json();
+        
+        if (data.success && data.results && data.results.length > 0) {
+            displayHotelResults(data.results);
+        } else {
+            showToast('No hotels found. Try different city or dates.', 'info');
+            document.getElementById('searchResults').classList.add('hidden');
+        }
+    } catch (error) {
+        console.error('Hotel search error:', error);
+        showToast('Failed to search hotels', 'error');
+    } finally {
+        hideSearchLoading();
+    }
+}
+
+function displayHotelResults(hotels) {
+    const resultsDiv = document.getElementById('resultsList');
+    resultsDiv.innerHTML = '';
+    
+    hotels.forEach(hotel => {
+        const card = document.createElement('div');
+        card.className = 'border rounded-lg p-4 hover:shadow-lg transition cursor-pointer';
+        card.onclick = () => selectHotel(hotel);
+        card.innerHTML = `
+            <div class="flex justify-between items-start">
+                <div>
+                    <div class="flex items-center mb-2">
+                        <i class="fas fa-hotel text-green-600 mr-2"></i>
+                        <span class="font-semibold text-lg">${escapeHtml(hotel.name)}</span>
+                        <span class="text-sm text-yellow-500 ml-2">★ ${hotel.rating}</span>
+                    </div>
+                    <div class="text-sm text-gray-600">
+                        <i class="fas fa-bed mr-1"></i> ${hotel.room_type}<br>
+                        <i class="fas fa-door-open mr-1"></i> ${hotel.available_rooms} rooms left
+                    </div>
+                </div>
+                <div class="text-right">
+                    <div class="text-2xl font-bold text-green-600">₹${hotel.total_price || hotel.price_per_night}</div>
+                    <div class="text-xs text-gray-500">total for ${hotel.nights || 1} night(s)</div>
+                </div>
+            </div>
+        `;
+        resultsDiv.appendChild(card);
+    });
+    
+    document.getElementById('searchResults').classList.remove('hidden');
+}
+
+function selectHotel(hotel) {
+    selectedResult = hotel;
+    selectedResult.type = 'hotel';
+    
+    document.getElementById('selected_type').value = 'hotel';
+    document.getElementById('selected_provider').value = hotel.name;
+    document.getElementById('selected_from').value = document.getElementById('hotel_city').value;
+    document.getElementById('selected_to').value = document.getElementById('hotel_city').value;
+    document.getElementById('selected_date').value = document.getElementById('hotel_checkin').value;
+    document.getElementById('selected_price').value = hotel.total_price || hotel.price_per_night;
+    
+    updatePriceDisplay(hotel.total_price || hotel.price_per_night);
+    document.getElementById('bookingFormSection').classList.remove('hidden');
+    document.getElementById('searchResults').classList.add('hidden');
+}
+
+// ========== BUS SEARCH ==========
+async function searchBuses() {
+    const origin = document.getElementById('bus_from').value;
+    const destination = document.getElementById('bus_to').value;
+    const date = document.getElementById('bus_date').value;
+    
+    if (!origin || !destination || !date) {
+        showToast('Please fill in all fields', 'error');
+        return;
+    }
+    
+    showSearchLoading('Searching for buses...');
+    
+    // Rich mock bus data (expanded famous city routes)
+    setTimeout(() => {
+        const operators = ['VRL Travels', 'SRS Travels', 'RedBus Partner', 'Orange Tours', 'Kallada', 'Parveen', 'Neeta', 'Sharma Travels'];
+        const busTypes = ['AC Sleeper', 'AC Seater', 'Volvo Multi-Axle', 'Non-AC Sleeper', 'Electric Coach', 'Luxury Sleeper'];
+        const base = Math.max(400, (origin.length + destination.length) * 45);
+        const mockBuses = Array.from({ length: 12 }).map((_, i) => {
+            const depHour = (5 + (i * 2)) % 24;
+            const travelHours = 6 + (i % 8);
+            const arrHour = (depHour + travelHours) % 24;
+            return {
+                operator: operators[i % operators.length],
+                departure: `${String(depHour).padStart(2, '0')}:${i % 2 ? '30' : '00'}`,
+                arrival: `${String(arrHour).padStart(2, '0')}:${i % 2 ? '15' : '45'}`,
+                price: base + (i * 120),
+                seats: 8 + ((i * 3) % 28),
+                type: busTypes[i % busTypes.length]
+            };
+        });
+        displayBusResults(mockBuses);
+    }, 1000);
+}
+
+function displayBusResults(buses) {
+    const resultsDiv = document.getElementById('resultsList');
+    resultsDiv.innerHTML = '';
+    
+    buses.forEach(bus => {
+        const card = document.createElement('div');
+        card.className = 'border rounded-lg p-4 hover:shadow-lg transition cursor-pointer';
+        card.onclick = () => selectBus(bus);
+        card.innerHTML = `
+            <div class="flex justify-between items-start">
+                <div>
+                    <div class="flex items-center mb-2">
+                        <i class="fas fa-bus text-purple-600 mr-2"></i>
+                        <span class="font-semibold text-lg">${escapeHtml(bus.operator)}</span>
+                        <span class="text-sm text-gray-500 ml-2">${bus.type}</span>
+                    </div>
+                    <div class="text-sm text-gray-600">
+                        <i class="fas fa-clock mr-1"></i> Dep: ${bus.departure} | Arr: ${bus.arrival}
+                    </div>
+                </div>
+                <div class="text-right">
+                    <div class="text-2xl font-bold text-purple-600">₹${bus.price}</div>
+                    <div class="text-xs text-gray-500">per seat</div>
+                    <div class="mt-2 px-2 py-1 bg-green-100 text-green-700 rounded text-xs">
+                        ${bus.seats} seats left
+                    </div>
+                </div>
+            </div>
+        `;
+        resultsDiv.appendChild(card);
+    });
+    
+    document.getElementById('searchResults').classList.remove('hidden');
+    hideSearchLoading();
+}
+
+function selectBus(bus) {
+    selectedResult = bus;
+    selectedResult.type = 'bus';
+    
+    document.getElementById('selected_type').value = 'bus';
+    document.getElementById('selected_provider').value = bus.operator;
+    document.getElementById('selected_from').value = document.getElementById('bus_from').value;
+    document.getElementById('selected_to').value = document.getElementById('bus_to').value;
+    document.getElementById('selected_date').value = document.getElementById('bus_date').value;
+    document.getElementById('selected_price').value = bus.price;
+    
+    updatePriceDisplay(bus.price);
+    document.getElementById('bookingFormSection').classList.remove('hidden');
+    document.getElementById('searchResults').classList.add('hidden');
+}
+
+// ========== CAB SEARCH ==========
+async function searchCabs() {
+    const city = document.getElementById('cab_city').value;
+    const date = document.getElementById('cab_date').value;
+    
+    if (!city || !date) {
+        showToast('Please fill in all fields', 'error');
+        return;
+    }
+    
+    showSearchLoading('Searching for cabs...');
+    
+    try {
+        const response = await fetch(`/api/engine/cabs?city=${encodeURIComponent(city)}&date=${date}`);
+        const data = await response.json();
+        
+        if (data.success && data.results && data.results.length > 0) {
+            displayCabResults(data.results);
+        } else {
+            showToast('No cabs found. Try different city.', 'info');
+            document.getElementById('searchResults').classList.add('hidden');
+        }
+    } catch (error) {
+        console.error('Cab search error:', error);
+        showToast('Failed to search cabs', 'error');
+    } finally {
+        hideSearchLoading();
+    }
+}
+
+function displayCabResults(cabs) {
+    const resultsDiv = document.getElementById('resultsList');
+    resultsDiv.innerHTML = '';
+    
+    cabs.forEach(cab => {
+        const card = document.createElement('div');
+        card.className = 'border rounded-lg p-4 hover:shadow-lg transition cursor-pointer';
+        card.onclick = () => selectCab(cab);
+        card.innerHTML = `
+            <div class="flex justify-between items-start">
+                <div>
+                    <div class="flex items-center mb-2">
+                        <i class="fas fa-taxi text-yellow-600 mr-2"></i>
+                        <span class="font-semibold text-lg">${escapeHtml(cab.company)}</span>
+                        <span class="text-sm text-gray-500 ml-2">${cab.type}</span>
+                    </div>
+                    <div class="text-sm text-gray-600">
+                        <i class="fas fa-tachometer-alt mr-1"></i> ₹${cab.price_km}/km + ₹${cab.base_fare} base
+                    </div>
+                </div>
+                <div class="text-right">
+                    <div class="text-2xl font-bold text-yellow-600">₹${cab.base_fare + (cab.price_km * 50)}</div>
+                    <div class="text-xs text-gray-500">estimated for 50km</div>
+                    <div class="mt-2 px-2 py-1 bg-green-100 text-green-700 rounded text-xs">
+                        ${cab.available} cabs available
+                    </div>
+                </div>
+            </div>
+        `;
+        resultsDiv.appendChild(card);
+    });
+    
+    document.getElementById('searchResults').classList.remove('hidden');
+}
+
+function selectCab(cab) {
+    selectedResult = cab;
+    selectedResult.type = 'cab';
+    
+    document.getElementById('selected_type').value = 'cab';
+    document.getElementById('selected_provider').value = cab.company;
+    document.getElementById('selected_from').value = document.getElementById('cab_city').value;
+    document.getElementById('selected_to').value = document.getElementById('cab_city').value;
+    document.getElementById('selected_date').value = document.getElementById('cab_date').value;
+    document.getElementById('selected_price').value = cab.base_fare + (cab.price_km * 50);
+    
+    updatePriceDisplay(cab.base_fare + (cab.price_km * 50));
+    document.getElementById('bookingFormSection').classList.remove('hidden');
+    document.getElementById('searchResults').classList.add('hidden');
+}
+
+// Update price display
+function updatePriceDisplay(price) {
+    const travelers = parseInt(document.getElementById('travelers_count')?.value || 1);
+    const basePrice = price * travelers;
+    const taxes = basePrice * 0.12;
+    const total = basePrice + taxes;
+    
+    currentTotal = total;
+    
+    document.getElementById('basePrice').textContent = `₹${basePrice.toFixed(2)}`;
+    document.getElementById('taxes').textContent = `₹${taxes.toFixed(2)}`;
+    document.getElementById('totalPrice').textContent = `₹${total.toFixed(2)}`;
+    document.getElementById('display_total').textContent = `₹${total.toFixed(2)}`;
+}
+
+// ========== FORM SUBMISSION WITH RAZORPAY PAYMENT ==========
+document.getElementById('bookingForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    if (isLoading || !selectedResult) return;
+    
+    const token = localStorage.getItem('access_token');
+    if (!token) {
+        showToast('Please login to continue', 'error');
+        setTimeout(() => window.location.href = '/login', 1500);
+        return;
+    }
+    
+    // Validate passenger details
+    const passengerName = document.getElementById('passenger_name')?.value;
+    const passengerEmail = document.getElementById('passenger_email')?.value;
+    const passengerPhone = document.getElementById('passenger_phone')?.value;
+    
+    if (!passengerName || !passengerEmail || !passengerPhone) {
+        showToast('Please fill in all passenger details', 'error');
+        return;
+    }
+    
+    // Build booking details
+    const bookingDetails = {
+        type: currentType,
+        details: {
+            ...selectedResult,
+            passenger_name: passengerName,
+            passenger_email: passengerEmail,
+            passenger_phone: passengerPhone,
+            travelers: parseInt(document.getElementById('travelers_count')?.value || 1),
+            special_requests: document.getElementById('special_requests')?.value || '',
+            booking_date: new Date().toISOString()
+        }
+    };
+    
+    isLoading = true;
+    const bookButton = document.getElementById('bookButton');
+    const originalText = bookButton.innerHTML;
+    bookButton.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Creating order...';
+    bookButton.disabled = true;
+    
+    try {
+        // Step 1: Create Razorpay order
+        const orderRes = await fetch('/api/create_order', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({ amount: currentTotal })
+        });
+        
+        const orderData = await orderRes.json();
+        if (!orderRes.ok || orderData.error) {
+            throw new Error(orderData.error || 'Failed to create order');
+        }
+        
+        // Step 2: Get user details for prefill
+        const userRes = await fetch('/api/me', {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const user = await userRes.json();
+        
+        // Step 3: Open Razorpay checkout
+        const options = {
+            key: "{{ razorpay_key_id }}",
+            amount: orderData.amount,
+            currency: orderData.currency,
+            name: "YATRIKA",
+            description: `${currentType.toUpperCase()} Booking: ${bookingDetails.details.airline || bookingDetails.details.train_name || bookingDetails.details.name || 'Travel'}`,
+            order_id: orderData.id,
+            prefill: {
+                name: user.username || passengerName,
+                email: user.email || passengerEmail,
+                contact: passengerPhone
+            },
+            theme: { color: "#3B82F6" },
+            handler: async function(response) {
+                // Payment successful – create booking
+                bookingDetails.details.payment_id = response.razorpay_payment_id;
+                bookingDetails.details.order_id = response.razorpay_order_id;
+                
+                const bookRes = await fetch('/api/engine/book', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify(bookingDetails)
+                });
+                
+                const bookData = await bookRes.json();
+                if (bookRes.ok && bookData.success) {
+                    showToast(`Booking confirmed! ID: ${bookData.booking.booking_id}`, 'success');
+                    setTimeout(() => {
+                        window.location.href = '/dashboard';
+                    }, 2000);
+                } else {
+                    showToast('Payment succeeded but booking failed. Contact support.', 'error');
+                }
+            },
+            modal: {
+                ondismiss: function() {
+                    showToast('Payment cancelled', 'info');
+                    bookButton.innerHTML = originalText;
+                    bookButton.disabled = false;
+                    isLoading = false;
+                }
+            }
+        };
+        
+        const rzp = new Razorpay(options);
+        rzp.open();
+        
+        // Reset button after 60 seconds in case of no response (safety)
+        setTimeout(() => {
+            if (isLoading) {
+                bookButton.innerHTML = originalText;
+                bookButton.disabled = false;
+                isLoading = false;
+            }
+        }, 60000);
+        
+    } catch (error) {
+        console.error('Order creation error:', error);
+        showToast(error.message || 'Failed to initiate payment', 'error');
+        bookButton.innerHTML = originalText;
+        bookButton.disabled = false;
+        isLoading = false;
+    }
+});
+
+// Update price when travelers count changes
+document.getElementById('travelers_count')?.addEventListener('change', () => {
+    if (selectedResult && selectedResult.price) {
+        updatePriceDisplay(selectedResult.price);
+    }
+});
+
+// Set minimum dates
+const dateInputs = ['flight_departure', 'flight_return', 'cruise_date', 'train_date', 'hotel_checkin', 'hotel_checkout', 'bus_date', 'cab_date'];
+dateInputs.forEach(id => {
+    const input = document.getElementById(id);
+    if (input) input.min = today;
+});
+
+// Initialize default dates
+const defaultDateInputs = ['flight_departure', 'cruise_date', 'train_date', 'hotel_checkin', 'bus_date', 'cab_date'];
+defaultDateInputs.forEach(id => {
+    const input = document.getElementById(id);
+    if (input) input.value = today;
+});
+
+// Hotel date validation
+const hotelCheckin = document.getElementById('hotel_checkin');
+const hotelCheckout = document.getElementById('hotel_checkout');
+if (hotelCheckin && hotelCheckout) {
+    hotelCheckin.addEventListener('change', () => {
+        hotelCheckout.min = hotelCheckin.value;
+        if (hotelCheckout.value && hotelCheckout.value < hotelCheckin.value) {
+            hotelCheckout.value = hotelCheckin.value;
+        }
+    });
+}
+</script>
+{% endblock %}

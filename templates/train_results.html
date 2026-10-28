@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Train Details</title>
+    <style>
+        body { font-family: Arial, sans-serif; background: #f5f5f5; padding: 20px; }
+        .container { max-width: 800px; margin: 0 auto; }
+        .back-btn {
+            background: #6c757d;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-bottom: 20px;
+        }
+        .train-card {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .train-number { font-size: 28px; font-weight: bold; color: #667eea; }
+        .train-name { font-size: 20px; color: #333; margin: 10px 0; }
+        .route {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        .station { font-size: 18px; font-weight: bold; }
+        .duration { text-align: center; margin: 20px 0; font-size: 14px; color: #666; }
+        .classes {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin: 20px 0;
+        }
+        .class-badge {
+            background: #e9ecef;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <button class="back-btn" onclick="window.location.href='/booking?type=train'">← Back to Search</button>
+        
+        {% if train %}
+        <div class="train-card">
+            <div class="train-number">🚂 Train {{ train.train_number }}</div>
+            <div class="train-name">{{ train.train_name }}</div>
+            
+            <div class="route">
+                <div class="station">🟢 {{ train.source }} ({{ train.source_code }})</div>
+                <div style="font-size: 24px; margin: 10px 0;">⬇️</div>
+                <div class="station">🔴 {{ train.destination }} ({{ train.destination_code }})</div>
+            </div>
+            
+            <div class="duration">
+                ⏱️ Journey Duration: {{ train.duration }}
+            </div>
+            
+            <div class="classes">
+                <strong>Available Classes:</strong>
+                {% for class_name in train.classes %}
+                <span class="class-badge">{{ class_name }}</span>
+                {% endfor %}
+            </div>
+            
+            <div class="info">
+                <p>📅 Runs on: 
+                    {% for day in train.days_running %}
+                        {{ day }}{% if not loop.last %}, {% endif %}
+                    {% endfor %}
+                </p>
+            </div>
+            
+            <div style="margin-top: 20px; padding: 15px; background: #fff3cd; border-radius: 8px;">
+                <strong>ℹ️ Note:</strong> For live train status, PNR check, and booking, please use the 
+                <a href="/train/live-status?train_number={{ train.train_number }}">Live Status</a> feature.
+            </div>
+        </div>
+        {% else %}
+        <div class="train-card">
+            <h3>Train not found</h3>
+            <p>Please check the train number and try again.</p>
+        </div>
+        {% endif %}
+    </div>
+</body>
+</html>

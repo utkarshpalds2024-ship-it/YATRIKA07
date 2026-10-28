@@ -1,0 +1,221 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-100">
+    <div class="container mx-auto px-4 py-8">
+        <div class="bg-white rounded-2xl shadow-xl overflow-hidden">
+            <div class="bg-gradient-to-r from-blue-600 to-purple-600 px-6 py-4">
+                <h2 class="text-xl font-semibold text-white flex items-center">
+                    <i class="fas fa-plane mr-2"></i>Live Flight Tracker
+                </h2>
+                <p class="text-blue-100 text-sm mt-1">Real-time flights from OpenSky Network</p>
+            </div>
+            
+            <div class="p-4">
+                <!-- Controls -->
+                <div class="flex flex-wrap gap-4 mb-4 justify-between items-center">
+                    <div>
+                        <span id="flightCount" class="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm">
+                            Loading flights...
+                        </span>
+                    </div>
+                    <div class="flex gap-2">
+                        <button onclick="refreshFlights()" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700">
+                            <i class="fas fa-sync-alt mr-2"></i>Refresh
+                        </button>
+                        <button onclick="centerMap()" class="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700">
+                            <i class="fas fa-crosshairs mr-2"></i>Center Map
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Map Container -->
+                <div id="map" style="height: 600px; width: 100%; border-radius: 12px; overflow: hidden;"></div>
+                
+                <!-- Flight List -->
+                <div class="mt-4">
+                    <h3 class="font-semibold text-gray-800 mb-2">Nearby Flights</h3>
+                    <div id="flightList" class="max-h-60 overflow-y-auto space-y-2">
+                        <p class="text-gray-500 text-center py-4">Click on a plane on the map to see details</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Leaflet CSS and JS -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://unpkg.com/leaflet.rotatedmarker@0.2.0/leaflet.rotatedMarker.js"></script>
+
+<script>
+let flightMap;
+let markers = {};
+let flightsData = [];
+
+// Initialize map centered on India
+function initMap() {
+    const mapElement = document.getElementById('map');
+    if (typeof L === 'undefined') {
+        mapElement.innerHTML = '<div class="h-full flex items-center justify-center text-red-600">Unable to load the map library. Please check your internet connection and refresh.</div>';
+        return false;
+    }
+    
+    flightMap = L.map('map', { zoomControl: true }).setView([20.5937, 78.9629], 5);
+    
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+        maxZoom: 19,
+        crossOrigin: true
+    }).addTo(flightMap);
+
+    // Leaflet needs this after the page layout has finished to draw tiles.
+    setTimeout(() => flightMap.invalidateSize(), 100);
+    return true;
+}
+
+// Custom airplane icon
+const planeIcon = L.divIcon({
+    html: '<i class="fas fa-plane" style="font-size: 24px; color: #3B82F6; transform: rotate(-45deg);"></i>',
+    iconSize: [24, 24],
+    className: 'plane-marker'
+});
+
+// Fetch live flights
+async function refreshFlights() {
+    const countSpan = document.getElementById('flightCount');
+    countSpan.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Loading...';
+    
+    if (!flightMap) {
+        countSpan.textContent = 'Map is unavailable';
+        return;
+    }
+
+    try {
+        const response = await fetch('/api/live-flights');
+        const data = await response.json();
+        
+        if (data.success) {
+            flightsData = data.flights;
+            countSpan.innerHTML = `${data.count} live flights tracked`;
+            updateMapMarkers();
+            updateFlightList();
+        } else {
+            countSpan.innerHTML = 'Error loading flights';
+            console.error(data.error);
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        countSpan.innerHTML = 'Connection error';
+    }
+}
+
+// Update markers on map
+function updateMapMarkers() {
+    // Remove old markers
+    if (!flightMap) return;
+    Object.values(markers).forEach(marker => flightMap.removeLayer(marker));
+    markers = {};
+    
+    // Add new markers
+    flightsData.forEach(flight => {
+        if (Number.isFinite(flight.latitude) && Number.isFinite(flight.longitude) && !flight.on_ground) {
+            // Create custom marker with rotation
+            const angle = flight.true_track || 0;
+            const icon = L.divIcon({
+                html: `<div style="transform: rotate(${angle}deg);">
+                        <i class="fas fa-plane" style="font-size: 20px; color: #3B82F6;"></i>
+                       </div>`,
+                iconSize: [20, 20],
+                className: 'plane-marker'
+            });
+            
+            const marker = L.marker([flight.latitude, flight.longitude], { icon: icon })
+                .bindPopup(createPopupContent(flight))
+                .addTo(flightMap);
+            
+            marker.on('click', () => showFlightDetails(flight));
+            markers[flight.icao24] = marker;
+        }
+    });
+}
+
+// Create popup content
+function createPopupContent(flight) {
+    return `
+        <div class="text-sm">
+            <strong>✈️ ${flight.callsign || 'Unknown'}</strong><br>
+            🌍 ${flight.origin_country}<br>
+            📍 Alt: ${flight.altitude ? Math.round(flight.altitude) + 'm' : 'N/A'}<br>
+            ⚡ Speed: ${flight.velocity ? Math.round(flight.velocity * 3.6) + 'km/h' : 'N/A'}
+        </div>
+    `;
+}
+
+// Update flight list
+function updateFlightList() {
+    const listContainer = document.getElementById('flightList');
+    
+    if (flightsData.length === 0) {
+        listContainer.innerHTML = '<p class="text-gray-500 text-center py-4">No flights found</p>';
+        return;
+    }
+    
+    listContainer.innerHTML = flightsData.slice(0, 20).map(flight => `
+        <div class="bg-gray-50 rounded-lg p-3 cursor-pointer hover:bg-gray-100 transition"
+             onclick="flyToFlight(${flight.latitude}, ${flight.longitude}, '${flight.icao24}')">
+            <div class="flex justify-between items-center">
+                <div>
+                    <span class="font-semibold">✈️ ${flight.callsign || 'Unknown'}</span>
+                    <span class="text-xs text-gray-500 ml-2">${flight.origin_country}</span>
+                </div>
+                <div class="text-right">
+                    <div class="text-xs text-gray-500">${flight.altitude ? Math.round(flight.altitude) + 'm' : 'N/A'}</div>
+                    <div class="text-xs text-gray-500">${flight.velocity ? Math.round(flight.velocity * 3.6) + 'km/h' : 'N/A'}</div>
+                </div>
+            </div>
+        </div>
+    `).join('');
+}
+
+// Fly to selected flight
+function flyToFlight(lat, lng, icao24) {
+    if (!flightMap || !Number.isFinite(lat) || !Number.isFinite(lng)) return;
+    flightMap.flyTo([lat, lng], 10);
+    if (markers[icao24]) {
+        markers[icao24].openPopup();
+    }
+}
+
+// Show flight details
+function showFlightDetails(flight) {
+    // You can add more detailed view here
+    console.log('Flight details:', flight);
+}
+
+// Center map on default view
+function centerMap() {
+    if (flightMap) flightMap.setView([20.5937, 78.9629], 5);
+}
+
+// Initialize on page load
+document.addEventListener('DOMContentLoaded', () => {
+    if (initMap()) {
+        refreshFlights();
+        // Refresh every 30 seconds
+        setInterval(refreshFlights, 30000);
+    }
+});
+</script>
+
+<style>
+    .plane-marker {
+        background: transparent;
+        border: none;
+    }
+    .flight-list-item:hover {
+        background-color: #f3f4f6;
+    }
+</style>
+{% endblock %}

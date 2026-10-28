@@ -1,0 +1,2403 @@
+{% extends "base.html" %}
+
+{% block content %}
+<style>
+    /* Premium Dashboard Styling */
+    :root {
+        --glow-blue: rgba(59, 130, 246, 0.25);
+        --glow-green: rgba(16, 185, 129, 0.25);
+        --glow-orange: rgba(245, 158, 11, 0.25);
+        --glow-purple: rgba(139, 92, 246, 0.25);
+        --glow-teal: rgba(6, 182, 212, 0.25);
+        --glow-gold: rgba(217, 119, 6, 0.25);
+    }
+
+    /* Background */
+    body {
+        background: linear-gradient(135deg, #f8fbff 0%, #eef4ff 50%, #f5f3ff 100%);
+        min-height: 100vh;
+    }
+
+    /* Glass Card Base */
+    .glass-card {
+        backdrop-filter: blur(10px);
+        background: rgba(255, 255, 255, 0.65);
+        border: 1px solid rgba(255, 255, 255, 0.5);
+        box-shadow: 0 8px 32px rgba(31, 38, 135, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.8);
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .glass-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 12px 48px rgba(31, 38, 135, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.8);
+        border-color: rgba(255, 255, 255, 0.6);
+    }
+
+    /* KPI Cards with Section Colors */
+    .kpi-card {
+        backdrop-filter: blur(12px);
+        background: rgba(255, 255, 255, 0.7);
+        border: 1.5px solid rgba(255, 255, 255, 0.6);
+        box-shadow: 0 10px 40px rgba(31, 38, 135, 0.1);
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .kpi-card::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -50%;
+        width: 200%;
+        height: 200%;
+        background: radial-gradient(circle, rgba(255, 255, 255, 0.4) 0%, transparent 70%);
+        transition: all 0.6s ease;
+        opacity: 0;
+    }
+
+    .kpi-card:hover::before {
+        opacity: 1;
+    }
+
+    .kpi-card:hover {
+        transform: translateY(-6px);
+        border-color: rgba(255, 255, 255, 0.8);
+    }
+
+    .kpi-trip { --accent-color: #3B82F6; --glow: var(--glow-blue); }
+    .kpi-booking { --accent-color: #10B981; --glow: var(--glow-green); }
+    .kpi-stories { --accent-color: #8B5CF6; --glow: var(--glow-purple); }
+    .kpi-spent { --accent-color: #F59E0B; --glow: var(--glow-orange); }
+
+    .kpi-card .accent-icon {
+        width: 56px;
+        height: 56px;
+        border-radius: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 24px;
+        box-shadow: 0 8px 16px var(--glow);
+        transition: all 0.3s ease;
+    }
+
+    .kpi-card:hover .accent-icon {
+        transform: scale(1.1) rotate(-5deg);
+        box-shadow: 0 12px 24px var(--glow);
+    }
+
+    /* Hero Card */
+    .hero-card {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        position: relative;
+        overflow: hidden;
+        border-radius: 24px;
+        padding: 40px;
+        color: white;
+        box-shadow: 0 20px 60px rgba(102, 126, 234, 0.4);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .hero-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        right: 0;
+        width: 300px;
+        height: 300px;
+        background: radial-gradient(circle, rgba(255, 255, 255, 0.15) 0%, transparent 70%);
+        border-radius: 50%;
+        transform: translate(100px, -100px);
+    }
+
+    .hero-card::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 200px;
+        height: 200px;
+        background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+        border-radius: 50%;
+        transform: translate(-50px, 50px);
+    }
+
+    .hero-content {
+        position: relative;
+        z-index: 2;
+    }
+
+    /* Section Headers with Accent Colors */
+    .section-header {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 20px;
+        padding-bottom: 12px;
+        border-bottom: 2px solid rgba(0, 0, 0, 0.08);
+    }
+
+    .section-header::before {
+        content: '';
+        width: 4px;
+        height: 24px;
+        background: linear-gradient(135deg, var(--accent-color), rgba(var(--accent-rgb), 0.5));
+        border-radius: 2px;
+    }
+
+    .section-header h3 {
+        font-size: 18px;
+        font-weight: 700;
+        color: #1f2937;
+        margin: 0;
+    }
+
+    /* Tab Styling */
+    .tab-button {
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+        font-weight: 600;
+        color: #6b7280;
+    }
+
+    .tab-button::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 0;
+        height: 2px;
+        background: #3B82F6;
+        transition: width 0.3s ease;
+    }
+
+    .tab-button:hover {
+        color: #3B82F6;
+    }
+
+    .tab-button.active::after,
+    .tab-button:hover::after {
+        width: 100%;
+    }
+
+    /* CTA Cards Enhanced */
+    .cta-card {
+        position: relative;
+        overflow: hidden;
+        border-radius: 20px;
+        padding: 24px;
+        color: white;
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        border: 2px solid rgba(255, 255, 255, 0.2);
+        cursor: pointer;
+        text-decoration: none;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        min-height: 180px;
+    }
+
+    .cta-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0);
+        transition: all 0.4s ease;
+        border-radius: 20px;
+    }
+
+    .cta-card:hover::before {
+        background: rgba(0, 0, 0, 0.15);
+    }
+
+    .cta-card:hover {
+        transform: translateY(-8px);
+        border-color: rgba(255, 255, 255, 0.4);
+        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.2);
+    }
+
+    .cta-icon {
+        font-size: 48px;
+        margin-bottom: 12px;
+        transition: all 0.4s ease;
+        display: inline-block;
+        z-index: 1;
+        position: relative;
+    }
+
+    .cta-card:hover .cta-icon {
+        transform: scale(1.15) rotate(5deg);
+        filter: drop-shadow(0 8px 16px rgba(0, 0, 0, 0.2));
+    }
+
+    .cta-title {
+        font-size: 18px;
+        font-weight: 700;
+        margin: 0;
+        position: relative;
+        z-index: 1;
+    }
+
+    .cta-subtitle {
+        font-size: 13px;
+        margin-top: 6px;
+        opacity: 0.9;
+        position: relative;
+        z-index: 1;
+    }
+
+    /* Glow Effect for Active States */
+    .glow-effect {
+        box-shadow: 0 0 30px var(--glow);
+    }
+
+    .glow-effect:hover {
+        box-shadow: 0 0 40px var(--glow), 0 12px 48px var(--glow);
+    }
+
+    /* Animations */
+    @keyframes slideInUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @keyframes fadeInScale {
+        from {
+            opacity: 0;
+            transform: scale(0.95);
+        }
+        to {
+            opacity: 1;
+            transform: scale(1);
+        }
+    }
+
+    @keyframes shimmer {
+        0% { background-position: -1000px 0; }
+        100% { background-position: 1000px 0; }
+    }
+
+    @keyframes float {
+        0%, 100% { transform: translateY(0px); }
+        50% { transform: translateY(-10px); }
+    }
+
+    @keyframes pulse-glow {
+        0%, 100% { box-shadow: 0 0 20px rgba(59, 130, 246, 0.3); }
+        50% { box-shadow: 0 0 40px rgba(59, 130, 246, 0.5); }
+    }
+
+    @keyframes coinPulse {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.08); }
+        100% { transform: scale(1); }
+    }
+
+    @keyframes fireBounce {
+        0% { transform: translateY(0); }
+        50% { transform: translateY(-3px); }
+        100% { transform: translateY(0); }
+    }
+
+    @keyframes xpFill {
+        from { width: 0; }
+        to { width: 100%; }
+    }
+
+    @keyframes chartLoad {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+
+    .animate-slide-up {
+        animation: slideInUp 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+    }
+
+    .animate-fade-scale {
+        animation: fadeInScale 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .animate-float {
+        animation: float 3s ease-in-out infinite;
+    }
+
+    .coin-pulse {
+        animation: coinPulse 1.3s ease-in-out infinite;
+    }
+
+    .streak-fire {
+        animation: fireBounce 1s ease-in-out infinite;
+    }
+
+    .xp-fill {
+        animation: xpFill 1.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    /* Chart Container */
+    .chart-container {
+        position: relative;
+        border-radius: 16px;
+        padding: 20px;
+        background: white;
+        animation: chartLoad 0.8s ease;
+    }
+
+    .chart-container h3 {
+        font-size: 16px;
+        font-weight: 700;
+        margin-bottom: 12px;
+        color: #1f2937;
+    }
+
+    /* Floating Gamification Mini Widget */
+    .gami-float-widget {
+        position: fixed;
+        bottom: 24px;
+        right: 24px;
+        background: linear-gradient(135deg, #fde68a 0%, #f59e0b 100%);
+        border-radius: 16px;
+        padding: 16px;
+        color: #78350f;
+        font-weight: 700;
+        box-shadow: 0 10px 40px rgba(245, 158, 11, 0.3);
+        z-index: 40;
+        cursor: pointer;
+        max-width: 200px;
+        animation: float 6s ease-in-out infinite;
+        transition: all 0.3s ease;
+    }
+
+    .gami-float-widget:hover {
+        transform: scale(1.05);
+        box-shadow: 0 15px 50px rgba(245, 158, 11, 0.5);
+    }
+
+    .gami-float-widget-icon {
+        font-size: 24px;
+        margin-bottom: 4px;
+    }
+
+    .gami-float-widget-stat {
+        font-size: 12px;
+        opacity: 0.95;
+        line-height: 1.4;
+    }
+
+    .gami-surface {
+        background: radial-gradient(circle at 10% 20%, rgba(16, 185, 129, 0.15), transparent 40%),
+                    radial-gradient(circle at 80% 0%, rgba(59, 130, 246, 0.18), transparent 45%),
+                    linear-gradient(135deg, #ecfeff 0%, #eff6ff 45%, #f5f3ff 100%);
+    }
+    .gami-dark .gami-surface {
+        background: radial-gradient(circle at 10% 20%, rgba(16, 185, 129, 0.2), transparent 40%),
+                    radial-gradient(circle at 80% 0%, rgba(59, 130, 246, 0.25), transparent 45%),
+                    linear-gradient(135deg, #0f172a 0%, #111827 45%, #1e1b4b 100%);
+    }
+
+    /* Responsive Adjustments */
+    @media (max-width: 768px) {
+        .hero-card {
+            padding: 24px;
+        }
+
+        .gami-float-widget {
+            bottom: 16px;
+            right: 16px;
+            padding: 12px;
+            font-size: 12px;
+        }
+
+        .cta-card {
+            min-height: 150px;
+        }
+    }
+
+    /* ============ Premium Expense Tracker Styles ============ */
+    
+    /* Modal Enhancement */
+    #expenseModal {
+        animation: fadeIn 0.3s ease-out;
+    }
+    
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+        }
+        to {
+            opacity: 1;
+        }
+    }
+    
+    #expenseModal > div {
+        animation: slideMount 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    
+    @keyframes slideMount {
+        from {
+            opacity: 0;
+            transform: scale(0.9) translateY(-20px);
+        }
+        to {
+            opacity: 1;
+            transform: scale(1) translateY(0);
+        }
+    }
+    
+    /* Summary Cards Container */
+    #expenseSummaryCards .glass-card {
+        position: relative;
+        overflow: hidden;
+    }
+    
+    #expenseSummaryCards .glass-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(135deg, rgba(255, 255, 255, 0.5) 0%, transparent 100%);
+        opacity: 0;
+        transition: opacity 0.3s ease;
+        pointer-events: none;
+    }
+    
+    #expenseSummaryCards .glass-card:hover::before {
+        opacity: 1;
+    }
+    
+    /* Expense List Cards */
+    #expenses-list .glass-card {
+        border-left: 4px solid transparent;
+        transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    
+    #expenses-list .glass-card:hover {
+        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.15);
+        transform: translateY(-6px) translateX(4px);
+    }
+    
+    /* Budget Progress Bar */
+    #budgetProgressSection {
+        background: linear-gradient(135deg, rgba(255, 255, 255, 0.8) 0%, rgba(255, 255, 255, 0.6) 100%);
+    }
+    
+    /* Expense Breakdown Chart Container */
+    #expenseChartSection {
+        background: linear-gradient(to bottom, rgba(255, 255, 255, 0.8), rgba(255, 255, 255, 0.6));
+    }
+    
+    /* Category Icons in Summary */
+    #summaryHighestIcon {
+        animation: bounce 2s infinite;
+    }
+    
+    @keyframes bounce {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-8px); }
+    }
+    
+    /* Smooth transitions for progress bars */
+    #budgetProgressBar, #totalSpentProgress {
+        transition: width 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+        border-radius: 10px;
+    }
+
+    /* Stagger Animation for Grid Items */
+    .grid > * {
+        animation: slideInUp 0.6s cubic-bezier(0.4, 0, 0.2, 1) backwards;
+    }
+
+    .grid > *:nth-child(1) { animation-delay: 0.1s; }
+    .grid > *:nth-child(2) { animation-delay: 0.15s; }
+    .grid > *:nth-child(3) { animation-delay: 0.2s; }
+    .grid > *:nth-child(4) { animation-delay: 0.25s; }
+</style>
+
+<div class="min-h-screen py-8">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
+        
+        <!-- Premium Welcome Hero Card -->
+        <div class="hero-card animate-slide-up">
+            <div class="hero-content">
+                <div class="flex justify-between items-start mb-6">
+                    <div>
+                        <h1 class="text-4xl font-black text-white mb-2">Welcome back! ✈️</h1>
+                        <p class="text-white/90 text-lg">Let's continue your amazing travels</p>
+                        <button onclick="refreshDashboardData()" class="mt-3 rounded-lg bg-white/15 px-3 py-2 text-sm font-semibold text-white border border-white/30 hover:bg-white/25 transition" title="Refresh dashboard data">
+                            <i class="fas fa-sync-alt mr-1"></i> Refresh live data
+                        </button>
+                    </div>
+                    <div class="text-5xl animate-float">🌍</div>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mt-8">
+                    <div class="bg-white/15 backdrop-blur-sm rounded-lg p-4 border border-white/20">
+                        <div class="text-sm text-white/80">Next Trip</div>
+                        <div class="text-xl font-bold text-white mt-1" id="nextTripDest">-</div>
+                        <div class="text-xs text-white/70 mt-1" id="nextTripDays">No upcoming trip</div>
+                    </div>
+                    <div class="bg-white/15 backdrop-blur-sm rounded-lg p-4 border border-white/20">
+                        <div class="text-sm text-white/80">Budget Left</div>
+                        <div class="text-xl font-bold text-white mt-1" id="budgetLeft">₹0</div>
+                        <div class="text-xs text-white/70 mt-1" id="budgetLeftDetail">Loading live totals…</div>
+                    </div>
+                    <div class="bg-white/15 backdrop-blur-sm rounded-lg p-4 border border-white/20">
+                        <div class="text-sm text-white/80">YC Coins</div>
+                        <div class="text-xl font-bold text-white mt-1" id="heroYCCoins">0</div>
+                        <div class="text-xs text-white/70 mt-1">in your wallet</div>
+                    </div>
+                    <div class="bg-white/15 backdrop-blur-sm rounded-lg p-4 border border-white/20">
+                        <div class="text-sm text-white/80">Current Rank</div>
+                        <div class="text-xl font-bold text-white mt-1" id="heroRank">#-</div>
+                        <div class="text-xs text-white/70 mt-1">on leaderboard</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- KPI Cards with Hover Effects -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div class="kpi-card kpi-trip" style="--accent-color: #3B82F6; --accent-rgb: 59, 130, 246;">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-gray-600 text-sm font-medium">Total Trips</p>
+                        <p id="totalTrips" class="text-4xl font-black text-blue-600 mt-2">0</p>
+                        <div class="mt-3 h-2 bg-blue-100 rounded-full overflow-hidden">
+                            <div class="h-full bg-gradient-to-r from-blue-500 to-cyan-400" style="width: 65%;"></div>
+                        </div>
+                    </div>
+                    <div class="accent-icon" style="background: linear-gradient(135deg, #3B82F6, #0EA5E9); box-shadow: 0 8px 20px rgba(59, 130, 246, 0.3);">
+                        <i class="fas fa-plane-departure text-white text-2xl"></i>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="kpi-card kpi-booking" style="--accent-color: #10B981; --accent-rgb: 16, 185, 129;">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-gray-600 text-sm font-medium">Total Bookings</p>
+                        <p id="totalBookings" class="text-4xl font-black text-green-600 mt-2">0</p>
+                        <div class="mt-3 h-2 bg-green-100 rounded-full overflow-hidden">
+                            <div class="h-full bg-gradient-to-r from-green-500 to-emerald-400" style="width: 45%;"></div>
+                        </div>
+                    </div>
+                    <div class="accent-icon" style="background: linear-gradient(135deg, #10B981, #34D399); box-shadow: 0 8px 20px rgba(16, 185, 129, 0.3);">
+                        <i class="fas fa-ticket-alt text-white text-2xl"></i>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="kpi-card kpi-stories" style="--accent-color: #8B5CF6; --accent-rgb: 139, 92, 246;">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-gray-600 text-sm font-medium">Travel Stories</p>
+                        <p id="totalStories" class="text-4xl font-black text-purple-600 mt-2">0</p>
+                        <div class="mt-3 h-2 bg-purple-100 rounded-full overflow-hidden">
+                            <div class="h-full bg-gradient-to-r from-purple-500 to-indigo-400" style="width: 28%;"></div>
+                        </div>
+                    </div>
+                    <div class="accent-icon" style="background: linear-gradient(135deg, #8B5CF6, #A78BFA); box-shadow: 0 8px 20px rgba(139, 92, 246, 0.3);">
+                        <i class="fas fa-book-open text-white text-2xl"></i>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="kpi-card kpi-spent" style="--accent-color: #F59E0B; --accent-rgb: 245, 158, 11;">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-gray-600 text-sm font-medium">Total Spent</p>
+                        <p id="totalSpent" class="text-4xl font-black text-amber-600 mt-2">₹0</p>
+                        <div class="mt-3 h-2 bg-amber-100 rounded-full overflow-hidden">
+                            <div id="totalSpentKpiProgress" class="h-full bg-gradient-to-r from-amber-500 to-orange-400" style="width: 0%;"></div>
+                        </div>
+                    </div>
+                    <div class="accent-icon" style="background: linear-gradient(135deg, #F59E0B, #FBBF24); box-shadow: 0 8px 20px rgba(245, 158, 11, 0.3);">
+                        <i class="fas fa-dollar-sign text-white text-2xl"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Dashboard Tabs -->
+        <div class="glass-card rounded-2xl overflow-hidden">
+            <div class="border-b border-gray-200">
+                <nav class="flex flex-wrap -mb-px p-6 gap-8">
+                    <button onclick="showTab('trips')" class="tab-button active py-2" id="tab-trips">
+                        <i class="fas fa-map-marked-alt mr-2"></i>My Trips
+                    </button>
+                    <button onclick="showTab('bookings')" class="tab-button py-2" id="tab-bookings">
+                        <i class="fas fa-ticket-alt mr-2"></i>My Bookings
+                    </button>
+                    <button onclick="showTab('expenses')" class="tab-button py-2" id="tab-expenses">
+                        <i class="fas fa-receipt mr-2"></i>Expenses
+                    </button>
+                    <button onclick="showTab('visa')" class="tab-button py-2" id="tab-visa">
+                        <i class="fas fa-passport mr-2"></i>Visa
+                    </button>
+                    <button onclick="showTab('analytics')" class="tab-button py-2" id="tab-analytics">
+                        <i class="fas fa-chart-line mr-2"></i>Analytics
+                    </button>
+                    <button onclick="showTab('gamification')" class="tab-button py-2" id="tab-gamification">
+                        <i class="fas fa-trophy mr-2"></i>Game Hub
+                    </button>
+                </nav>
+            </div>
+
+            <!-- Trips Tab -->
+            <div id="trips" class="p-8">
+                <div class="section-header" style="--accent-color: #3B82F6;">
+                    <h3>My Trips</h3>
+                </div>
+                <div id="trips-list" class="space-y-4">
+                    <div class="text-center py-8">
+                        <i class="fas fa-spinner fa-spin text-3xl text-blue-600 mb-2"></i>
+                        <p class="text-gray-500">Loading your trips...</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bookings Tab -->
+            <div id="bookings" class="p-8 hidden">
+                <div class="section-header" style="--accent-color: #10B981;">
+                    <h3>My Bookings</h3>
+                </div>
+                <div id="bookings-list" class="space-y-4">
+                    <div class="text-center py-8">
+                        <i class="fas fa-spinner fa-spin text-3xl text-green-600 mb-2"></i>
+                        <p class="text-gray-500">Loading your bookings...</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Expenses Tab -->
+            <div id="expenses" class="p-8 hidden">
+                <div class="mb-8 flex justify-between items-center">
+                    <div class="section-header" style="--accent-color: #F59E0B;">
+                        <h3>💰 Trip Expenses</h3>
+                    </div>
+                    <button onclick="showAddExpenseModal()" class="px-6 py-3 rounded-xl bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold hover:shadow-lg transition transform hover:scale-105 flex items-center gap-2">
+                        <i class="fas fa-plus"></i>Add Expense
+                    </button>
+                </div>
+                
+                <!-- Summary Cards -->
+                <div id="expenseSummaryCards" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+                    <!-- Total Spent Card -->
+                    <div class="glass-card rounded-2xl p-6 border-l-4 border-orange-500">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm font-medium text-gray-600 mb-1">💸 Total Spent</p>
+                                <p class="text-3xl font-bold text-gray-900">$<span id="summaryTotalSpent">0.00</span></p>
+                            </div>
+                            <div class="text-5xl opacity-20">💸</div>
+                        </div>
+                        <div class="mt-3 w-full bg-gray-200 rounded-full h-2">
+                            <div id="totalSpentProgress" class="bg-orange-500 h-2 rounded-full transition-all" style="width: 0%"></div>
+                        </div>
+                    </div>
+                    
+                    <!-- Remaining Budget Card -->
+                    <div class="glass-card rounded-2xl p-6 border-l-4 border-green-500">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm font-medium text-gray-600 mb-1">💵 Remaining Budget</p>
+                                <p class="text-3xl font-bold text-green-600">$<span id="summaryRemainingBudget">0.00</span></p>
+                            </div>
+                            <div class="text-5xl opacity-20">💵</div>
+                        </div>
+                        <p id="budgetStatus" class="mt-3 text-xs text-green-600 font-semibold"></p>
+                    </div>
+                    
+                    <!-- Highest Expense Card -->
+                    <div class="glass-card rounded-2xl p-6 border-l-4 border-purple-500">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm font-medium text-gray-600 mb-1">📊 Highest Category</p>
+                                <p class="text-2xl font-bold text-gray-900"><span id="summaryHighestCategory">—</span></p>
+                                <p class="text-sm text-gray-600 mt-1">$<span id="summaryHighestAmount">0.00</span></p>
+                            </div>
+                            <div class="text-5xl" id="summaryHighestIcon">📊</div>
+                        </div>
+                    </div>
+                    
+                    <!-- Today's Spend Card -->
+                    <div class="glass-card rounded-2xl p-6 border-l-4 border-blue-500">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm font-medium text-gray-600 mb-1">📈 Today's Spend</p>
+                                <p class="text-3xl font-bold text-blue-600">$<span id="summaryTodaySpend">0.00</span></p>
+                            </div>
+                            <div class="text-5xl opacity-20">📈</div>
+                        </div>
+                        <p id="transactionCount" class="mt-3 text-xs text-gray-600"></p>
+                    </div>
+                </div>
+                
+                <!-- Budget Progress Section -->
+                <div id="budgetProgressSection" class="glass-card rounded-2xl p-6 mb-8 hidden">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-lg font-semibold text-gray-900">📊 Budget Progress</h3>
+                        <span id="budgetPercentage" class="text-2xl font-bold text-orange-600">0%</span>
+                    </div>
+                    <div class="w-full bg-gray-200 rounded-full h-3 overflow-hidden">
+                        <div id="budgetProgressBar" class="bg-gradient-to-r from-green-500 to-orange-500 h-3 rounded-full transition-all" style="width: 0%"></div>
+                    </div>
+                    <div class="flex justify-between mt-2 text-sm text-gray-600">
+                        <span>Budget Used: <span id="budgetUsed">0</span> / <span id="budgetTotal">0</span></span>
+                        <span id="budgetWarning" class="text-red-500 font-semibold hidden">⚠️ Budget exceeded 70%!</span>
+                    </div>
+                </div>
+                
+                <!-- Expense Breakdown Chart -->
+                <div id="expenseChartSection" class="glass-card rounded-2xl p-6 mb-8 hidden">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4">📈 Expense Breakdown by Category</h3>
+                    <div class="flex items-center justify-center" style="height: 300px;">
+                        <canvas id="expenseBreakdownChart"></canvas>
+                    </div>
+                </div>
+                
+                <!-- Expenses List -->
+                <div id="expenses-list" class="space-y-4">
+                    <div class="text-center py-12">
+                        <i class="fas fa-spinner fa-spin text-4xl text-orange-600 mb-4"></i>
+                        <p class="text-gray-500">Loading expenses...</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Visa Tab -->
+            <div id="visa" class="p-8 hidden">
+                <div class="mb-4 flex justify-between items-center">
+                    <div class="section-header" style="--accent-color: #8B5CF6;">
+                        <h3>Visa Applications</h3>
+                    </div>
+                    <a href="/visa" class="px-4 py-2 rounded-lg bg-gradient-to-r from-purple-500 to-indigo-500 text-white font-semibold hover:shadow-lg transition">
+                        <i class="fas fa-plus mr-2"></i>New Application
+                    </a>
+                </div>
+                <div id="visa-list" class="space-y-4">
+                    <div class="text-center py-8">
+                        <i class="fas fa-spinner fa-spin text-3xl text-purple-600 mb-2"></i>
+                        <p class="text-gray-500">Loading visa applications...</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Analytics Tab -->
+            <div id="analytics" class="p-8 hidden">
+                <div class="section-header" style="--accent-color: #06B6D4;">
+                    <h3>Analytics & Insights</h3>
+                </div>
+                <div class="grid md:grid-cols-2 gap-6">
+                    <div class="chart-container">
+                        <h3>Trip Distribution by Destination</h3>
+                        <canvas id="tripChart" width="400" height="250"></canvas>
+                    </div>
+                    <div class="chart-container">
+                        <h3>Monthly Spending Trend</h3>
+                        <canvas id="spendingChart" width="400" height="250"></canvas>
+                    </div>
+                    <div class="md:col-span-2 chart-container">
+                        <h3>Booking Types Breakdown</h3>
+                        <canvas id="bookingTypeChart" width="800" height="250"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Gamification Tab -->
+            <div id="gamification" class="p-0 hidden">
+                <div id="gamiReactRoot" class="gami-surface p-6 md:p-8">
+                    <div class="text-center py-10">
+                        <i class="fas fa-spinner fa-spin text-3xl text-blue-600 mb-2"></i>
+                        <p class="text-gray-600">Loading premium YATRIKA Game Hub...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Floating Gamification Widget -->
+    <div class="gami-float-widget" onclick="showTab('gamification')" title="Click to open Game Hub">
+        <div class="gami-float-widget-icon">🎮</div>
+        <div class="gami-float-widget-stat">
+            <div id="floatYC">0 YC</div>
+            <div id="floatStreak">0 🔥</div>
+            <div id="floatRank">#- Rank</div>
+        </div>
+    </div>
+</div>
+
+<!-- Add Expense Modal - Premium Design -->
+<div id="expenseModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50 p-4">
+    <div class="bg-white rounded-2xl overflow-hidden max-w-md w-full mx-auto shadow-2xl transform transition-all">
+        <!-- Gradient Header -->
+        <div class="bg-gradient-to-r from-blue-600 to-purple-600 px-6 py-8">
+            <h2 class="text-3xl font-bold text-white mb-2 flex items-center gap-2">
+                <span>💸</span> Add Travel Expense
+            </h2>
+            <p class="text-blue-100 text-sm">Track your trip spending smartly</p>
+        </div>
+        
+        <!-- Content -->
+        <form id="expenseForm" class="p-6">
+            <!-- Trip Selection -->
+            <div class="mb-5">
+                <label class="block text-sm font-semibold text-gray-700 mb-2">📍 Select Trip</label>
+                <select id="expense_trip_id" required class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-blue-500 transition bg-gray-50">
+                    <option value="">Choose a trip...</option>
+                </select>
+            </div>
+            
+            <!-- Category Selection -->
+            <div class="mb-5">
+                <label class="block text-sm font-semibold text-gray-700 mb-2">🏷️ Category</label>
+                <select id="expense_category" required class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-blue-500 transition bg-gray-50">
+                    <option value="">Select category...</option>
+                    <option value="Food">🍔 Food</option>
+                    <option value="Transport">🚕 Transport / Cab</option>
+                    <option value="Hotel">🏨 Hotel</option>
+                    <option value="Flight">✈️ Flight</option>
+                    <option value="Activities">🎟️ Activities</option>
+                    <option value="Shopping">🛍️ Shopping</option>
+                    <option value="Internet">📶 Internet / SIM</option>
+                    <option value="Emergency">💊 Emergency</option>
+                </select>
+            </div>
+            
+            <!-- Amount Input -->
+            <div class="mb-5">
+                <label class="block text-sm font-semibold text-gray-700 mb-2">💰 Amount</label>
+                <div class="relative">
+                    <span class="absolute left-4 top-3 text-gray-600 font-semibold">$</span>
+                    <input type="number" id="expense_amount" step="0.01" min="0" required placeholder="0.00" class="w-full pl-8 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-blue-500 transition bg-gray-50">
+                </div>
+            </div>
+            
+            <!-- Date Input -->
+            <div class="mb-5">
+                <label class="block text-sm font-semibold text-gray-700 mb-2">📅 Date</label>
+                <input type="date" id="expense_date" required class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-blue-500 transition bg-gray-50">
+            </div>
+            
+            <!-- Note Input -->
+            <div class="mb-6">
+                <label class="block text-sm font-semibold text-gray-700 mb-2">📝 Note (Optional)</label>
+                <textarea id="expense_note" rows="2" placeholder="Add any notes about this expense..." class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-blue-500 transition bg-gray-50 resize-none"></textarea>
+            </div>
+            
+            <!-- Button Group -->
+            <div class="flex gap-3">
+                <button type="button" onclick="closeExpenseModal()" class="flex-1 px-4 py-3 border-2 border-gray-300 text-gray-700 font-semibold rounded-xl hover:bg-gray-100 transition">
+                    Cancel
+                </button>
+                <button type="submit" class="flex-1 px-4 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-xl hover:shadow-lg hover:from-blue-700 hover:to-purple-700 transition transform hover:scale-105">
+                    Add Expense
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+const token = localStorage.getItem('access_token');
+if (!token) window.location.href = '/login';
+
+let tripChart, spendingChart, bookingTypeChart;
+let gamiData = null;
+let leaderboardScope = 'weekly';
+
+const dashboardCurrency = 'INR';
+
+function formatINR(value) {
+    return new Intl.NumberFormat('en-IN', {
+        style: 'currency',
+        currency: dashboardCurrency,
+        maximumFractionDigits: 0
+    }).format(Number(value) || 0);
+}
+
+function dateOnly(value) {
+    return new Date(`${value}T00:00:00`);
+}
+
+async function refreshDashboardData() {
+    const refreshButton = document.querySelector('[onclick="refreshDashboardData()"]');
+    if (refreshButton) refreshButton.classList.add('animate-pulse');
+    try {
+        const headers = { 'Authorization': `Bearer ${token}` };
+        const [tripsRes, bookingsRes] = await Promise.all([
+            fetch('/api/trips', { headers }),
+            fetch('/api/bookings', { headers })
+        ]);
+        if (!tripsRes.ok || !bookingsRes.ok) throw new Error('Dashboard data request failed');
+
+        const trips = await tripsRes.json();
+        const bookings = await bookingsRes.json();
+        const expenseResults = await Promise.all(trips.map(async (trip) => {
+            const response = await fetch(`/api/expenses/trip/${trip.id}`, { headers });
+            if (!response.ok) return [];
+            const payload = await response.json();
+            return Array.isArray(payload.expenses) ? payload.expenses : [];
+        }));
+        const expenses = expenseResults.flat();
+
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const activeTrips = trips.filter(trip => dateOnly(trip.end_date) >= today)
+            .sort((a, b) => dateOnly(a.start_date) - dateOnly(b.start_date));
+        const nextTrip = activeTrips[0];
+        const nextTripDest = document.getElementById('nextTripDest');
+        const nextTripDays = document.getElementById('nextTripDays');
+
+        if (nextTrip) {
+            const startDate = dateOnly(nextTrip.start_date);
+            const daysUntil = Math.round((startDate - today) / 86400000);
+            nextTripDest.textContent = nextTrip.destination;
+            nextTripDays.textContent = daysUntil <= 0
+                ? (dateOnly(nextTrip.end_date) > today ? 'Currently in progress' : 'Starts today')
+                : `In ${daysUntil} day${daysUntil === 1 ? '' : 's'}`;
+        } else {
+            nextTripDest.textContent = 'No trip planned';
+            nextTripDays.textContent = 'Plan your next adventure';
+        }
+
+        const totalBudget = trips.reduce((sum, trip) => sum + (Number(trip.budget) || 0), 0);
+        const bookingSpent = bookings.reduce((sum, booking) =>
+            sum + ((Number(booking.price) || 0) * (Number(booking.travelers) || 1)), 0);
+        const expenseSpent = expenses.reduce((sum, expense) => sum + (Number(expense.amount) || 0), 0);
+        const totalSpent = bookingSpent + expenseSpent;
+        const budgetLeft = totalBudget - totalSpent;
+
+        document.getElementById('totalTrips').textContent = trips.length;
+        document.getElementById('totalBookings').textContent = bookings.length;
+        document.getElementById('totalSpent').textContent = formatINR(totalSpent);
+        document.getElementById('budgetLeft').textContent = formatINR(Math.max(0, budgetLeft));
+        document.getElementById('budgetLeftDetail').textContent = budgetLeft >= 0
+            ? `${formatINR(totalSpent)} spent of ${formatINR(totalBudget)}`
+            : `Over budget by ${formatINR(Math.abs(budgetLeft))}`;
+
+        const progress = totalBudget > 0 ? Math.min((totalSpent / totalBudget) * 100, 100) : 0;
+        const progressBar = document.getElementById('totalSpentProgress');
+        if (progressBar) progressBar.style.width = `${progress}%`;
+        const kpiProgressBar = document.getElementById('totalSpentKpiProgress');
+        if (kpiProgressBar) kpiProgressBar.style.width = `${progress}%`;
+    } catch (error) {
+        console.error('Dashboard summary refresh failed:', error);
+        document.getElementById('budgetLeftDetail').textContent = 'Unable to refresh totals';
+    } finally {
+        if (refreshButton) refreshButton.classList.remove('animate-pulse');
+    }
+}
+
+function showTab(tabName) {
+    document.querySelectorAll('#trips, #bookings, #expenses, #visa, #analytics, #gamification').forEach(el => el.classList.add('hidden'));
+    document.getElementById(tabName).classList.remove('hidden');
+    
+    // Update active tab button styling
+    document.querySelectorAll('.tab-button').forEach(btn => {
+        btn.classList.remove('active');
+    });
+    document.getElementById(`tab-${tabName}`).classList.add('active');
+    
+    if (tabName === 'analytics') {
+        loadAnalytics();
+    }
+    if (tabName === 'expenses') {
+        loadExpenses();
+    }
+    if (tabName === 'visa') {
+        loadVisaApplications();
+    }
+    if (tabName === 'gamification') {
+        loadGamification();
+    }
+}
+
+async function loadGamification() {
+    if (window.yatrikaGamiApp && typeof window.yatrikaGamiApp.reload === 'function') {
+        window.yatrikaGamiApp.reload();
+    }
+}
+
+// Load Trips
+async function loadTrips() {
+    try {
+        const res = await fetch('/api/trips', {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const trips = await res.json();
+        
+        document.getElementById('totalTrips').textContent = trips.length;
+        
+        
+        let html = '';
+        if (trips.length === 0) {
+            html = `
+                <div class="text-center py-12">
+                    <i class="fas fa-map-marked-alt text-5xl text-gray-400 mb-4"></i>
+                    <p class="text-gray-500 mb-4">No trips planned yet</p>
+                    <a href="/planner" class="inline-block bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition">
+                        Plan Your First Trip
+                    </a>
+                </div>
+            `;
+        } else {
+            trips.forEach(trip => {
+                const startDate = new Date(trip.start_date);
+                const endDate = new Date(trip.end_date);
+                const duration = Math.ceil((endDate - startDate) / (1000 * 60 * 60 * 24)) + 1;
+                
+                html += `
+                    <div class="glass-card rounded-xl p-5 hover:shadow-lg transition">
+                        <div class="flex flex-wrap justify-between items-start gap-4">
+                            <div class="flex-1">
+                                <div class="flex items-center mb-2">
+                                    <i class="fas fa-map-marker-alt text-blue-600 mr-2"></i>
+                                    <h3 class="text-xl font-semibold text-gray-900">${escapeHtml(trip.destination)}</h3>
+                                </div>
+                                <div class="grid grid-cols-1 md:grid-cols-3 gap-3 text-sm text-gray-600 mt-2">
+                                    <div>
+                                        <i class="fas fa-calendar-alt mr-1"></i>
+                                        ${formatDate(trip.start_date)} - ${formatDate(trip.end_date)}
+                                    </div>
+                                    <div>
+                                        <i class="fas fa-clock mr-1"></i>
+                                        ${duration} days
+                                    </div>
+                                    <div>
+                                        <i class="fas fa-dollar-sign mr-1"></i>
+                                        Budget: $${trip.budget}
+                                    </div>
+                                </div>
+                                <div class="mt-3">
+                                    <p class="text-sm font-medium text-gray-700 mb-1">Itinerary:</p>
+                                    <ul class="list-disc list-inside text-sm text-gray-600 space-y-1">
+                                        ${trip.itinerary.slice(0, 2).map(day => `<li>${escapeHtml(day)}</li>`).join('')}
+                                        ${trip.itinerary.length > 2 ? `<li class="text-blue-600">And ${trip.itinerary.length - 2} more days...</li>` : ''}
+                                    </ul>
+                                </div>
+                            </div>
+                            <div class="flex space-x-2">
+                                <button onclick="viewTripDetails(${trip.id})" class="text-blue-600 hover:text-blue-700">
+                                    <i class="fas fa-eye"></i> View
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            
+        }
+        document.getElementById('trips-list').innerHTML = html;
+        
+        // Populate trip dropdown for expenses
+        const tripSelect = document.getElementById('expense_trip_id');
+        if (tripSelect) {
+            tripSelect.innerHTML = '<option value="">Select a trip</option>' + 
+                trips.map(trip => `<option value="${trip.id}">${escapeHtml(trip.destination)} (${formatDate(trip.start_date)} - ${formatDate(trip.end_date)})</option>`).join('');
+        }
+    } catch (error) {
+        console.error('Error loading trips:', error);
+        document.getElementById('trips-list').innerHTML = '<div class="text-center py-8 text-red-500">Error loading trips</div>';
+    }
+}
+
+// Load Bookings - Enhanced with type icons
+async function loadBookings() {
+    try {
+        const res = await fetch('/api/bookings', {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const bookings = await res.json();
+        
+        document.getElementById('totalBookings').textContent = bookings.length;
+        
+        let html = '';
+        if (bookings.length === 0) {
+            html = `
+                <div class="text-center py-12">
+                    <i class="fas fa-ticket-alt text-5xl text-gray-400 mb-4"></i>
+                    <p class="text-gray-500 mb-4">No bookings yet</p>
+                    <a href="/booking" class="inline-block bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition">
+                        Make a Booking
+                    </a>
+                </div>
+            `;
+        } else {
+            bookings.forEach(booking => {
+                const statusColors = {
+                    confirmed: 'bg-green-100 text-green-800',
+                    pending: 'bg-yellow-100 text-yellow-800',
+                    cancelled: 'bg-red-100 text-red-800'
+                };
+                const statusColor = statusColors[booking.status] || 'bg-gray-100 text-gray-800';
+                
+                // Get icon based on booking type
+                let typeIcon = '';
+                let typeColor = '';
+                let typeDetails = '';
+                
+                if (booking.type === 'flight') {
+                    typeIcon = '✈️';
+                    typeColor = 'text-blue-600';
+                    typeDetails = `${booking.from || ''} → ${booking.to || ''} | ${booking.airline || booking.provider || 'Airline'} | ${booking.flight_number || ''}`;
+                } else if (booking.type === 'hotel') {
+                    typeIcon = '🏨';
+                    typeColor = 'text-green-600';
+                    typeDetails = `${booking.hotel_name || booking.provider} | ${booking.room_type || 'Standard Room'} | ${booking.nights || 1} nights`;
+                } else if (booking.type === 'train') {
+                    typeIcon = '🚂';
+                    typeColor = 'text-orange-600';
+                    typeDetails = `${booking.train_name || booking.train_number} | ${booking.from || ''} → ${booking.to || ''} | Coach: ${booking.coach || ''}`;
+                } else if (booking.type === 'bus') {
+                    typeIcon = '🚌';
+                    typeColor = 'text-purple-600';
+                    typeDetails = `${booking.bus_operator || booking.provider} | ${booking.from || ''} → ${booking.to || ''} | Seats: ${booking.seat_numbers || ''}`;
+                } else if (booking.type === 'cab') {
+                    typeIcon = '🚕';
+                    typeColor = 'text-yellow-600';
+                    typeDetails = `${booking.provider || 'Cab Service'} | ${booking.from || booking.to || ''} | ${booking.time || 'On demand'}`;
+                } else if (booking.type === 'cruise') {
+                    typeIcon = '🛳️';
+                    typeColor = 'text-cyan-600';
+                    typeDetails = `${booking.provider || 'Cruise'} | ${booking.to || ''} | ${booking.time || 'Scheduled'}`;
+                }
+                
+                html += `
+                    <div class="bg-gray-50 rounded-xl p-5 hover:shadow-lg transition">
+                        <div class="flex flex-wrap justify-between items-start gap-4">
+                            <div class="flex-1">
+                                <div class="flex items-center mb-2">
+                                    <span class="text-2xl mr-2">${typeIcon}</span>
+                                    <h3 class="text-xl font-semibold text-gray-900">${booking.type.toUpperCase()}</h3>
+                                    <span class="ml-2 inline-block px-2 py-1 rounded-full text-xs font-semibold ${statusColor}">
+                                        ${booking.status.toUpperCase()}
+                                    </span>
+                                </div>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm text-gray-600">
+                                    <div>
+                                        <i class="fas fa-info-circle mr-1"></i>
+                                        ${escapeHtml(typeDetails)}
+                                    </div>
+                                    <div>
+                                        <i class="fas fa-calendar-alt mr-1"></i>
+                                        ${formatDate(booking.date)}
+                                    </div>
+                                    <div>
+                                        <i class="fas fa-clock mr-1"></i>
+                                        ${booking.time || 'Any time'}
+                                    </div>
+                                    <div>
+                                        <i class="fas fa-users mr-1"></i>
+                                        ${booking.travelers || 1} traveler(s)
+                                    </div>
+                                    <div>
+                                        <i class="fas fa-dollar-sign mr-1"></i>
+                                        $${booking.price}
+                                    </div>
+                                    ${booking.special_requests ? `
+                                    <div class="md:col-span-2">
+                                        <i class="fas fa-comment mr-1"></i>
+                                        Special: ${escapeHtml(booking.special_requests)}
+                                    </div>
+                                    ` : ''}
+                                </div>
+                            </div>
+                            <div class="flex space-x-2">
+                                <button onclick="cancelBooking(${booking.id})" class="text-red-600 hover:text-red-700">
+                                    <i class="fas fa-times-circle"></i> Cancel
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+        document.getElementById('bookings-list').innerHTML = html;
+    } catch (error) {
+        console.error('Error loading bookings:', error);
+        document.getElementById('bookings-list').innerHTML = '<div class="text-center py-8 text-red-500">Error loading bookings</div>';
+    }
+}
+
+// Cancel booking
+async function cancelBooking(bookingId) {
+    if (!confirm('Are you sure you want to cancel this booking?')) return;
+    
+    try {
+        const res = await fetch(`/api/bookings/${bookingId}/cancel`, {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        
+        if (res.ok) {
+            showToast('Booking cancelled successfully', 'success');
+            loadBookings();
+        } else {
+            showToast('Failed to cancel booking', 'error');
+        }
+    } catch (error) {
+        showToast('Error cancelling booking', 'error');
+    }
+}
+
+// Load Expenses
+// Category Icons Mapping
+const categoryIcons = {
+    'Food': '🍔',
+    'Transport': '🚕',
+    'Hotel': '🏨',
+    'Flight': '✈️',
+    'Activities': '🎟️',
+    'Shopping': '🛍️',
+    'Internet': '📶',
+    'Emergency': '💊',
+    'Accommodation': '🏨',
+    'Other': '📌'
+};
+
+// Category Colors
+const categoryColors = {
+    'Food': '#F59E0B',
+    'Transport': '#3B82F6',
+    'Hotel': '#10B981',
+    'Flight': '#6366F1',
+    'Activities': '#EC4899',
+    'Shopping': '#F97316',
+    'Internet': '#6B7280',
+    'Emergency': '#DC2626',
+    'Accommodation': '#10B981',
+    'Other': '#94A3B8'
+};
+
+let expenseChart = null;
+
+async function loadExpenses() {
+    try {
+        const tripsRes = await fetch('/api/trips', {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const trips = await tripsRes.json();
+        
+        let allExpenses = [];
+        let totalBudget = 0;
+        let totalSpent = 0;
+        let categoryWiseSpending = {};
+        let todayExpenses = [];
+        const today = new Date().toISOString().split('T')[0];
+        
+        // Collect all expenses and calculate metrics
+        for (const trip of trips) {
+            totalBudget += parseFloat(trip.budget) || 0;
+            
+            const expensesRes = await fetch(`/api/expenses/trip/${trip.id}`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            const data = await expensesRes.json();
+            
+            data.expenses.forEach(exp => {
+                allExpenses.push({ ...exp, trip_id: trip.id, trip_destination: trip.destination, trip_budget: trip.budget });
+                totalSpent += parseFloat(exp.amount) || 0;
+                
+                // Category-wise spending
+                if (!categoryWiseSpending[exp.category]) {
+                    categoryWiseSpending[exp.category] = 0;
+                }
+                categoryWiseSpending[exp.category] += parseFloat(exp.amount) || 0;
+                
+                // Today's expenses
+                if (exp.date === today) {
+                    todayExpenses.push(exp);
+                }
+            });
+        }
+        
+        // Update Summary Cards
+        document.getElementById('summaryTotalSpent').textContent = totalSpent.toFixed(2);
+        const remainingBudget = Math.max(0, totalBudget - totalSpent);
+        document.getElementById('summaryRemainingBudget').textContent = remainingBudget.toFixed(2);
+        
+        // Highest Category
+        let highestCategory = '—';
+        let highestAmount = 0;
+        let highestIcon = '📊';
+        for (const [category, amount] of Object.entries(categoryWiseSpending)) {
+            if (amount > highestAmount) {
+                highestAmount = amount;
+                highestCategory = category;
+                highestIcon = categoryIcons[category] || '📌';
+            }
+        }
+        document.getElementById('summaryHighestCategory').textContent = highestCategory;
+        document.getElementById('summaryHighestAmount').textContent = highestAmount.toFixed(2);
+        document.getElementById('summaryHighestIcon').textContent = highestIcon;
+        
+        // Today's Spend
+        let todayTotal = 0;
+        todayExpenses.forEach(exp => {
+            todayTotal += parseFloat(exp.amount) || 0;
+        });
+        document.getElementById('summaryTodaySpend').textContent = todayTotal.toFixed(2);
+        document.getElementById('transactionCount').textContent = `${todayExpenses.length} transaction${todayExpenses.length !== 1 ? 's' : ''} today`;
+        
+        // Budget Status
+        const budgetStatusEl = document.getElementById('budgetStatus');
+        if (remainingBudget > 0) {
+            budgetStatusEl.textContent = `✅ ${((remainingBudget / totalBudget) * 100).toFixed(1)}% of budget remaining`;
+            budgetStatusEl.className = 'mt-3 text-xs text-green-600 font-semibold';
+        } else {
+            budgetStatusEl.textContent = `⚠️ Budget exceeded by $${Math.abs(remainingBudget).toFixed(2)}`;
+            budgetStatusEl.className = 'mt-3 text-xs text-red-600 font-semibold';
+        }
+        
+        // Budget Progress Bar
+        if (totalBudget > 0) {
+            const budgetPercentage = Math.min((totalSpent / totalBudget) * 100, 100);
+            document.getElementById('budgetProgressSection').classList.remove('hidden');
+            document.getElementById('budgetProgressBar').style.width = budgetPercentage + '%';
+            document.getElementById('budgetPercentage').textContent = Math.round(budgetPercentage) + '%';
+            document.getElementById('budgetUsed').textContent = '$' + totalSpent.toFixed(2);
+            document.getElementById('budgetTotal').textContent = '$' + totalBudget.toFixed(2);
+            
+            // Show warning if budget exceeded 70%
+            const warningEl = document.getElementById('budgetWarning');
+            if (budgetPercentage >= 70) {
+                warningEl.classList.remove('hidden');
+                document.getElementById('budgetProgressBar').className = 'bg-gradient-to-r from-orange-500 to-red-500 h-3 rounded-full transition-all';
+            } else {
+                warningEl.classList.add('hidden');
+                document.getElementById('budgetProgressBar').className = 'bg-gradient-to-r from-green-500 to-blue-500 h-3 rounded-full transition-all';
+            }
+            
+            // Update progress indicators in summary
+            const totalSpentProgress = (totalSpent / totalBudget) * 100;
+            document.getElementById('totalSpentProgress').style.width = Math.min(totalSpentProgress, 100) + '%';
+        }
+        
+        // Expense Breakdown Chart
+        if (Object.keys(categoryWiseSpending).length > 0) {
+            document.getElementById('expenseChartSection').classList.remove('hidden');
+            drawExpenseChart(categoryWiseSpending);
+        }
+        
+        // Render Expenses List
+        let html = '';
+        if (allExpenses.length === 0) {
+            html = `
+                <div class="text-center py-12">
+                    <i class="fas fa-inbox text-5xl text-gray-400 mb-4"></i>
+                    <p class="text-gray-500 mb-4">No expenses recorded yet</p>
+                    <button onclick="showAddExpenseModal()" class="inline-block bg-gradient-to-r from-blue-600 to-purple-600 text-white px-6 py-2 rounded-lg hover:shadow-lg transition">
+                        Add Your First Expense
+                    </button>
+                </div>
+            `;
+        } else {
+            // Sort expenses by date (newest first)
+            allExpenses.sort((a, b) => new Date(b.date) - new Date(a.date));
+            
+            allExpenses.forEach(exp => {
+                const icon = categoryIcons[exp.category] || '📌';
+                const color = categoryColors[exp.category] || '#94A3B8';
+                
+                html += `
+                    <div class="glass-card rounded-2xl p-5 hover:shadow-lg transition">
+                        <div class="flex items-center justify-between">
+                            <div class="flex-1 flex items-center gap-4">
+                                <div class="w-14 h-14 rounded-xl flex items-center justify-center text-2xl" style="background-color: ${color}20; border: 2px solid ${color}">
+                                    ${icon}
+                                </div>
+                                <div class="flex-1">
+                                    <div class="flex items-center gap-2 mb-1">
+                                        <h4 class="font-semibold text-gray-800">${exp.category}</h4>
+                                        <span class="inline-block px-2 py-1 bg-gray-100 rounded-lg text-xs text-gray-600">${formatDate(exp.date)}</span>
+                                    </div>
+                                    ${exp.note ? `<p class="text-sm text-gray-600">📝 ${escapeHtml(exp.note)}</p>` : ''}
+                                    <p class="text-xs text-gray-500 mt-1">Trip: ${exp.trip_destination}</p>
+                                </div>
+                            </div>
+                            <div class="text-right">
+                                <div class="text-2xl font-bold" style="color: ${color}">\$${parseFloat(exp.amount).toFixed(2)}</div>
+                                <button onclick="deleteExpense(${exp.id})" class="mt-2 text-red-500 hover:text-red-700 transition text-sm">
+                                    <i class="fas fa-trash-alt mr-1"></i>Delete
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+        
+        document.getElementById('expenses-list').innerHTML = html;
+    } catch (error) {
+        console.error('Error loading expenses:', error);
+        document.getElementById('expenses-list').innerHTML = '<div class="text-center py-8 text-red-500"><i class="fas fa-exclamation-circle mr-2"></i>Error loading expenses</div>';
+    }
+}
+
+// Draw Expense Breakdown Pie Chart
+function drawExpenseChart(categoryWiseSpending) {
+    const ctx = document.getElementById('expenseBreakdownChart');
+    if (!ctx) return;
+    
+    const categories = Object.keys(categoryWiseSpending);
+    const amounts = Object.values(categoryWiseSpending);
+    const colors = categories.map(cat => categoryColors[cat] || '#94A3B8');
+    
+    // Destroy existing chart if it exists
+    if (expenseChart) {
+        expenseChart.destroy();
+    }
+    
+    expenseChart = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: categories.map(cat => `${categoryIcons[cat] || '📌'} ${cat}`),
+            datasets: [{
+                data: amounts,
+                backgroundColor: colors,
+                borderColor: '#fff',
+                borderWidth: 3,
+                hoverBorderWidth: 5,
+                hoverOffset: 10
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: true,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: {
+                        padding: 15,
+                        font: { size: 13, weight: '600' },
+                        usePointStyle: true,
+                        pointStyle: 'circle'
+                    }
+                },
+                tooltip: {
+                    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                    padding: 12,
+                    titleFont: { size: 13, weight: 'bold' },
+                    bodyFont: { size: 12 },
+                    callbacks: {
+                        label: function(context) {
+                            const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                            const percentage = ((context.parsed / total) * 100).toFixed(1);
+                            return `$${context.parsed.toFixed(2)} (${percentage}%)`;
+                        }
+                    }
+                }
+            }
+        }
+    });
+}
+
+// Delete Expense
+async function deleteExpense(expenseId) {
+    if (!confirm('Are you sure you want to delete this expense?')) return;
+    
+    try {
+        const res = await fetch(`/api/expenses/${expenseId}`, {
+            method: 'DELETE',
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        
+        if (res.ok) {
+            showToast('Expense deleted successfully', 'success');
+            loadExpenses();
+        } else {
+            showToast('Failed to delete expense', 'error');
+        }
+    } catch (error) {
+        showToast('Error deleting expense', 'error');
+    }
+}
+
+// Load Visa Applications
+async function loadVisaApplications() {
+    try {
+        const res = await fetch('/api/visa/applications', {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const payload = await res.json();
+        if (!res.ok) {
+            throw new Error(payload.error || payload.msg || 'Could not load visa applications');
+        }
+        const applications = Array.isArray(payload) ? payload : (payload.applications || []);
+        
+        let html = '';
+        if (applications.length === 0) {
+            html = `
+                <div class="text-center py-12">
+                    <i class="fas fa-passport text-5xl text-gray-400 mb-4"></i>
+                    <p class="text-gray-500 mb-4">No visa applications yet</p>
+                    <a href="/visa" class="inline-block bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition">
+                        Apply for Visa
+                    </a>
+                </div>
+            `;
+        } else {
+            const statusColors = {
+                'Submitted': 'bg-indigo-100 text-indigo-800',
+                'Applied': 'bg-yellow-100 text-yellow-800',
+                'In Review': 'bg-blue-100 text-blue-800',
+                'Approved': 'bg-green-100 text-green-800',
+                'Rejected': 'bg-red-100 text-red-800'
+            };
+            
+            applications.forEach(app => {
+                html += `
+                    <div class="bg-gray-50 rounded-xl p-5">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <h3 class="text-xl font-semibold">${escapeHtml(app.country)}</h3>
+                                <p class="text-xs text-gray-500">Application ID: ${escapeHtml(app.id)}</p>
+                                <p class="text-sm text-gray-500">Applied: ${formatDate(app.applied_date)}</p>
+                                ${app.notes ? `<p class="text-sm text-gray-600 mt-2">Notes: ${escapeHtml(app.notes)}</p>` : ''}
+                            </div>
+                            <div>
+                                <span class="inline-block px-3 py-1 rounded-full text-sm font-semibold ${statusColors[app.status] || 'bg-gray-100'}">
+                                    ${app.status}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+        document.getElementById('visa-list').innerHTML = html;
+    } catch (error) {
+        console.error('Error loading visa applications:', error);
+        document.getElementById('visa-list').innerHTML = '<div class="text-center py-8 text-red-500">Error loading visa applications</div>';
+    }
+}
+
+// Add Expense Modal
+function showAddExpenseModal() {
+    document.getElementById('expenseModal').classList.remove('hidden');
+    document.getElementById('expenseModal').classList.add('flex');
+    document.getElementById('expense_date').value = new Date().toISOString().split('T')[0];
+}
+
+function closeExpenseModal() {
+    document.getElementById('expenseModal').classList.add('hidden');
+    document.getElementById('expenseModal').classList.remove('flex');
+}
+
+// Submit Expense
+document.getElementById('expenseForm')?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    const tripId = document.getElementById('expense_trip_id').value;
+    const category = document.getElementById('expense_category').value;
+    const amount = parseFloat(document.getElementById('expense_amount').value);
+    const date = document.getElementById('expense_date').value;
+    const note = document.getElementById('expense_note').value;
+    
+    if (!tripId) {
+        showToast('Please select a trip', 'error');
+        return;
+    }
+    
+    try {
+        const res = await fetch('/api/expenses', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({ trip_id: tripId, category, amount, date, note })
+        });
+        
+        if (res.ok) {
+            showToast('🎉 Expense added successfully!', 'success');
+            // Reset form
+            document.getElementById('expenseForm').reset();
+            document.getElementById('expense_date').value = new Date().toISOString().split('T')[0];
+            closeExpenseModal();
+            loadExpenses();
+        } else {
+            const errorData = await res.json().catch(() => ({}));
+            showToast(errorData.message || 'Failed to add expense', 'error');
+        }
+    } catch (error) {
+        console.error('Expense error:', error);
+        showToast('Error adding expense', 'error');
+    }
+});
+
+// Load Stories count
+async function loadStories() {
+    try {
+        const res = await fetch('/api/stories');
+        const allStories = await res.json();
+        const userRes = await fetch('/api/me', {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const user = await userRes.json();
+        const userStories = allStories.filter(s => s.user === user.username);
+        document.getElementById('totalStories').textContent = userStories.length;
+    } catch (error) {
+        console.error('Error loading stories:', error);
+    }
+}
+
+// Load Analytics
+async function loadAnalytics() {
+    try {
+        const tripsRes = await fetch('/api/trips', {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const trips = await tripsRes.json();
+        
+        // Group trips by destination for chart
+        const destinationCount = {};
+        trips.forEach(trip => {
+            destinationCount[trip.destination] = (destinationCount[trip.destination] || 0) + 1;
+        });
+        
+        const destinations = Object.keys(destinationCount);
+        const counts = Object.values(destinationCount);
+        
+        if (tripChart) tripChart.destroy();
+        const ctx = document.getElementById('tripChart').getContext('2d');
+        tripChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: destinations.length > 0 ? destinations : ['No data'],
+                datasets: [{
+                    label: 'Number of Trips',
+                    data: counts.length > 0 ? counts : [0],
+                    backgroundColor: 'rgba(59, 130, 246, 0.7)',
+                    borderColor: 'rgba(59, 130, 246, 1)',
+                    borderWidth: 2,
+                    borderRadius: 8,
+                    borderSkipped: false,
+                    hoverBackgroundColor: 'rgba(59, 130, 246, 0.9)',
+                    hoverBorderWidth: 3
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        grid: {
+                            color: 'rgba(0, 0, 0, 0.05)',
+                            drawBorder: false
+                        },
+                        ticks: {
+                            font: { weight: '600', size: 12 }
+                        }
+                    },
+                    x: {
+                        grid: {
+                            display: false
+                        },
+                        ticks: {
+                            font: { weight: '600', size: 11 }
+                        }
+                    }
+                }
+            }
+        });
+        
+        // Load bookings for spending chart and type distribution
+        const bookingsRes = await fetch('/api/bookings', {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const bookings = await bookingsRes.json();
+        
+        // Monthly spending
+        const monthlySpending = {};
+        bookings.forEach(booking => {
+            const month = new Date(booking.date).toLocaleString('default', { month: 'short' });
+            monthlySpending[month] = (monthlySpending[month] || 0) + booking.price;
+        });
+        
+        if (spendingChart) spendingChart.destroy();
+        const ctx2 = document.getElementById('spendingChart').getContext('2d');
+        spendingChart = new Chart(ctx2, {
+            type: 'line',
+            data: {
+                labels: Object.keys(monthlySpending).length > 0 ? Object.keys(monthlySpending) : ['No data'],
+                datasets: [{
+                    label: 'Monthly Spending ($)',
+                    data: Object.values(monthlySpending).length > 0 ? Object.values(monthlySpending) : [0],
+                    borderColor: 'rgba(16, 185, 129, 1)',
+                    backgroundColor: 'rgba(16, 185, 129, 0.15)',
+                    tension: 0.4,
+                    fill: true,
+                    borderWidth: 3,
+                    pointBackgroundColor: 'rgba(16, 185, 129, 1)',
+                    pointBorderColor: '#fff',
+                    pointBorderWidth: 2,
+                    pointRadius: 5,
+                    pointHoverRadius: 7,
+                    hoverBorderWidth: 3
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                        padding: 12,
+                        titleFont: { size: 13, weight: 'bold' },
+                        bodyFont: { size: 12 },
+                        borderColor: 'rgba(255, 255, 255, 0.2)',
+                        borderWidth: 1
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        grid: {
+                            color: 'rgba(0, 0, 0, 0.05)',
+                            drawBorder: false
+                        },
+                        ticks: {
+                            font: { weight: '600', size: 12 }
+                        }
+                    },
+                    x: {
+                        grid: {
+                            display: false
+                        },
+                        ticks: {
+                            font: { weight: '600', size: 11 }
+                        }
+                    }
+                }
+            }
+        });
+        
+        // Booking type distribution
+        const typeCount = {
+            flight: 0,
+            hotel: 0,
+            train: 0,
+            bus: 0,
+            cab: 0,
+            cruise: 0
+        };
+        bookings.forEach(booking => {
+            if (typeCount[booking.type] !== undefined) typeCount[booking.type]++;
+        });
+        
+        const hasBooks = Object.values(typeCount).some(v => v > 0);
+        
+        if (bookingTypeChart) bookingTypeChart.destroy();
+        const ctx3 = document.getElementById('bookingTypeChart').getContext('2d');
+        bookingTypeChart = new Chart(ctx3, {
+            type: 'bar',
+            data: {
+                labels: ['✈️ Flights', '🏨 Hotels', '🚂 Trains', '🚌 Buses', '🚕 Cabs', '🛳️ Cruises'],
+                datasets: [{
+                    label: 'Number of Bookings',
+                    data: [typeCount.flight, typeCount.hotel, typeCount.train, typeCount.bus, typeCount.cab, typeCount.cruise],
+                    backgroundColor: [
+                        'rgba(59, 130, 246, 0.7)',
+                        'rgba(16, 185, 129, 0.7)',
+                        'rgba(245, 158, 11, 0.7)',
+                        'rgba(139, 92, 246, 0.7)',
+                        'rgba(236, 72, 153, 0.7)',
+                        'rgba(6, 182, 212, 0.7)'
+                    ],
+                    borderColor: [
+                        'rgba(59, 130, 246, 1)',
+                        'rgba(16, 185, 129, 1)',
+                        'rgba(245, 158, 11, 1)',
+                        'rgba(139, 92, 246, 1)',
+                        'rgba(236, 72, 153, 1)',
+                        'rgba(6, 182, 212, 1)'
+                    ],
+                    borderWidth: 2,
+                    borderRadius: 8,
+                    borderSkipped: false,
+                    hoverBorderWidth: 3
+                }]
+            },
+            options: {
+                indexAxis: 'y',
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                },
+                scales: {
+                    x: {
+                        beginAtZero: true,
+                        grid: {
+                            color: 'rgba(0, 0, 0, 0.05)',
+                            drawBorder: false
+                        },
+                        ticks: {
+                            font: { weight: '600', size: 12 }
+                        }
+                    },
+                    y: {
+                        grid: {
+                            display: false
+                        },
+                        ticks: {
+                            font: { weight: '600', size: 11 }
+                        }
+                    }
+                }
+            }
+        });
+    } catch (error) {
+        console.error('Error loading analytics:', error);
+    }
+}
+
+function formatDate(dateString) {
+    if (!dateString) return 'N/A';
+    const options = { year: 'numeric', month: 'short', day: 'numeric' };
+    return new Date(dateString).toLocaleDateString(undefined, options);
+}
+
+function escapeHtml(text) {
+    if (!text) return '';
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+function viewTripDetails(tripId) {
+    showToast('Trip details coming soon!', 'info');
+}
+
+// Initialize dashboard
+loadTrips();
+loadBookings();
+loadStories();
+loadGamification();
+refreshDashboardData();
+setInterval(refreshDashboardData, 60000);
+
+// Update floating widget with gamification data
+async function updateFloatingWidget() {
+    try {
+        const res = await fetch('/api/gamification/dashboard', {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (res.ok) {
+            const data = await res.json();
+            document.getElementById('floatYC').textContent = `${data.wallet?.yc_balance || 0} YC`;
+            document.getElementById('floatStreak').textContent = `${data.streak?.current || 0} 🔥`;
+            const rank = data.leaderboard_meta?.your_rank;
+            document.getElementById('floatRank').textContent = `#${rank ?? '-'} Rank`;
+            
+            // Also populate hero card rank
+            document.getElementById('heroRank').textContent = `#${rank ?? '-'}`;
+            document.getElementById('heroYCCoins').textContent = `${data.wallet?.yc_balance || 0}`;
+        }
+    } catch (error) {
+        console.error('Error updating floating widget:', error);
+    }
+}
+
+// Update widget every 5 seconds
+updateFloatingWidget();
+setInterval(updateFloatingWidget, 5000);
+</script>
+<script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+{% raw %}
+<script type="text/babel">
+const { useEffect, useMemo, useState } = React;
+
+function animateCount(from, to, durationMs, onTick, onDone) {
+    const start = performance.now();
+    const delta = to - from;
+    function frame(now) {
+        const t = Math.min(1, (now - start) / durationMs);
+        const eased = 1 - Math.pow(1 - t, 3);
+        onTick(Math.round(from + delta * eased));
+        if (t < 1) requestAnimationFrame(frame); else if (onDone) onDone();
+    }
+    requestAnimationFrame(frame);
+}
+
+function medalForRank(rank) {
+    if (rank === 1) return '🥇';
+    if (rank === 2) return '🥈';
+    if (rank === 3) return '🥉';
+    return `#${rank}`;
+}
+
+function GameHubReact() {
+    const [data, setData] = useState(null);
+    const [loading, setLoading] = useState(true);
+    const [scope, setScope] = useState('weekly');
+    const [dark, setDark] = useState(localStorage.getItem('gami_theme') === 'dark');
+    const [animatedYC, setAnimatedYC] = useState(0);
+    const [animatedScore, setAnimatedScore] = useState({});
+    const [spinning, setSpinning] = useState(false);
+    const [spinAngle, setSpinAngle] = useState(0);
+    const [leaderboardData, setLeaderboardData] = useState({ items: [], meta: {} });
+    const [prevLevel, setPrevLevel] = useState(null);
+    const [prevUnlockedCount, setPrevUnlockedCount] = useState(0);
+    const [referralCode, setReferralCode] = useState('');
+    const [referralInput, setReferralInput] = useState('');
+
+    const load = async () => {
+        setLoading(true);
+        try {
+            const res = await fetch('/api/gamification/dashboard', {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            if (!res.ok) throw new Error(`HTTP ${res.status}`);
+            const json = await res.json();
+
+            if (prevLevel && prevLevel !== json.level?.current_level) {
+                showToast(`🎉 Level Up! Welcome to ${json.level?.current_level}`, 'success');
+            }
+            setPrevLevel(json.level?.current_level || null);
+
+            const unlockedNow = (json.badges || []).filter(b => b.is_unlocked).length;
+            if (prevUnlockedCount > 0 && unlockedNow > prevUnlockedCount) {
+                showToast('🏅 Badge Unlocked!', 'success');
+            }
+            setPrevUnlockedCount(unlockedNow);
+
+            setData(json);
+            await loadReferral();
+            animateCount(animatedYC || 0, json.wallet?.yc_balance || 0, 1200, setAnimatedYC);
+
+            await loadLeaderboard(scope);
+        } catch (e) {
+            console.error('Game hub load failed:', e);
+            showToast('Failed to load Game Hub', 'error');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const loadLeaderboard = async (targetScope) => {
+        try {
+            const res = await fetch(`/api/gamification/leaderboard?scope=${encodeURIComponent(targetScope)}`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            const json = await res.json();
+            if (!res.ok) {
+                throw new Error(json.error || 'Leaderboard load failed');
+            }
+            setLeaderboardData({ items: json.items || [], meta: json.meta || {} });
+
+            const nextScores = {};
+            (json.items || []).forEach((row, idx) => {
+                animateCount(0, row.score, 900 + idx * 80, (v) => {
+                    nextScores[row.user_id] = v;
+                    setAnimatedScore({ ...nextScores });
+                });
+            });
+        } catch (e) {
+            console.error('Leaderboard error:', e);
+        }
+    };
+
+    const loadReferral = async () => {
+        try {
+            const res = await fetch('/api/gamification/referral', {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            const json = await res.json();
+            if (res.ok) setReferralCode(json.referral_code || '');
+        } catch (_) {
+            // Silent non-blocking failure.
+        }
+    };
+
+    useEffect(() => {
+        load();
+        window.yatrikaGamiApp = { reload: load };
+    }, []);
+
+    useEffect(() => {
+        if (data) loadLeaderboard(scope);
+    }, [scope]);
+
+    useEffect(() => {
+        if (dark) {
+            document.documentElement.classList.add('gami-dark');
+            localStorage.setItem('gami_theme', 'dark');
+        } else {
+            document.documentElement.classList.remove('gami-dark');
+            localStorage.setItem('gami_theme', 'light');
+        }
+    }, [dark]);
+
+    const list = useMemo(() => leaderboardData?.items || [], [leaderboardData]);
+
+    const claimMission = async (missionId) => {
+        try {
+            const res = await fetch('/api/gamification/missions/claim', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                body: JSON.stringify({ mission_id: missionId })
+            });
+            const json = await res.json();
+            if (!res.ok) {
+                showToast(json.error || 'Unable to claim', 'error');
+                return;
+            }
+            showToast(`Claimed +${json.coins} YC and +${json.xp} XP`, 'success');
+            load();
+        } catch (_) {
+            showToast('Network error', 'error');
+        }
+    };
+
+    const progressMission = async (missionId) => {
+        try {
+            const res = await fetch('/api/gamification/missions/progress', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                body: JSON.stringify({ mission_id: missionId, delta: 1 })
+            });
+            const json = await res.json();
+            if (!res.ok) {
+                showToast(json.error || 'Unable to update task', 'error');
+                return;
+            }
+            showToast(json.is_complete ? 'Task completed. Claim your reward.' : 'Task progress updated.', 'success');
+            load();
+        } catch (_) {
+            showToast('Network error', 'error');
+        }
+    };
+
+    const redeem = async (rewardKey) => {
+        try {
+            const res = await fetch('/api/gamification/redeem', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                body: JSON.stringify({ reward_key: rewardKey })
+            });
+            const json = await res.json();
+            if (!res.ok) {
+                showToast(json.error || 'Redemption failed', 'error');
+                return;
+            }
+            showToast(`Voucher unlocked: ${json.voucher_code}`, 'success');
+            load();
+        } catch (_) {
+            showToast('Network error', 'error');
+        }
+    };
+
+    const spinNow = async () => {
+        if (spinning) return;
+        setSpinning(true);
+        const extra = 1080 + Math.floor(Math.random() * 720);
+        setSpinAngle(prev => prev + extra);
+        try {
+            const res = await fetch('/api/gamification/spin', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` }
+            });
+            const json = await res.json();
+            setTimeout(() => {
+                if (!res.ok) {
+                    showToast(json.error || 'Spin unavailable', 'error');
+                } else {
+                    const bonus = json.coupon ? ` Coupon: ${json.coupon}` : '';
+                    const badge = json.bonus_badge ? ' Bonus badge unlocked!' : '';
+                    showToast(`Spin reward: ${json.reward} (+${json.coins} YC, +${json.xp} XP).${bonus}${badge}`, 'success');
+                    load();
+                }
+            }, 1400);
+        } catch (_) {
+            showToast('Spin failed', 'error');
+        } finally {
+            setTimeout(() => setSpinning(false), 1500);
+        }
+    };
+
+    const applyReferral = async () => {
+        const code = referralInput.trim();
+        if (!code) {
+            showToast('Enter referral code', 'error');
+            return;
+        }
+        try {
+            const res = await fetch('/api/gamification/referral/apply', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                body: JSON.stringify({ code })
+            });
+            const json = await res.json();
+            if (!res.ok) {
+                showToast(json.error || 'Referral apply failed', 'error');
+                return;
+            }
+            showToast('Referral applied. Rewards credited!', 'success');
+            setReferralInput('');
+            load();
+        } catch (_) {
+            showToast('Network error', 'error');
+        }
+    };
+
+    if (loading) {
+        return <div className="text-center py-16 text-gray-600">Loading premium Game Hub...</div>;
+    }
+    if (!data) {
+        return <div className="text-center py-16 text-red-500">Could not load Game Hub.</div>;
+    }
+
+    const daily = (data.missions || []).filter(m => m.mission_type === 'daily');
+    const weekly = (data.missions || []).filter(m => m.mission_type === 'weekly');
+    const badges = data.badges || [];
+    const rewards = data.reward_store || [];
+    const streak = data.streak?.current || 0;
+
+    return (
+        <div className="space-y-4">
+            <div className="flex items-center justify-between">
+                <div>
+                    <h3 className="text-2xl font-black text-slate-900 gami-text-main">YATRIKA Game Hub</h3>
+                    <p className="text-sm text-slate-600 gami-text-sub">Premium retention engine for your travel journey.</p>
+                </div>
+                <button onClick={() => setDark(!dark)} className="px-4 py-2 rounded-full bg-gradient-to-r from-slate-900 to-indigo-700 text-white text-xs font-bold shadow-lg hover:scale-105 transition">{dark ? 'Light' : 'Dark'} Theme</button>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+                <div className="glass-card rounded-2xl p-5 hover:scale-[1.02] transition-transform" style={{ background: 'linear-gradient(135deg, #fde68a 0%, #f59e0b 50%, #b45309 100%)' }}>
+                    <div className="flex items-center justify-between">
+                        <div>
+                            <p className="text-xs uppercase tracking-wide text-amber-900/80">Yatrika Coin Wallet</p>
+                            <div className="text-4xl font-black text-white drop-shadow-[0_0_12px_rgba(255,255,255,0.85)]">{animatedYC} YC</div>
+                            <p className="text-xs font-semibold text-amber-100 mt-1">+{data.wallet?.today_earned || 0} earned today</p>
+                            <div className="mt-2 text-xs text-amber-100/95">Discount value: Rs {data.wallet?.discount_inr || 0}</div>
+                            <div className="mt-2 grid grid-cols-2 gap-2 text-[11px]">
+                                <div className="bg-black/20 rounded-lg p-2 text-white">Total Earned: {data.wallet?.yc_lifetime_earned || 0}</div>
+                                <div className="bg-black/20 rounded-lg p-2 text-white">Redeemed: {data.wallet?.yc_lifetime_spent || 0}</div>
+                            </div>
+                            <div className="mt-2 text-[11px] text-amber-100">Your referral code: <b>{referralCode || 'loading...'}</b></div>
+                        </div>
+                        <div className="w-16 h-16 rounded-full bg-white/20 flex items-center justify-center text-3xl spin-coin">🪙</div>
+                    </div>
+                </div>
+
+                <div className="glass-card rounded-2xl p-5 hover:scale-[1.02] transition-transform">
+                    <p className="text-xs uppercase tracking-wide text-gray-500">Current Level</p>
+                    <div className="text-2xl font-black text-blue-700 mt-1">{data.level?.current_level}</div>
+                    <div className="mt-3 h-3 rounded-full bg-slate-200 overflow-hidden">
+                        <div className="h-full bg-gradient-to-r from-cyan-500 via-blue-500 to-indigo-500 xp-fill" style={{ width: `${data.level?.progress_percent || 0}%` }}></div>
+                    </div>
+                    <p className="text-xs text-gray-600 mt-2">{data.level?.progress_percent || 0}% complete · {data.level?.xp_to_next || 0} XP to next level</p>
+                </div>
+
+                <div className="glass-card rounded-2xl p-5 hover:scale-[1.02] transition-transform">
+                    <p className="text-xs uppercase tracking-wide text-gray-500">Login Streak</p>
+                    <div className="flex items-center gap-3 mt-2">
+                        <div className="text-4xl streak-fire">🔥</div>
+                        <div>
+                            <div className="text-2xl font-black text-orange-600">{streak} days</div>
+                            <div className="text-xs text-gray-600">Next reward in {Math.max(0, 7 - (streak % 7 || 7))} day(s)</div>
+                        </div>
+                    </div>
+                    <div className="grid grid-cols-7 gap-1 mt-3">
+                        {Array.from({ length: 7 }).map((_, i) => {
+                            const day = i + 1;
+                            const active = day <= Math.max(0, streak % 7 || (streak >= 7 ? 7 : streak));
+                            return <div key={day} className={`h-8 rounded-full text-xs font-bold flex items-center justify-center ${active ? 'bg-orange-500 text-white' : 'bg-slate-200 text-slate-600'}`}>{day}</div>;
+                        })}
+                    </div>
+                    <div className="mt-2 flex items-center justify-between text-xs">
+                        <span className="text-slate-600">7-day chest</span>
+                        <span className="chest-bounce">🎁</span>
+                    </div>
+                </div>
+            </div>
+
+            <div className="grid grid-cols-1 xl:grid-cols-3 gap-4">
+                <div className="glass-card rounded-2xl p-5 xl:col-span-2">
+                    <h4 className="font-bold mb-3">Achievement Medals</h4>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                        {badges.map(b => {
+                            const pct = b.target > 0 ? Math.min(100, Math.round((b.progress / b.target) * 100)) : 0;
+                            return (
+                                <div key={b.id} title={b.description || ''} className={`rounded-xl p-3 border transition hover:scale-[1.03] ${b.is_unlocked ? 'border-emerald-400 shadow-[0_0_20px_rgba(16,185,129,0.35)] badge-pop' : 'border-slate-200'}`}>
+                                    <div className="flex items-center gap-2">
+                                        <div className={`w-12 h-12 rounded-full flex items-center justify-center text-lg ${b.is_unlocked ? 'bg-emerald-500 text-white' : 'bg-slate-200 text-slate-500'}`}>
+                                            {b.is_unlocked ? <i className={`fas ${b.icon || 'fa-medal'}`}></i> : <i className="fas fa-lock"></i>}
+                                        </div>
+                                        <div>
+                                            <p className="text-sm font-semibold">{b.title}</p>
+                                            <p className="text-xs text-slate-600">{pct}% complete</p>
+                                        </div>
+                                    </div>
+                                    <div className="mt-2 h-1.5 bg-slate-200 rounded-full overflow-hidden">
+                                        <div className="h-full bg-gradient-to-r from-emerald-500 to-teal-400 xp-fill" style={{ width: `${pct}%` }}></div>
+                                    </div>
+                                </div>
+                            );
+                        })}
+                    </div>
+                </div>
+
+                <div className="glass-card rounded-2xl p-5">
+                    <div className="flex items-center justify-between mb-3">
+                        <h4 className="font-bold">Leaderboard</h4>
+                        <div className="flex gap-1">
+                            {['weekly', 'city', 'college', 'friends'].map(k => (
+                                <button key={k} onClick={() => setScope(k)} className={`px-2 py-1 rounded-full text-[11px] ${scope === k ? 'bg-blue-600 text-white' : 'bg-slate-200'}`}>{k}</button>
+                            ))}
+                        </div>
+                    </div>
+                    <div className="space-y-2">
+                        {list.slice(0, 8).map(row => {
+                            const isMe = row.user_id === data.user_id;
+                            return (
+                                <div key={row.user_id} className={`rounded-lg p-2 flex items-center justify-between transition ${isMe ? 'bg-indigo-100 border border-indigo-300' : 'bg-white/70 border border-white/60'}`}>
+                                    <div className="flex items-center gap-2">
+                                        <span className="text-lg">{medalForRank(row.rank)}</span>
+                                        <div>
+                                            <div className="text-sm font-semibold">{row.username}</div>
+                                            <div className="text-xs text-slate-500">{scope === 'college' ? row.college : scope === 'friends' ? 'Friend circle' : row.city}</div>
+                                        </div>
+                                    </div>
+                                    <div className="text-sm font-black text-indigo-700">{animatedScore[row.user_id] || 0}</div>
+                                </div>
+                            );
+                        })}
+                    </div>
+                    <div className="mt-3 text-xs text-slate-600">
+                        <div>Your Rank: <b>{leaderboardData.meta?.your_rank || 'N/A'}</b></div>
+                        <div>Need <b>{leaderboardData.meta?.need_points_to_next_rank || 0}</b> score to reach next rank</div>
+                    </div>
+                </div>
+            </div>
+
+            <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
+                {[{ title: 'Daily Missions', items: daily }, { title: 'Weekly Challenges', items: weekly }].map(section => (
+                    <div key={section.title} className="glass-card rounded-2xl p-5">
+                        <h4 className="font-bold mb-3">{section.title}</h4>
+                        <div className="space-y-2">
+                            {section.items.map(m => {
+                                const pct = m.target_count > 0 ? Math.min(100, Math.round((m.current_count / m.target_count) * 100)) : 0;
+                                const done = m.current_count >= m.target_count;
+                                return (
+                                    <div key={m.id} className={`rounded-xl p-3 border transition hover:scale-[1.01] ${done ? 'border-emerald-400 bg-emerald-50 mission-done' : 'border-slate-200 bg-white/70'}`}>
+                                        <div className="flex items-center justify-between gap-2">
+                                            <div className="flex items-center gap-2">
+                                                <button onClick={() => (!done && !m.is_claimed) ? progressMission(m.id) : null} className={`w-5 h-5 rounded border flex items-center justify-center ${done ? 'bg-emerald-500 border-emerald-500' : 'border-slate-400 hover:border-indigo-500'} transition`}>
+                                                    {done ? <i className="fas fa-check text-white text-[10px]"></i> : null}
+                                                </button>
+                                                <div>
+                                                    <div className="text-sm font-semibold">{m.title}</div>
+                                                    <div className="text-xs text-slate-600">+{m.reward_coins} YC +{m.reward_xp} XP</div>
+                                                </div>
+                                            </div>
+                                            <button disabled={!done || m.is_claimed} onClick={() => claimMission(m.id)} className={`px-3 py-1 rounded-lg text-xs font-bold ${m.is_claimed ? 'bg-slate-200 text-slate-500' : done ? 'bg-emerald-600 text-white shadow-[0_0_16px_rgba(5,150,105,0.45)]' : 'bg-blue-100 text-blue-700'}`}>{m.is_claimed ? 'Claimed' : 'Claim Reward'}</button>
+                                        </div>
+                                        {!done && !m.is_claimed ? (
+                                            <button onClick={() => progressMission(m.id)} className="mt-2 px-3 py-1 rounded-md text-[11px] font-semibold bg-indigo-100 text-indigo-700 hover:bg-indigo-200 transition">Mark Progress</button>
+                                        ) : null}
+                                        <div className="mt-2 h-1.5 rounded-full bg-slate-200 overflow-hidden">
+                                            <div className="h-full bg-gradient-to-r from-blue-500 to-indigo-500 xp-fill" style={{ width: `${pct}%` }}></div>
+                                        </div>
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    </div>
+                ))}
+            </div>
+
+            <div className="grid grid-cols-1 xl:grid-cols-3 gap-4">
+                <div className="glass-card rounded-2xl p-5 xl:col-span-2">
+                    <h4 className="font-bold mb-3">Reward Redemption Store</h4>
+                    <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-3">
+                        {rewards.map(r => {
+                            const insufficient = (data.wallet?.yc_balance || 0) < r.cost;
+                            const icon = r.type === 'hotel' ? 'fa-hotel' : r.type === 'cab' ? 'fa-taxi' : r.type === 'cashback' ? 'fa-wallet' : 'fa-gem';
+                            return (
+                                <div key={r.key} className="rounded-xl p-4 border border-white/40 bg-white/70 hover:-translate-y-1 hover:shadow-lg transition">
+                                    <div className="w-9 h-9 rounded-lg bg-indigo-100 text-indigo-700 flex items-center justify-center mb-2"><i className={`fas ${icon}`}></i></div>
+                                    <div className="text-sm font-semibold">{r.title}</div>
+                                    <div className="text-xs text-slate-600 mt-1">{r.value}</div>
+                                    <div className="mt-2 text-amber-600 font-black">{r.cost} YC</div>
+                                    {insufficient ? <div className="text-[11px] text-red-600 mt-1">Insufficient balance</div> : null}
+                                    <button onClick={() => redeem(r.key)} className="mt-3 w-full px-3 py-2 rounded-lg text-xs font-bold text-white bg-gradient-to-r from-fuchsia-600 to-indigo-600 hover:shadow-[0_0_18px_rgba(99,102,241,0.45)] transition">Redeem</button>
+                                </div>
+                            );
+                        })}
+                    </div>
+                </div>
+
+                <div className="glass-card rounded-2xl p-5">
+                    <h4 className="font-bold mb-3">Spin & Win Reward Wheel</h4>
+                    <div className="relative w-48 h-48 mx-auto">
+                        <div className="absolute inset-0 rounded-full border-8 border-indigo-200 bg-conic">
+                            <div className="absolute inset-2 rounded-full bg-white/80"></div>
+                        </div>
+                        <div className="absolute inset-0 flex items-center justify-center text-4xl transition-transform duration-[1400ms] ease-out" style={{ transform: `rotate(${spinAngle}deg)` }}>🎡</div>
+                        <div className="absolute -top-2 left-1/2 -translate-x-1/2 text-xl">🔻</div>
+                    </div>
+                    <button disabled={spinning} onClick={spinNow} className="mt-5 w-full px-4 py-2 rounded-xl text-white font-bold bg-gradient-to-r from-emerald-500 to-cyan-500 hover:shadow-[0_0_20px_rgba(16,185,129,0.5)] disabled:opacity-50">{spinning ? 'Spinning...' : 'Spin Now'}</button>
+                    <p className="text-xs text-slate-600 mt-2">One spin per day: YC rewards, coupon, mystery XP, or bonus badge.</p>
+                    <div className="mt-4 border-t border-slate-200 pt-3">
+                        <p className="text-xs font-semibold text-slate-700">Apply Referral Code</p>
+                        <div className="mt-2 flex gap-2">
+                            <input value={referralInput} onChange={(e) => setReferralInput(e.target.value.toUpperCase())} placeholder="Enter code" className="flex-1 px-2 py-1.5 rounded-lg border border-slate-300 text-xs" />
+                            <button onClick={applyReferral} className="px-3 py-1.5 rounded-lg text-xs font-bold bg-indigo-600 text-white hover:bg-indigo-700">Apply</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+}
+
+const gamiMount = document.getElementById('gamiReactRoot');
+if (gamiMount) {
+    ReactDOM.createRoot(gamiMount).render(<GameHubReact />);
+}
+</script>
+{% endraw %}
+<style>
+    .spin-coin { animation: spinCoin 3s linear infinite; }
+    @keyframes spinCoin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+    .badge-pop { animation: badgePop 0.55s ease-out; }
+    @keyframes badgePop { 0% { transform: scale(0.86); } 100% { transform: scale(1); } }
+    .mission-done { animation: missionDone 0.5s ease-in-out; }
+    @keyframes missionDone { 0% { transform: scale(0.98); opacity: 0.9; } 100% { transform: scale(1); opacity: 1; } }
+    .chest-bounce { animation: chestBounce 1.2s ease-in-out infinite; }
+    @keyframes chestBounce { 0% { transform: translateY(0px); } 50% { transform: translateY(-4px); } 100% { transform: translateY(0px); } }
+    .bg-conic {
+        background: conic-gradient(#f59e0b 0deg 60deg, #38bdf8 60deg 120deg, #6366f1 120deg 180deg, #34d399 180deg 240deg, #f472b6 240deg 300deg, #f97316 300deg 360deg);
+    }
+</style>
+{% endblock %}

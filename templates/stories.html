@@ -1,0 +1,677 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 py-8">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Header -->
+        <div class="text-center mb-12" data-aos="fade-down">
+            <h1 class="text-4xl font-bold text-gray-900 mb-4">Travel Stories</h1>
+            <p class="text-xl text-gray-600">Discover inspiring travel experiences from our community</p>
+        </div>
+
+        <!-- Create Story Card (if logged in) -->
+        <div id="createStoryCard" class="bg-white rounded-2xl shadow-xl p-6 mb-8 hidden" data-aos="fade-up">
+            <div class="flex items-start space-x-4">
+                <div class="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center text-white flex-shrink-0">
+                    <i class="fas fa-pen-fancy"></i>
+                </div>
+                <div class="flex-1">
+                    <button onclick="toggleStoryForm()" class="w-full text-left p-3 bg-gray-50 rounded-xl hover:bg-gray-100 transition">
+                        <span class="text-gray-500">Share your travel experience...</span>
+                    </button>
+                </div>
+            </div>
+            
+            <div id="storyFormContainer" class="hidden mt-6">
+                <form id="storyForm" enctype="multipart/form-data" class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Story Title</label>
+                        <input type="text" name="title" required 
+                               class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                               placeholder="Give your story a catchy title">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Your Story</label>
+                        <textarea name="content" rows="5" required 
+                                  class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                  placeholder="Share your amazing travel experience..."></textarea>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            <i class="fas fa-images mr-2"></i>Photos (up to 5 images)
+                        </label>
+                        <div class="border-2 border-dashed border-gray-300 rounded-xl p-6 text-center hover:border-blue-500 transition cursor-pointer" 
+                             onclick="document.getElementById('storyImages').click()">
+                            <i class="fas fa-cloud-upload-alt text-3xl text-gray-400 mb-2"></i>
+                            <p class="text-gray-500">Click to upload or drag and drop</p>
+                            <p class="text-xs text-gray-400 mt-1">PNG, JPG up to 10MB each</p>
+                        </div>
+                        <input type="file" id="storyImages" name="images" multiple accept="image/*" class="hidden" onchange="previewImages(this)">
+                        <div id="imagePreview" class="flex flex-wrap gap-2 mt-3"></div>
+                    </div>
+                    <div class="flex justify-end space-x-3">
+                        <button type="button" onclick="toggleStoryForm()" class="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition">
+                            Cancel
+                        </button>
+                        <button type="submit" class="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-6 py-2 rounded-lg hover:shadow-lg transition">
+                            <i class="fas fa-paper-plane mr-2"></i>Publish Story
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Filters -->
+        <div class="flex flex-wrap justify-between items-center gap-4 mb-8" data-aos="fade-up">
+            <div class="flex flex-wrap gap-2">
+                <button onclick="filterStories('all', this)" class="filter-btn px-4 py-2 rounded-lg bg-blue-600 text-white transition-all">
+                    All Stories
+                </button>
+                <button onclick="filterStories('popular', this)" class="filter-btn px-4 py-2 rounded-lg bg-gray-200 text-gray-700 hover:bg-gray-300 transition-all">
+                    Most Liked
+                </button>
+                <button onclick="filterStories('recent', this)" class="filter-btn px-4 py-2 rounded-lg bg-gray-200 text-gray-700 hover:bg-gray-300 transition-all">
+                    Recent
+                </button>
+            </div>
+            <div class="relative">
+                <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                <input type="text" id="searchStories" placeholder="Search stories..." 
+                       class="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent w-full md:w-64">
+            </div>
+        </div>
+
+        <!-- Stories Grid -->
+        <div id="storiesGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <div class="col-span-3 text-center py-12">
+                <i class="fas fa-spinner fa-spin text-3xl text-blue-600 mb-2"></i>
+                <p class="text-gray-500">Loading stories...</p>
+            </div>
+        </div>
+
+        <!-- Load More Button -->
+        <div class="text-center mt-8" id="loadMoreContainer">
+            <button id="loadMoreBtn" class="px-6 py-3 bg-white border border-gray-300 rounded-xl hover:shadow-lg transition hidden">
+                <i class="fas fa-sync-alt mr-2"></i>Load More Stories
+            </button>
+        </div>
+    </div>
+</div>
+
+<style>
+/* ==================== Cross-Browser Text Truncation ==================== */
+/* Method 1: Standard line clamp with all vendor prefixes */
+.story-content-preview {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    display: -moz-box;
+    -moz-line-clamp: 3;
+    -moz-box-orient: vertical;
+    display: -ms-flexbox;
+    -ms-line-clamp: 3;
+    -ms-box-orient: vertical;
+    display: box;
+    line-clamp: 3;
+    box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    word-wrap: break-word;
+    
+    /* Fallback for browsers that don't support line-clamp */
+    max-height: 4.5em;
+    line-height: 1.5em;
+}
+
+/* Method 2: Fallback for very old browsers */
+@supports not (display: -webkit-box) {
+    .story-content-preview {
+        position: relative;
+        max-height: 4.5em;
+        overflow: hidden;
+        padding-right: 1em;
+    }
+    
+    .story-content-preview::after {
+        content: '...';
+        position: absolute;
+        bottom: 0;
+        right: 0;
+        background: linear-gradient(to right, rgba(255,255,255,0), rgba(255,255,255,1) 50%);
+        padding-left: 20px;
+    }
+}
+
+/* Ensure proper display in all browsers */
+.story-content-preview * {
+    max-width: 100%;
+}
+
+/* ==================== Story Card Animations ==================== */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.story-card {
+    animation: fadeInUp 0.5s ease-out forwards;
+    opacity: 0;
+}
+
+/* ==================== Image Preview ==================== */
+#imagePreview img {
+    transition: transform 0.2s ease;
+    cursor: pointer;
+}
+
+#imagePreview img:hover {
+    transform: scale(1.05);
+}
+
+/* ==================== Custom Scrollbar ==================== */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #555;
+}
+
+/* Firefox scrollbar */
+* {
+    scrollbar-width: thin;
+    scrollbar-color: #888 #f1f1f1;
+}
+
+/* ==================== Loading Spinner ==================== */
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.fa-spinner {
+    animation: spin 1s linear infinite;
+}
+
+/* ==================== Image Modal ==================== */
+.image-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.9);
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes scaleIn {
+    from {
+        transform: scale(0.9);
+    }
+    to {
+        transform: scale(1);
+    }
+}
+
+.image-modal img {
+    max-width: 90vw;
+    max-height: 90vh;
+    object-fit: contain;
+    animation: scaleIn 0.3s ease;
+}
+
+/* ==================== Button Styles ==================== */
+.filter-btn {
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.filter-btn:hover {
+    transform: translateY(-1px);
+}
+
+/* ==================== Story Card Hover ==================== */
+.story-card {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.story-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.02);
+}
+
+/* ==================== Responsive Design ==================== */
+@media (max-width: 640px) {
+    .story-content-preview {
+        -webkit-line-clamp: 2;
+        -moz-line-clamp: 2;
+        line-clamp: 2;
+        max-height: 3em;
+    }
+}
+
+/* ==================== Accessibility ==================== */
+button:focus-visible,
+input:focus-visible {
+    outline: 2px solid #3b82f6;
+    outline-offset: 2px;
+}
+
+/* ==================== Print Styles ==================== */
+@media print {
+    .filter-btn,
+    .load-more-btn,
+    .image-modal {
+        display: none;
+    }
+    
+    .story-card {
+        break-inside: avoid;
+        page-break-inside: avoid;
+    }
+}
+</style>
+
+<script>
+let allStories = [];
+let currentFilter = 'all';
+let currentSearch = '';
+let currentPage = 1;
+const storiesPerPage = 6;
+
+const token = localStorage.getItem('access_token');
+
+// Check if user is logged in to show create story card
+if (token) {
+    const createStoryCard = document.getElementById('createStoryCard');
+    if (createStoryCard) {
+        createStoryCard.classList.remove('hidden');
+    }
+}
+
+// Toggle story form
+function toggleStoryForm() {
+    const container = document.getElementById('storyFormContainer');
+    if (container) {
+        container.classList.toggle('hidden');
+    }
+}
+
+// Preview images before upload
+function previewImages(input) {
+    const preview = document.getElementById('imagePreview');
+    if (!preview) return;
+    
+    preview.innerHTML = '';
+    const files = Array.from(input.files);
+    
+    files.forEach((file, index) => {
+        if (file.type.startsWith('image/')) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const div = document.createElement('div');
+                div.className = 'relative w-20 h-20';
+                div.innerHTML = `
+                    <img src="${e.target.result}" class="w-full h-full object-cover rounded-lg cursor-pointer" onclick="viewImage('${e.target.result}')">
+                    <button type="button" onclick="removeImage(${index})" class="absolute -top-2 -right-2 w-5 h-5 bg-red-500 text-white rounded-full text-xs flex items-center justify-center hover:bg-red-600 transition">
+                        ×
+                    </button>
+                `;
+                preview.appendChild(div);
+            };
+            reader.readAsDataURL(file);
+        }
+    });
+}
+
+// Remove image from preview
+function removeImage(index) {
+    const input = document.getElementById('storyImages');
+    if (!input) return;
+    
+    const dt = new DataTransfer();
+    const files = Array.from(input.files);
+    files.splice(index, 1);
+    files.forEach(file => dt.items.add(file));
+    input.files = dt.files;
+    previewImages(input);
+}
+
+// Submit story form
+const storyForm = document.getElementById('storyForm');
+if (storyForm) {
+    storyForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const formData = new FormData(e.target);
+        const submitBtn = e.target.querySelector('button[type="submit"]');
+        const originalText = submitBtn.innerHTML;
+        
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Publishing...';
+        submitBtn.disabled = true;
+        
+        try {
+            const res = await fetch('/api/stories', {
+                method: 'POST',
+                headers: { 'Authorization': `Bearer ${token}` },
+                body: formData
+            });
+            
+            const data = await res.json();
+            
+            if (res.ok) {
+                if (typeof showToast === 'function') {
+                    showToast('Story published successfully! 🎉', 'success');
+                } else {
+                    alert('Story published successfully!');
+                }
+                toggleStoryForm();
+                e.target.reset();
+                const imagePreview = document.getElementById('imagePreview');
+                if (imagePreview) imagePreview.innerHTML = '';
+                loadStories();
+            } else {
+                const errorMsg = data.msg || 'Error publishing story';
+                if (typeof showToast === 'function') {
+                    showToast(errorMsg, 'error');
+                } else {
+                    alert(errorMsg);
+                }
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            if (typeof showToast === 'function') {
+                showToast('Network error. Please try again.', 'error');
+            } else {
+                alert('Network error. Please try again.');
+            }
+        } finally {
+            submitBtn.innerHTML = originalText;
+            submitBtn.disabled = false;
+        }
+    });
+}
+
+// Load stories from API
+async function loadStories() {
+    try {
+        const res = await fetch('/api/stories');
+        if (!res.ok) throw new Error('Failed to load stories');
+        allStories = await res.json();
+        renderStories();
+    } catch (error) {
+        console.error('Error loading stories:', error);
+        const storiesGrid = document.getElementById('storiesGrid');
+        if (storiesGrid) {
+            storiesGrid.innerHTML = `
+                <div class="col-span-3 text-center py-12">
+                    <i class="fas fa-exclamation-circle text-3xl text-red-500 mb-2"></i>
+                    <p class="text-gray-500">Error loading stories. Please refresh the page.</p>
+                </div>
+            `;
+        }
+    }
+}
+
+// Render stories based on filters
+function renderStories() {
+    let filteredStories = [...allStories];
+    
+    // Apply filter
+    if (currentFilter === 'popular') {
+        filteredStories.sort((a, b) => (b.likes || 0) - (a.likes || 0));
+    } else if (currentFilter === 'recent') {
+        filteredStories.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+    }
+    
+    // Apply search
+    if (currentSearch && currentSearch.trim()) {
+        const searchTerm = currentSearch.toLowerCase().trim();
+        filteredStories = filteredStories.filter(story => 
+            (story.title && story.title.toLowerCase().includes(searchTerm)) ||
+            (story.content && story.content.toLowerCase().includes(searchTerm)) ||
+            (story.user && story.user.toLowerCase().includes(searchTerm))
+        );
+    }
+    
+    // Pagination
+    const start = (currentPage - 1) * storiesPerPage;
+    const end = start + storiesPerPage;
+    const displayStories = filteredStories.slice(start, end);
+    const hasMore = filteredStories.length > end;
+    
+    const storiesGrid = document.getElementById('storiesGrid');
+    const loadMoreBtn = document.getElementById('loadMoreBtn');
+    
+    if (!storiesGrid) return;
+    
+    if (displayStories.length === 0) {
+        storiesGrid.innerHTML = `
+            <div class="col-span-3 text-center py-12">
+                <i class="fas fa-book-open text-5xl text-gray-400 mb-4"></i>
+                <p class="text-gray-500">No stories found</p>
+                ${token ? '<button onclick="toggleStoryForm()" class="mt-4 text-blue-600 hover:text-blue-700">Be the first to share a story!</button>' : '<p class="text-sm text-gray-400 mt-2">Login to share your travel experiences</p>'}
+            </div>
+        `;
+        if (loadMoreBtn) loadMoreBtn.classList.add('hidden');
+        return;
+    }
+    
+    let html = '';
+    displayStories.forEach((story, index) => {
+        const date = new Date(story.created_at);
+        const formattedDate = date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+        const formattedTime = date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+        
+        // Handle images
+        let imagesHtml = '';
+        if (story.images && Array.isArray(story.images) && story.images.length > 0) {
+            imagesHtml = `
+                <div class="flex flex-wrap gap-2 mt-3">
+                    ${story.images.slice(0, 3).map(img => `
+                        <img src="/static/${img}" class="w-20 h-20 object-cover rounded-lg cursor-pointer hover:opacity-90 transition" onclick="viewImage('/static/${img}')" alt="Story image">
+                    `).join('')}
+                    ${story.images.length > 3 ? `<div class="w-20 h-20 bg-gray-200 rounded-lg flex items-center justify-center text-gray-500 text-sm font-medium">+${story.images.length - 3}</div>` : ''}
+                </div>
+            `;
+        }
+        
+        html += `
+            <div class="bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300 story-card" style="animation-delay: ${index * 0.1}s">
+                <div class="p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center text-white flex-shrink-0">
+                                <i class="fas fa-user"></i>
+                            </div>
+                            <div>
+                                <p class="font-semibold text-gray-900">${escapeHtml(story.user)}</p>
+                                <p class="text-xs text-gray-500">${formattedDate} • ${formattedTime}</p>
+                            </div>
+                        </div>
+                        <button onclick="likeStory('${story.id}')" class="text-gray-400 hover:text-red-500 transition">
+                            <i class="far fa-heart text-xl"></i>
+                            <span class="text-xs ml-1">${story.likes || 0}</span>
+                        </button>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-900 mb-2">${escapeHtml(story.title)}</h3>
+                    <div class="story-content-preview text-gray-600 mb-4">
+                        ${escapeHtml(story.content)}
+                    </div>
+                    ${imagesHtml}
+                    <button onclick="readMore('${story.id}')" class="mt-4 text-blue-600 hover:text-blue-700 text-sm font-medium inline-flex items-center transition">
+                        Read full story <i class="fas fa-arrow-right ml-1"></i>
+                    </button>
+                </div>
+            </div>
+        `;
+    });
+    
+    storiesGrid.innerHTML = html;
+    
+    // Trigger animation after render
+    const storyCards = document.querySelectorAll('.story-card');
+    storyCards.forEach((card, idx) => {
+        setTimeout(() => {
+            card.style.opacity = '1';
+        }, idx * 100);
+    });
+    
+    if (loadMoreBtn) {
+        if (hasMore) {
+            loadMoreBtn.classList.remove('hidden');
+            loadMoreBtn.onclick = () => loadMoreStories(filteredStories);
+        } else {
+            loadMoreBtn.classList.add('hidden');
+        }
+    }
+}
+
+// Load more stories
+function loadMoreStories(allFilteredStories) {
+    currentPage++;
+    renderStories();
+}
+
+// Filter stories
+function filterStories(filter, buttonElement) {
+    currentFilter = filter;
+    currentPage = 1;
+    
+    // Update button styles
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+        btn.classList.remove('bg-blue-600', 'text-white');
+        btn.classList.add('bg-gray-200', 'text-gray-700');
+    });
+    
+    if (buttonElement) {
+        buttonElement.classList.remove('bg-gray-200', 'text-gray-700');
+        buttonElement.classList.add('bg-blue-600', 'text-white');
+    }
+    
+    renderStories();
+}
+
+// Like story
+function likeStory(storyId) {
+    if (!token) {
+        if (typeof showToast === 'function') {
+            showToast('Please login to like stories', 'error');
+        } else {
+            alert('Please login to like stories');
+        }
+        return;
+    }
+    
+    if (typeof showToast === 'function') {
+        showToast('Story liked! ❤️', 'success');
+    } else {
+        alert('Story liked!');
+    }
+}
+
+// Read full story
+function readMore(storyId) {
+    if (typeof showToast === 'function') {
+        showToast('Full story view coming soon!', 'info');
+    } else {
+        alert('Full story view coming soon!');
+    }
+}
+
+// View full image
+function viewImage(imageUrl) {
+    const modal = document.createElement('div');
+    modal.className = 'image-modal';
+    modal.onclick = (e) => {
+        if (e.target === modal) {
+            modal.remove();
+        }
+    };
+    modal.innerHTML = `
+        <div class="relative max-w-4xl max-h-screen p-4">
+            <img src="${imageUrl}" class="max-w-full max-h-screen object-contain rounded-lg" alt="Full size image">
+            <button onclick="this.closest('.image-modal').remove()" class="absolute top-4 right-4 text-white text-2xl hover:text-gray-300 transition">
+                ×
+            </button>
+        </div>
+    `;
+    document.body.appendChild(modal);
+    
+    // Close on escape key
+    const closeOnEsc = (e) => {
+        if (e.key === 'Escape') {
+            modal.remove();
+            document.removeEventListener('keydown', closeOnEsc);
+        }
+    };
+    document.addEventListener('keydown', closeOnEsc);
+}
+
+// Escape HTML to prevent XSS
+function escapeHtml(text) {
+    if (!text) return '';
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+// Search functionality with debounce
+const searchInput = document.getElementById('searchStories');
+if (searchInput) {
+    let searchTimeout;
+    searchInput.addEventListener('input', (e) => {
+        clearTimeout(searchTimeout);
+        searchTimeout = setTimeout(() => {
+            currentSearch = e.target.value;
+            currentPage = 1;
+            renderStories();
+        }, 300);
+    });
+}
+
+// Initialize stories
+loadStories();
+
+// Make functions globally available
+window.toggleStoryForm = toggleStoryForm;
+window.previewImages = previewImages;
+window.removeImage = removeImage;
+window.filterStories = filterStories;
+window.likeStory = likeStory;
+window.readMore = readMore;
+window.viewImage = viewImage;
+</script>
+{% endblock %}

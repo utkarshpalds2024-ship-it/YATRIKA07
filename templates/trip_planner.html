@@ -1,0 +1,577 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 py-8">
+    <div class="container mx-auto px-4">
+        <div class="max-w-4xl mx-auto">
+            <!-- Header -->
+            <div class="text-center mb-8">
+                <h1 class="text-4xl font-bold text-gray-900 mb-2">AI Trip Planner</h1>
+                <p class="text-lg text-gray-600">Let AI create your perfect personalized itinerary</p>
+            </div>
+
+            <!-- Main Planner Card -->
+            <div class="bg-white rounded-2xl shadow-xl overflow-hidden">
+                <div class="bg-gradient-to-r from-blue-600 to-purple-600 px-6 py-4">
+                    <h2 class="text-xl font-semibold text-white flex items-center">
+                        <i class="fas fa-robot mr-2"></i>AI-Powered Trip Planner
+                    </h2>
+                    <p class="text-blue-100 text-sm mt-1">Powered by Groq Llama 3 - Smart, personalized recommendations</p>
+                </div>
+                
+                <form id="planForm" class="p-6 space-y-5">
+                    <!-- Destination -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            <i class="fas fa-map-marker-alt text-blue-600 mr-2"></i>Where do you want to go?
+                        </label>
+                        <input type="text" id="destination" required 
+                               class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                               placeholder="e.g., Paris, Tokyo, New York, Mumbai, Bali">
+                        <p class="text-xs text-gray-500 mt-1">Any city worldwide - AI will create a custom itinerary</p>
+                    </div>
+                    
+                    <!-- Days and Budget -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                <i class="fas fa-clock text-blue-600 mr-2"></i>Number of Days
+                            </label>
+                            <input type="number" id="days" required min="1" max="30" value="3"
+                                   class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                <i class="fas fa-dollar-sign text-blue-600 mr-2"></i>Budget (INR)
+                            </label>
+                            <input type="number" id="budget" 
+                                   class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500"
+                                   placeholder="Optional - e.g., 50000">
+                        </div>
+                    </div>
+                    
+                    <!-- Travel Style -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            <i class="fas fa-users text-blue-600 mr-2"></i>Travel Style
+                        </label>
+                        <select id="travel_style" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500">
+                            <option value="solo">Solo Traveler</option>
+                            <option value="couple">Couple / Romantic</option>
+                            <option value="family">Family with Kids</option>
+                            <option value="friends">Friends Group</option>
+                            <option value="business">Business Trip</option>
+                        </select>
+                    </div>
+                    
+                    <!-- Preferences -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            <i class="fas fa-heart text-blue-600 mr-2"></i>What do you love? (Select all that apply)
+                        </label>
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-3">
+                            <label class="flex items-center p-2 bg-gray-50 rounded-lg cursor-pointer hover:bg-gray-100">
+                                <input type="checkbox" value="adventure" class="pref-checkbox mr-2">
+                                <span>🏔️ Adventure</span>
+                            </label>
+                            <label class="flex items-center p-2 bg-gray-50 rounded-lg cursor-pointer hover:bg-gray-100">
+                                <input type="checkbox" value="culture" class="pref-checkbox mr-2">
+                                <span>🎭 Culture</span>
+                            </label>
+                            <label class="flex items-center p-2 bg-gray-50 rounded-lg cursor-pointer hover:bg-gray-100">
+                                <input type="checkbox" value="food" class="pref-checkbox mr-2">
+                                <span>🍜 Food & Dining</span>
+                            </label>
+                            <label class="flex items-center p-2 bg-gray-50 rounded-lg cursor-pointer hover:bg-gray-100">
+                                <input type="checkbox" value="nature" class="pref-checkbox mr-2">
+                                <span>🌿 Nature</span>
+                            </label>
+                            <label class="flex items-center p-2 bg-gray-50 rounded-lg cursor-pointer hover:bg-gray-100">
+                                <input type="checkbox" value="beach" class="pref-checkbox mr-2">
+                                <span>🏖️ Beach</span>
+                            </label>
+                            <label class="flex items-center p-2 bg-gray-50 rounded-lg cursor-pointer hover:bg-gray-100">
+                                <input type="checkbox" value="romantic" class="pref-checkbox mr-2">
+                                <span>💕 Romantic</span>
+                            </label>
+                            <label class="flex items-center p-2 bg-gray-50 rounded-lg cursor-pointer hover:bg-gray-100">
+                                <input type="checkbox" value="shopping" class="pref-checkbox mr-2">
+                                <span>🛍️ Shopping</span>
+                            </label>
+                            <label class="flex items-center p-2 bg-gray-50 rounded-lg cursor-pointer hover:bg-gray-100">
+                                <input type="checkbox" value="nightlife" class="pref-checkbox mr-2">
+                                <span>🌙 Nightlife</span>
+                            </label>
+                        </div>
+                        <input type="text" id="custom_preferences" 
+                               class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500"
+                               placeholder="Or type your own preferences (e.g., luxury hotels, budget hostels, vegetarian food)">
+                    </div>
+                    
+                    <!-- Pace -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            <i class="fas fa-tachometer-alt text-blue-600 mr-2"></i>Travel Pace
+                        </label>
+                        <div class="grid grid-cols-3 gap-3">
+                            <label class="flex items-center justify-center p-3 bg-gray-50 rounded-lg cursor-pointer hover:bg-gray-100">
+                                <input type="radio" name="pace" value="relaxed" class="mr-2"> Relaxed
+                            </label>
+                            <label class="flex items-center justify-center p-3 bg-gray-50 rounded-lg cursor-pointer hover:bg-gray-100">
+                                <input type="radio" name="pace" value="moderate" class="mr-2" checked> Moderate
+                            </label>
+                            <label class="flex items-center justify-center p-3 bg-gray-50 rounded-lg cursor-pointer hover:bg-gray-100">
+                                <input type="radio" name="pace" value="packed" class="mr-2"> Packed
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <!-- Start Date (Optional) -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            <i class="fas fa-calendar-alt text-blue-600 mr-2"></i>Start Date (Optional)
+                        </label>
+                        <input type="date" id="start_date" 
+                               class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500">
+                        <p class="text-xs text-gray-500 mt-1">Helps suggest season-appropriate activities</p>
+                    </div>
+                    
+                    <!-- Generate Button -->
+                    <button type="submit" id="generateBtn" 
+                            class="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-3 rounded-xl font-semibold hover:shadow-lg transform hover:scale-105 transition-all duration-300">
+                        <i class="fas fa-magic mr-2"></i>Generate AI Itinerary
+                    </button>
+                </form>
+            </div>
+
+            <!-- Loading Indicator -->
+            <div id="loadingIndicator" class="hidden mt-8 text-center">
+                <div class="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+                <p class="text-gray-600 mt-3">🤖 AI is creating your personalized itinerary...</p>
+                <p class="text-sm text-gray-400">This may take 10-15 seconds</p>
+            </div>
+
+            <!-- Itinerary Display -->
+            <div id="itineraryContainer" class="mt-8 hidden">
+                <div class="bg-white rounded-2xl shadow-xl overflow-hidden">
+                    <div class="bg-gradient-to-r from-green-500 to-green-600 px-6 py-4 flex justify-between items-center">
+                        <div>
+                            <h2 class="text-xl font-semibold text-white flex items-center">
+                                <i class="fas fa-map-marked-alt mr-2"></i>Your AI-Powered Itinerary
+                            </h2>
+                            <p class="text-green-100 text-sm mt-1" id="itinerarySource"></p>
+                        </div>
+                        <button onclick="copyItinerary()" class="bg-white text-green-600 px-4 py-2 rounded-lg hover:bg-gray-100 transition">
+                            <i class="fas fa-copy mr-2"></i>Copy
+                        </button>
+                    </div>
+                    <div id="itinerary" class="p-6"></div>
+                    <div class="p-6 bg-gray-50 border-t border-gray-200 flex flex-wrap gap-3 justify-between">
+                        <button id="saveTripButton" onclick="saveItinerary()" class="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition">
+                            <i class="fas fa-save mr-2"></i>Save Trip
+                        </button>
+                        <button onclick="exportItinerary()" class="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 transition">
+                            <i class="fas fa-download mr-2"></i>Export as Text
+                        </button>
+                        <button onclick="shareItinerary()" class="bg-purple-600 text-white px-6 py-2 rounded-lg hover:bg-purple-700 transition">
+                            <i class="fas fa-share-alt mr-2"></i>Share
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tips Section -->
+            <div class="mt-8 bg-blue-50 rounded-xl p-4">
+                <h3 class="font-semibold text-blue-800 mb-2"><i class="fas fa-lightbulb"></i> Pro Tips</h3>
+                <ul class="text-sm text-blue-700 space-y-1">
+                    <li>• Be specific about your destination for better recommendations</li>
+                    <li>• Select your interests to get personalized activity suggestions</li>
+                    <li>• Add a budget to help AI suggest cost-appropriate options</li>
+                    <li>• The AI considers seasonality, local events, and travel logistics</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .activity-item {
+        transition: all 0.2s ease;
+    }
+    .activity-item:hover {
+        background-color: #f9fafb;
+        transform: translateX(5px);
+    }
+    .pref-checkbox {
+        width: 18px;
+        height: 18px;
+        cursor: pointer;
+    }
+</style>
+
+<script>
+// Helper functions
+function getToken() {
+    return localStorage.getItem('access_token');
+}
+
+function escapeHtml(text) {
+    if (!text) return '';
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+// Format currency
+function formatCurrency(amount, currency = 'INR') {
+    const numericAmount = Number(amount);
+    if (!Number.isFinite(numericAmount)) return 'N/A';
+    if (currency === 'INR') {
+        return '₹' + numericAmount.toLocaleString('en-IN', { maximumFractionDigits: 2 });
+    }
+    return currency + ' ' + numericAmount.toLocaleString(undefined, { maximumFractionDigits: 2 });
+}
+
+// Generate AI itinerary
+document.getElementById('planForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const token = getToken();
+    if (!token) {
+        alert('Please login to use the AI trip planner');
+        window.location.href = '/login';
+        return;
+    }
+
+    // Get form values
+    const destination = document.getElementById('destination').value.trim();
+    const days = document.getElementById('days').value;
+    const budget = document.getElementById('budget').value;
+    const travelStyle = document.getElementById('travel_style').value;
+    const startDate = document.getElementById('start_date').value;
+    const customPrefs = document.getElementById('custom_preferences').value;
+    
+    // Get selected preferences
+    const selectedPrefs = Array.from(document.querySelectorAll('.pref-checkbox:checked')).map(cb => cb.value);
+    
+    // Get pace
+    const pace = document.querySelector('input[name="pace"]:checked').value;
+    
+    // Build preferences string
+    let preferences = [];
+    if (selectedPrefs.length) preferences.push(...selectedPrefs);
+    if (customPrefs) preferences.push(customPrefs);
+    preferences.push(travelStyle);
+    preferences.push(`${pace} pace`);
+    const preferencesText = preferences.join(', ');
+
+    if (!destination) {
+        alert('Please enter a destination');
+        return;
+    }
+
+    if (!days || days < 1) {
+        alert('Please enter a valid number of days');
+        return;
+    }
+
+    // Show loading
+    const generateBtn = document.getElementById('generateBtn');
+    const originalBtnText = generateBtn.innerHTML;
+    generateBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>AI is thinking...';
+    generateBtn.disabled = true;
+    
+    document.getElementById('loadingIndicator').classList.remove('hidden');
+    document.getElementById('itineraryContainer').classList.add('hidden');
+
+    try {
+        const response = await fetch('/api/smart_itinerary', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({ 
+                destination, 
+                days: parseInt(days), 
+                budget: parseFloat(budget) || 0,
+                preferences: preferencesText,
+                start_date: startDate,
+                save_trip: true
+            })
+        });
+        
+        const data = await response.json();
+        
+        // Hide loading
+        document.getElementById('loadingIndicator').classList.add('hidden');
+        
+        if (data.success) {
+            displayItinerary(data);
+        } else {
+            document.getElementById('itineraryContainer').classList.remove('hidden');
+            document.getElementById('itinerary').innerHTML = `<div class="bg-red-100 text-red-700 p-4 rounded">${data.error || 'Failed to generate itinerary. Please try again.'}</div>`;
+        }
+    } catch (error) {
+        console.error('Itinerary error:', error);
+        document.getElementById('loadingIndicator').classList.add('hidden');
+        document.getElementById('itineraryContainer').classList.remove('hidden');
+        document.getElementById('itinerary').innerHTML = '<div class="bg-red-100 text-red-700 p-4 rounded">Network error. Please check your connection and try again.</div>';
+    } finally {
+        generateBtn.innerHTML = originalBtnText;
+        generateBtn.disabled = false;
+    }
+});
+
+// Display itinerary
+function displayItinerary(data) {
+    const container = document.getElementById('itineraryContainer');
+    const itineraryDiv = document.getElementById('itinerary');
+    const sourceSpan = document.getElementById('itinerarySource');
+    
+    let html = '';
+    
+    // Source badge
+    if (data.source === 'groq_ai') {
+        sourceSpan.innerHTML = '<span class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold bg-purple-600 text-white"><i class="fas fa-brain"></i> Generated by Groq AI (Llama 3)</span>';
+    } else if (data.source === 'database') {
+        sourceSpan.innerHTML = '<span class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold bg-green-600 text-white"><i class="fas fa-database"></i> Generated from Database</span>';
+    } else {
+        sourceSpan.innerHTML = '<span class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold bg-blue-600 text-white"><i class="fas fa-robot"></i> AI Generated</span>';
+    }
+    
+    // Destination and cost summary
+    html += `<div class="mb-6 p-4 bg-gradient-to-r from-blue-50 to-purple-50 rounded-xl">
+        <h3 class="text-xl font-bold text-gray-800">✈️ ${escapeHtml(data.destination || 'Your Trip')}</h3>
+        <p class="text-gray-600 mt-1">💰 Expected itinerary cost: ${formatCurrency(data.total_estimated_cost, data.currency || 'INR')}</p>
+        <p class="text-xs text-gray-500 mt-1">Based on activity, transport, food, and entry-fee estimates.</p>
+        ${data.message ? `<p class="text-sm text-gray-500 mt-2">${escapeHtml(data.message)}</p>` : ''}
+    </div>`;
+    
+    // Itinerary
+    if (data.itinerary && Array.isArray(data.itinerary)) {
+        data.itinerary.forEach(day => {
+            const dayExpectedCost = (day.activities || []).reduce((sum, activity) => {
+                const cost = Number(activity.cost);
+                return sum + (Number.isFinite(cost) ? cost : 0);
+            }, 0);
+            html += `<div class="mb-4 border rounded-xl overflow-hidden">
+                <div class="bg-gradient-to-r from-blue-600 to-purple-600 px-4 py-3">
+                    <div class="flex items-center justify-between gap-3">
+                        <h4 class="text-white font-semibold">Day ${day.day}</h4>
+                        <span class="text-sm font-semibold text-white">Expected: ${formatCurrency(dayExpectedCost, data.currency || 'INR')}</span>
+                    </div>
+                </div>
+                <div class="p-4 space-y-3">`;
+            
+            if (day.activities && day.activities.length) {
+                day.activities.forEach(activity => {
+                    html += `<div class="activity-item flex justify-between items-start p-3 bg-gray-50 rounded-lg">
+                        <div class="flex-1">
+                            <div class="flex items-center gap-2 mb-1">
+                                <span class="font-semibold text-gray-800">${escapeHtml(activity.name)}</span>
+                                <span class="text-xs text-gray-500">${activity.duration || '2 hours'}</span>
+                            </div>
+                            <p class="text-sm text-gray-600">${escapeHtml(activity.description || '')}</p>
+                            <div class="flex items-center gap-4 mt-2">
+                                <span class="text-xs text-gray-500"><i class="far fa-clock"></i> ${activity.time || 'Flexible'}</span>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <span class="font-semibold text-green-600">${formatCurrency(activity.cost, data.currency || 'INR')}</span>
+                        </div>
+                    </div>`;
+                });
+            } else {
+                html += `<p class="text-gray-500">No activities listed for this day</p>`;
+            }
+            
+            html += `</div></div>`;
+        });
+    } else if (data.itinerary_text) {
+        html += `<div class="bg-gray-50 rounded-lg p-4 whitespace-pre-wrap font-mono text-sm">${escapeHtml(data.itinerary_text)}</div>`;
+    } else if (data.itinerary && typeof data.itinerary === 'object') {
+        html += `<pre class="bg-gray-50 rounded-lg p-4 whitespace-pre-wrap text-sm">${JSON.stringify(data.itinerary, null, 2)}</pre>`;
+    }
+    
+    // Travel Tips
+    if (data.travel_tips && data.travel_tips.length) {
+        html += `<div class="mt-6 p-4 bg-blue-50 rounded-xl">
+            <h4 class="font-semibold text-blue-800 mb-2"><i class="fas fa-lightbulb"></i> 💡 Travel Tips</h4>
+            <ul class="list-disc list-inside space-y-1">`;
+        data.travel_tips.forEach(tip => {
+            html += `<li class="text-sm text-gray-700">${escapeHtml(tip)}</li>`;
+        });
+        html += `</ul></div>`;
+    }
+    
+    // Local Cuisine
+    if (data.local_cuisine && data.local_cuisine.length) {
+        html += `<div class="mt-4 p-4 bg-orange-50 rounded-xl">
+            <h4 class="font-semibold text-orange-800 mb-2"><i class="fas fa-utensils"></i> 🍽️ Must-Try Local Cuisine</h4>
+            <div class="flex flex-wrap gap-2">`;
+        data.local_cuisine.forEach(dish => {
+            html += `<span class="px-3 py-1 bg-orange-100 text-orange-700 rounded-full text-sm">${escapeHtml(dish)}</span>`;
+        });
+        html += `</div></div>`;
+    }
+    
+    // Smart Packing Assistance
+    html += `<div class="mt-6 p-4 bg-amber-50 rounded-xl border-l-4 border-amber-400">
+        <h4 class="font-semibold text-amber-900 mb-3"><i class="fas fa-suitcase-rolling"></i> 🧳 Smart Packing Checklist</h4>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+                <h5 class="font-semibold text-amber-800 mb-2">📋 Essentials</h5>
+                <ul class="space-y-1 text-sm text-amber-900">
+                    <li>✓ Valid passport & documents</li>
+                    <li>✓ Travel insurance papers</li>
+                    <li>✓ Medications & prescriptions</li>
+                    <li>✓ Chargers & power bank</li>
+                    <li>✓ Toiletries & sunscreen</li>
+                </ul>
+            </div>
+            <div>
+                <h5 class="font-semibold text-amber-800 mb-2" id="packingClimate">☀️ Climate-Based Items</h5>
+                <ul class="space-y-1 text-sm text-amber-900" id="packingList">
+                    <li>✓ Lightweight clothing</li>
+                    <li>✓ Hat & sunglasses</li>
+                    <li>✓ Comfortable walking shoes</li>
+                    <li>✓ Beach items if applicable</li>
+                    <li>✓ Day backpack</li>
+                </ul>
+            </div>
+        </div>
+        <div class="mt-3 p-2 bg-amber-100 rounded text-xs text-amber-800">
+            <i class="fas fa-info-circle"></i> Smart checklist generated for your destination. Customize based on your needs!
+        </div>
+    </div>`;
+    
+    // Best Time to Visit
+    if (data.best_time_to_visit) {
+        html += `<div class="mt-4 p-4 bg-green-50 rounded-xl">
+            <h4 class="font-semibold text-green-800 mb-2"><i class="fas fa-calendar-alt"></i> 📅 Best Time to Visit</h4>
+            <p class="text-sm text-gray-700">${escapeHtml(data.best_time_to_visit)}</p>
+        </div>`;
+    }
+    
+    itineraryDiv.innerHTML = html;
+    const saveButton = document.getElementById('saveTripButton');
+    if (data.trip_saved && data.trip_id) {
+        saveButton.innerHTML = '<i class="fas fa-check mr-2"></i>Saved — View Dashboard';
+        saveButton.classList.remove('bg-blue-600', 'hover:bg-blue-700');
+        saveButton.classList.add('bg-green-600', 'hover:bg-green-700');
+    }
+    container.classList.remove('hidden');
+    container.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+// Copy itinerary to clipboard
+function copyItinerary() {
+    const itineraryText = document.getElementById('itinerary').innerText;
+    navigator.clipboard.writeText(itineraryText).then(() => {
+        alert('Itinerary copied to clipboard!');
+    }).catch(() => {
+        alert('Failed to copy');
+    });
+}
+
+// Save itinerary
+function saveItinerary() {
+    const token = getToken();
+    if (!token) {
+        alert('Please login to save your trip');
+        return;
+    }
+    window.location.href = '/dashboard';
+}
+
+// Export as text file
+function exportItinerary() {
+    const destination = document.getElementById('destination').value;
+    const itineraryContent = document.getElementById('itinerary').innerText;
+    const blob = new Blob([`Trip to ${destination}\n\n${itineraryContent}`], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${destination.replace(/\s/g, '_')}_itinerary.txt`;
+    a.click();
+    URL.revokeObjectURL(url);
+}
+
+// Share itinerary
+function shareItinerary() {
+    const destination = document.getElementById('destination').value;
+    const itineraryText = document.getElementById('itinerary').innerText;
+    if (navigator.share) {
+        navigator.share({
+            title: `My ${destination} Trip Itinerary`,
+            text: itineraryText.substring(0, 1000),
+        }).catch(() => alert('Share cancelled'));
+    } else {
+        alert('Share feature not supported on this browser. You can copy the itinerary instead.');
+    }
+}
+
+// Set minimum date for start date
+const today = new Date().toISOString().split('T')[0];
+const startDateInput = document.getElementById('start_date');
+if (startDateInput) {
+    startDateInput.min = today;
+}
+
+// Generate smart packing checklist based on destination
+function generatePackingChecklist(destination) {
+    const packingData = {
+        'maldives': { climate: '☀️ Tropical Beach', items: ['Light cotton clothes', 'Swimsuits (2-3)', 'Snorkeling gear', 'Reef-safe sunscreen', 'Water shoes', 'Beach bag', 'Light rain jacket', 'Quick-dry towel'] },
+        'bali': { climate: '☀️ Tropical', items: ['Light clothing', 'Sundresses/shorts', 'Swimwear', 'Strong sunscreen', 'Insect repellent', 'Light jacket', 'Breathable layers'] },
+        'goa': { climate: '☀️ Tropical Beach', items: ['Beach wear', 'Swimsuit', 'Waterproof phone case', 'Sunscreen SPF 50+', 'Hat & sunglasses', 'Evening clothes', 'Lightweight pants'] },
+        'phuket': { climate: '☀️ Tropical', items: ['Light clothing', 'Beach shoes', 'Quick-dry pants', 'Swimwear', 'Umbrella (monsoon)', 'Breathable layers', 'Insect repellent'] },
+        'boracay': { climate: '☀️ Tropical Beach', items: ['Beach clothes', 'Rash guard', 'Waterproof bag', 'Post-sun lotion', 'Lightweight sweater', 'Flip flops & shoes'] },
+        'switzerland': { climate: '❄️ Alpine', items: ['Thermal layers', 'Warm jacket', 'Hiking boots', 'Wool socks', 'Warm hat & gloves', 'Scarf', 'Sunscreen (altitude)', 'Jeans'] },
+        'norway': { climate: '❄️ Cold', items: ['Heavy winter coat', 'Thermals', 'Wool layers', 'Waterproof boots', 'Hat, gloves, scarf', 'Hand warmers', 'Sunglasses (snow glare)'] },
+        'nepal': { climate: '⛰️ Mountain', items: ['Warm layers', 'Hiking boots', 'Thermal underwear', 'Fleece jacket', 'Rain jacket', 'Trekking socks', 'Altitude medication'] },
+        'tibet': { climate: '❄️ High Altitude', items: ['Heavy thermal layers', 'Warm boots', 'Sunscreen (UV)', 'Lip balm', 'Moisturizer (dry air)', 'Altitude sickness pills', 'Sunglasses'] },
+        'paris': { climate: '🍂 Temperate', items: ['Comfortable walking shoes', 'Light jacket', 'Jeans & casual wear', 'Umbrella', 'Scarf', 'Sweater', 'Light dress/shirt'] },
+        'london': { climate: '🌧️ Temperate Rainy', items: ['Waterproof jacket', 'Umbrella', 'Comfortable shoes', 'Layers (weather varies)', 'Jeans & trousers', 'Cardigan', 'Formal casual wear'] },
+        'tokyo': { climate: '🌸 Temperate', items: ['Weather layers', 'Comfortable walking shoes', 'Lightweight jacket', 'Umbrella (frequent rain)', 'Casual smart wear', 'Socks'] },
+        'new york': { climate: '🌃 Urban', items: ['Weather layers', 'Good walking shoes', 'Jeans & casual', 'Blazer for dining', 'Compact umbrella', 'Sneakers'] },
+        'singapore': { climate: '☀️ Tropical', items: ['Light cotton clothes', 'Swimwear', 'Strong sunscreen', 'Hat/cap', 'Light rain jacket', 'Comfortable shoes', 'Breathable shirt'] },
+        'india': { climate: '☀️ Hot', items: ['Light cotton clothes', 'Scarf (sun & mosquito)', 'Lightweight pants', 'Closed shoes', 'Umbrella', 'Sunscreen SPF 50+', 'Light sweater for AC'] },
+        'dubai': { climate: '🔥 Desert Hot', items: ['Very light clothing', 'Hat & sunglasses', 'Light scarf', 'Comfortable sandals', 'Strong sunscreen', 'Evening shawl', 'Moisturizer'] },
+        'thailand': { climate: '☀️ Tropical', items: ['Light clothing', 'Swimwear', 'Sunscreen', 'Insect repellent', 'Light rain jacket', 'Quick-dry clothes', 'Comfortable shoes'] },
+        'australia': { climate: '☀️ Sunny', items: ['Light clothing', 'Rash guard (water)', 'Wide-brim hat', 'Sunscreen SPF 50+', 'Sunglasses', 'Flip flops & shoes', 'Light sweater'] },
+        'canada': { climate: '❄️ Cold', items: ['Heavy coat', 'Thermal layers', 'Warm boots', 'Hat, gloves, scarf', 'Thermal socks', 'Waterproof jacket', 'Jeans'] },
+        'usa': { climate: '🌎 Varies by region', items: ['Comfortable walking shoes', 'Weather layers', 'Jeans & casual', 'Umbrella', 'Sunscreen', 'Sneakers', 'Light jacket'] },
+        'default': { climate: '🌍 Mixed Climate', items: ['Comfortable walking shoes', 'Light & warm layer', 'Casual wear', 'Umbrella', 'Sunscreen', 'Phone charger', 'Basic medications'] }
+    };
+    
+    const destLower = destination.toLowerCase();
+    let packingInfo = packingData['default'];
+    
+    for (const [place, info] of Object.entries(packingData)) {
+        if (destLower.includes(place) || place.includes(destLower.split(' ')[0])) {
+            packingInfo = info;
+            break;
+        }
+    }
+    
+    // Update packing display
+    const climateEl = document.getElementById('packingClimate');
+    const packingListEl = document.getElementById('packingList');
+    
+    if (climateEl) climateEl.textContent = packingInfo.climate + ' Items';
+    if (packingListEl) {
+        packingListEl.innerHTML = packingInfo.items.map(item => `<li>✓ ${item}</li>`).join('');
+    }
+}
+
+// Call packing checklist after itinerary loads
+const originalDisplayItinerary = displayItinerary;
+window.displayItinerary = function(data) {
+    originalDisplayItinerary(data);
+    if (data.destination) {
+        generatePackingChecklist(data.destination);
+    }
+};
+</script>
+{% endblock %}

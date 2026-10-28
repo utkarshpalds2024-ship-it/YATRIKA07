@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Login - TravelEase</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100">
+<div class="max-w-md mx-auto mt-20 bg-white p-8 rounded shadow">
+    <h2 class="text-2xl font-bold mb-6 text-center">Login</h2>
+    <form id="loginForm">
+        <input type="text" id="username" placeholder="Username" class="w-full border p-2 mb-4 rounded" required>
+        <input type="password" id="password" placeholder="Password" class="w-full border p-2 mb-4 rounded" required>
+        <button type="submit" class="w-full bg-blue-600 text-white p-2 rounded">Login</button>
+    </form>
+    <p class="text-center mt-4">Don't have an account? <a href="/register" class="text-blue-600">Register</a></p>
+</div>
+
+<script>
+    document.getElementById('loginForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        console.log('Form submitted'); // ✅ Log 1
+
+        const username = document.getElementById('username').value;
+        const password = document.getElementById('password').value;
+        console.log('Username:', username); // ✅ Log 2
+
+        const res = await fetch('/api/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username, password })
+        });
+
+        const data = await res.json();
+        console.log('Server response:', data); // ✅ Log 3
+
+        if (res.ok) {
+            localStorage.setItem('access_token', data.access_token);
+            console.log('Token stored:', localStorage.getItem('access_token')); // ✅ Log 4
+            alert('Login successful! Redirecting...');
+            window.location.href = '/';
+        } else {
+            alert(data.msg || 'Login failed');
+        }
+    });
+</script>
+</body>
+</html>

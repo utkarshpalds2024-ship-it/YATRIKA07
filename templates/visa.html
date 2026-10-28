@@ -1,0 +1,1543 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="min-h-screen bg-white" style="background: linear-gradient(135deg, #f8f9fa 0%, #f0f2f5 100%);">
+    <style>
+        :root {
+            --primary-blue: #0066FF;
+            --success-green: #10B981;
+            --warning-orange: #FF8C42;
+            --danger-red: #EF4444;
+            --accent-purple: #7C3AED;
+            --accent-pink: #EC4899;
+            --dark-text: #1F2937;
+            --light-text: #6B7280;
+            --light-bg: #F3F4F6;
+            --border-color: #E5E7EB;
+        }
+
+        * {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+        }
+
+        .visa-dashboard {
+            min-height: 100vh;
+            padding: 2rem 1rem;
+        }
+
+        /* ===== Progress Step Bar ===== */
+        .progress-steps {
+            max-width: 1400px;
+            margin: 0 auto 3rem;
+            background: white;
+            border-radius: 16px;
+            padding: 2.5rem 2rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07);
+            border: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        .steps-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .step {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            position: relative;
+        }
+
+        .step:not(:last-child)::after {
+            content: '';
+            position: absolute;
+            right: -1.5rem;
+            width: 1rem;
+            height: 2px;
+            background: var(--border-color);
+        }
+
+        .step-circle {
+            min-width: 48px;
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+            background: var(--light-bg);
+            color: var(--light-text);
+            border: 2px solid var(--border-color);
+        }
+
+        .step.active .step-circle {
+            background: linear-gradient(135deg, var(--primary-blue), #0052cc);
+            color: white;
+            border-color: var(--primary-blue);
+            box-shadow: 0 8px 16px rgba(0, 102, 255, 0.3);
+            transform: scale(1.08);
+        }
+
+        .step.completed .step-circle {
+            background: var(--success-green);
+            color: white;
+            border-color: var(--success-green);
+        }
+
+        .step-text h4 {
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: var(--dark-text);
+            margin-bottom: 0.25rem;
+        }
+
+        .step-text p {
+            font-size: 0.85rem;
+            color: var(--light-text);
+        }
+
+        /* ===== Dashboard Container ===== */
+        .dashboard-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 1.5rem;
+        }
+
+        /* ===== Card Styling ===== */
+        .dashboard-card {
+            background: white;
+            border-radius: 16px;
+            border: 1px solid rgba(0, 0, 0, 0.05);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.6);
+            overflow: hidden;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            backdrop-filter: blur(10px);
+        }
+
+        .dashboard-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.8);
+            border-color: rgba(0, 0, 0, 0.08);
+        }
+
+        /* ===== Card Headers ===== */
+        .card-header {
+            padding: 1.75rem;
+            background: linear-gradient(135deg, #ffffff 0%, #f9fafb 100%);
+            border-bottom: 2px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .card-header.blue {
+            background: linear-gradient(135deg, #0066FF 0%, #0052CC 100%);
+            border-bottom: none;
+            color: white;
+        }
+
+        .card-header.green {
+            background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+            border-bottom: none;
+            color: white;
+        }
+
+        .card-header.orange {
+            background: linear-gradient(135deg, #FF8C42 0%, #FF7A2E 100%);
+            border-bottom: none;
+            color: white;
+        }
+
+        .card-header.purple {
+            background: linear-gradient(135deg, #7C3AED 0%, #6D28D9 100%);
+            border-bottom: none;
+            color: white;
+        }
+
+        .card-header h3 {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: inherit;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin: 0;
+            letter-spacing: -0.5px;
+        }
+
+        .card-header .icon-badge {
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.3rem;
+            background: rgba(255, 255, 255, 0.25);
+            border: 1px solid rgba(255, 255, 255, 0.35);
+            color: inherit;
+        }
+
+        .card-header.blue .icon-badge { color: var(--primary-blue); }
+        .card-header.green .icon-badge { color: var(--success-green); }
+        .card-header.orange .icon-badge { color: var(--warning-orange); }
+        .card-header.purple .icon-badge { color: var(--accent-purple); }
+
+        /* ===== Card Content ===== */
+        .card-content {
+            padding: 2rem;
+            flex: 1;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* ===== Form Groups ===== */
+        .form-group {
+            margin-bottom: 1.25rem;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: var(--dark-text);
+            margin-bottom: 0.5rem;
+            letter-spacing: -0.3px;
+        }
+
+        .form-group.required label::after {
+            content: ' *';
+            color: var(--danger-red);
+        }
+
+        .input-field {
+            position: relative;
+        }
+
+        .input-field input,
+        .input-field select,
+        .input-field textarea {
+            width: 100%;
+            padding: 0.95rem 1.25rem 0.95rem 2.75rem;
+            border: 2px solid var(--border-color);
+            border-radius: 10px;
+            font-size: 0.95rem;
+            color: var(--dark-text);
+            background: white;
+            transition: all 0.3s ease;
+            font-family: inherit;
+            font-weight: 500;
+        }
+
+        .input-field input::placeholder,
+        .input-field select::placeholder,
+        .input-field textarea::placeholder {
+            color: #9CA3AF;
+        }
+
+        .input-field input:focus,
+        .input-field select:focus,
+        .input-field textarea:focus {
+            outline: none;
+            border-color: var(--primary-blue);
+            background: white;
+            box-shadow: 0 0 0 4px rgba(0, 102, 255, 0.12), inset 0 1px 2px rgba(0, 102, 255, 0.08);
+        }
+
+        .input-field .input-icon {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #9CA3AF;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            pointer-events: none;
+        }
+
+        .input-field input:focus ~ .input-icon,
+        .input-field select:focus ~ .input-icon {
+            color: var(--primary-blue);
+        }
+
+
+        /* ===== Section Styling ===== */
+        .form-section {
+            margin-bottom: 1.75rem;
+            padding: 1.25rem;
+            background: linear-gradient(135deg, rgba(243, 244, 246, 0.8), rgba(249, 250, 251, 0.8));
+            border-radius: 12px;
+            border-left: 4px solid var(--primary-blue);
+        }
+
+        .form-section h4 {
+            margin: 0 0 1rem 0;
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: var(--dark-text);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            letter-spacing: -0.3px;
+        }
+
+        .form-section h4 i {
+            color: var(--primary-blue);
+            font-size: 1rem;
+        }
+
+        /* ===== Drag & Drop Upload ===== */
+        .upload-card {
+            border: 2px dashed var(--primary-blue);
+            border-radius: 14px;
+            padding: 3rem 2rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: linear-gradient(135deg, rgba(0, 102, 255, 0.04), rgba(0, 102, 255, 0.02));
+            position: relative;
+            overflow: hidden;
+        }
+
+        .upload-card:hover,
+        .upload-card.dragover {
+            border-color: var(--primary-blue);
+            background: linear-gradient(135deg, rgba(0, 102, 255, 0.05), rgba(0, 102, 255, 0.02));
+        }
+
+        .upload-icon {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+            color: var(--primary-blue);
+            transition: transform 0.3s ease;
+        }
+
+        .upload-card:hover .upload-icon {
+            transform: scale(1.1) translateY(-4px);
+        }
+
+        .upload-text {
+            margin: 0;
+            font-size: 0.95rem;
+            font-weight: 500;
+            color: var(--dark-text);
+        }
+
+        .upload-subtext {
+            margin: 0.5rem 0 0 0;
+            font-size: 0.85rem;
+            color: var(--light-text);
+        }
+
+        /* ===== Modern Buttons ===== */
+        .btn {
+            padding: 0.875rem 1.75rem;
+            border: none;
+            border-radius: 12px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            letter-spacing: -0.3px;
+            font-family: inherit;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary-blue), #0052cc);
+            color: white;
+            box-shadow: 0 4px 12px rgba(0, 102, 255, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0, 102, 255, 0.4);
+        }
+
+        .btn-primary:active {
+            transform: translateY(0px);
+        }
+
+        .btn-secondary {
+            background: white;
+            color: var(--primary-blue);
+            border: 2px solid var(--primary-blue);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(0, 102, 255, 0.05);
+            transform: translateY(-2px);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, var(--success-green), #059669);
+            color: white;
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+        }
+
+        .btn-success:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(16, 185, 129, 0.4);
+        }
+
+        .btn-full {
+            width: 100%;
+        }
+
+        .btn-sm {
+            padding: 0.625rem 1.25rem;
+            font-size: 0.875rem;
+        }
+
+        /* ===== Processing Times Cards ===== */
+        .processing-card {
+            background: white;
+            border-radius: 12px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            border: 1px solid var(--border-color);
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .processing-card:hover {
+            transform: translateX(4px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        }
+
+        .country-flag {
+            font-size: 2rem;
+            min-width: 2.5rem;
+        }
+
+        .processing-info {
+            flex: 1;
+        }
+
+        .processing-info h4 {
+            margin: 0 0 0.25rem 0;
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: var(--dark-text);
+        }
+
+        .processing-info p {
+            margin: 0;
+            font-size: 0.85rem;
+            color: var(--light-text);
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 0.375rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .status-badge.fast {
+            background: rgba(16, 185, 129, 0.15);
+            color: #047857;
+        }
+
+        .status-badge.medium {
+            background: rgba(255, 140, 66, 0.15);
+            color: #b45309;
+        }
+
+        .status-badge.slow {
+            background: rgba(239, 68, 68, 0.15);
+            color: #991b1b;
+        }
+
+        /* ===== Support Chat ===== */
+        .support-option {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: white;
+            border: 1px solid var(--border-color);
+            margin-bottom: 0.75rem;
+        }
+
+        .support-option:hover {
+            background: var(--light-bg);
+            border-color: var(--accent-purple);
+            transform: translateX(4px);
+        }
+
+        .support-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+            background: var(--light-bg);
+        }
+
+        .support-option.whatsapp .support-icon {
+            background: rgba(37, 211, 102, 0.15);
+            color: #25d366;
+        }
+
+        .support-option.email .support-icon {
+            background: rgba(0, 102, 255, 0.15);
+            color: var(--primary-blue);
+        }
+
+        .support-option.chat .support-icon {
+            background: rgba(124, 58, 237, 0.15);
+            color: var(--accent-purple);
+        }
+
+        .support-text h4 {
+            margin: 0 0 0.25rem 0;
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: var(--dark-text);
+        }
+
+        .support-text p {
+            margin: 0;
+            font-size: 0.85rem;
+            color: var(--light-text);
+        }
+
+        /* ===== Floating WhatsApp Button ===== */
+        .floating-whatsapp {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            width: 56px;
+            height: 56px;
+            background: linear-gradient(135deg, #25d366, #20ba5a);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.75rem;
+            cursor: pointer;
+            box-shadow: 0 8px 24px rgba(37, 211, 102, 0.4);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 999;
+            border: 3px solid white;
+        }
+
+        .floating-whatsapp:hover {
+            transform: scale(1.12) translateY(-4px);
+            box-shadow: 0 12px 32px rgba(37, 211, 102, 0.5);
+        }
+
+        .floating-whatsapp:active {
+            transform: scale(0.95);
+        }
+
+        /* ===== Status Modal ===== */
+        #statusModal {
+            animation: slideIn 0.3s ease;
+        }
+
+        #statusModal::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        #statusModal::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+
+        #statusModal::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 10px;
+        }
+
+        #statusModal::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* ===== Responsive Design ===== */
+        @media (max-width: 1024px) {
+            .dashboard-container {
+                grid-template-columns: 1fr;
+            }
+
+            .steps-container {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 1rem;
+            }
+
+            .step:nth-child(2n)::after,
+            .step:nth-child(odd):not(:nth-child(1))::after {
+                display: none;
+            }
+        }
+
+        @media (max-width: 640px) {
+            .visa-dashboard {
+                padding: 1rem 0.5rem;
+            }
+
+            .progress-steps {
+                padding: 1.5rem 1rem;
+                margin-bottom: 2rem;
+            }
+
+            .steps-container {
+                grid-template-columns: 1fr;
+                gap: 0.75rem;
+            }
+
+            .step {
+                gap: 0.75rem;
+            }
+
+            .step:not(:last-child)::after {
+                display: none;
+            }
+
+            .card-header {
+                padding: 1.25rem 1rem;
+            }
+
+            .card-content {
+                padding: 1.5rem 1rem;
+            }
+
+            .btn {
+                padding: 0.75rem 1.5rem;
+                font-size: 0.875rem;
+            }
+
+            .upload-card {
+                padding: 1.5rem 1rem;
+            }
+
+            .floating-whatsapp {
+                width: 50px;
+                height: 50px;
+                bottom: 1rem;
+                right: 1rem;
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+
+    <div class="visa-dashboard">
+        <!-- Progress Steps -->
+        <div class="progress-steps">
+            <div class="steps-container">
+                <div class="step active">
+                    <div class="step-circle">1</div>
+                    <div class="step-text">
+                        <h4>Check Requirements</h4>
+                        <p>Verify visa needs</p>
+                    </div>
+                </div>
+                <div class="step">
+                    <div class="step-circle">2</div>
+                    <div class="step-text">
+                        <h4>Fill Details</h4>
+                        <p>Complete form</p>
+                    </div>
+                </div>
+                <div class="step">
+                    <div class="step-circle">3</div>
+                    <div class="step-text">
+                        <h4>Upload Documents</h4>
+                        <p>Submit files</p>
+                    </div>
+                </div>
+                <div class="step">
+                    <div class="step-circle">4</div>
+                    <div class="step-text">
+                        <h4>Track Status</h4>
+                        <p>Monitor progress</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Dashboard Grid -->
+        <div class="dashboard-container">
+
+            <!-- LEFT COLUMN: VISA REQUIREMENT CHECKER -->
+            <div class="dashboard-card">
+                <div class="card-header blue">
+                    <div>
+                        <h3><i class="fas fa-search"></i> Visa Requirement Checker</h3>
+                    </div>
+                    <div class="icon-badge"><i class="fas fa-check-circle"></i></div>
+                </div>
+                <div class="card-content">
+                    <div class="form-group">
+                        <label>Select Destination Country</label>
+                        <div class="input-field">
+                            <select id="visaCountry" class="form-control" style="padding-left: 2.75rem;">
+                                <option value="">-- Select a country --</option>
+                            </select>
+                            <i class="fas fa-globe input-icon"></i>
+                        </div>
+                    </div>
+
+                    <button onclick="checkVisaRequirements()" class="btn btn-primary btn-full">
+                        <i class="fas fa-magnifying-glass"></i> Check Requirements
+                    </button>
+
+                    <!-- Visa Result Display -->
+                    <div id="visaResult" style="display: none; margin-top: 1.5rem; padding: 1.25rem; background: linear-gradient(135deg, rgba(0, 102, 255, 0.05), rgba(0, 102, 255, 0.02)); border-radius: 12px; border-left: 4px solid var(--primary-blue);">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                            <h4 style="margin: 0; font-size: 0.95rem; font-weight: 600; color: var(--dark-text);"><span id="countryName"></span> Visa Info</h4>
+                            <span id="visaBadge" style="padding: 0.375rem 0.75rem; border-radius: 20px; font-size: 0.75rem; font-weight: 600; background: rgba(16, 185, 129, 0.15); color: #047857;"></span>
+                        </div>
+                        <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+                            <div style="display: flex; justify-content: space-between; font-size: 0.85rem; margin-bottom: 0.5rem;">
+                                <span style="color: var(--light-text);">Visa Type:</span>
+                                <span style="font-weight: 600; color: var(--dark-text);" id="visaType"></span>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; font-size: 0.85rem; margin-bottom: 0.5rem;">
+                                <span style="color: var(--light-text);">Processing Time:</span>
+                                <span style="font-weight: 600; color: var(--dark-text);" id="processingTime"></span>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; font-size: 0.85rem; margin-bottom: 0.5rem;">
+                                <span style="color: var(--light-text);">Fee:</span>
+                                <span style="font-weight: 600; color: var(--success-green);" id="visaFee"></span>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; font-size: 0.85rem;">
+                                <span style="color: var(--light-text);">Validity:</span>
+                                <span style="font-weight: 600; color: var(--dark-text);" id="validity"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- CENTER COLUMN: APPLICATION FORM -->
+            <div class="dashboard-card">
+                <div class="card-header green">
+                    <div>
+                        <h3><i class="fas fa-file-alt"></i> Visa Application</h3>
+                    </div>
+                    <div class="icon-badge"><i class="fas fa-pen"></i></div>
+                </div>
+                <div class="card-content">
+                    <form id="visaApplicationForm">
+                        <!-- Personal Information Section -->
+                        <div style="margin-bottom: 1.25rem; padding: 1rem; background: var(--light-bg); border-radius: 12px;">
+                            <h4 style="margin: 0 0 1rem 0; font-size: 0.95rem; font-weight: 600; color: var(--dark-text);"><i class="fas fa-user" style="color: var(--primary-blue); margin-right: 0.5rem;"></i>Personal Information</h4>
+                            
+                            <div class="form-group">
+                                <label>Full Name *</label>
+                                <div class="input-field">
+                                    <input type="text" id="fullName" required placeholder="Enter your full name">
+                                    <i class="fas fa-user input-icon"></i>
+                                </div>
+                            </div>
+
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.25rem;">
+                                <div class="form-group">
+                                    <label>Date of Birth *</label>
+                                    <div class="input-field">
+                                        <input type="date" id="dob" required>
+                                        <i class="fas fa-calendar input-icon"></i>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label>Gender *</label>
+                                    <div class="input-field">
+                                        <select id="gender" required>
+                                            <option value="">Select</option>
+                                            <option value="Male">Male</option>
+                                            <option value="Female">Female</option>
+                                            <option value="Other">Other</option>
+                                        </select>
+                                        <i class="fas fa-person input-icon"></i>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                                <div class="form-group">
+                                    <label>Passport Number *</label>
+                                    <div class="input-field">
+                                        <input type="text" id="passportNo" required placeholder="ABC1234567">
+                                        <i class="fas fa-passport input-icon"></i>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label>Passport Expiry *</label>
+                                    <div class="input-field">
+                                        <input type="date" id="passportExpiry" required>
+                                        <i class="fas fa-calendar input-icon"></i>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Email Address *</label>
+                                <div class="input-field">
+                                    <input type="email" id="email" required placeholder="your@email.com">
+                                    <i class="fas fa-envelope input-icon"></i>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Phone Number *</label>
+                                <div class="input-field">
+                                    <input type="tel" id="phone" required placeholder="+1 (555) 123-4567">
+                                    <i class="fas fa-phone input-icon"></i>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Travel Details Section -->
+                        <div style="margin-bottom: 1.25rem; padding: 1rem; background: var(--light-bg); border-radius: 12px;">
+                            <h4 style="margin: 0 0 1rem 0; font-size: 0.95rem; font-weight: 600; color: var(--dark-text);"><i class="fas fa-plane" style="color: var(--success-green); margin-right: 0.5rem;"></i>Travel Details</h4>
+                            
+                            <div class="form-group">
+                                <label>Destination Country *</label>
+                                <div class="input-field">
+                                    <select id="applyCountry" required>
+                                        <option value="">-- Select country --</option>
+                                    </select>
+                                    <i class="fas fa-earth-americas input-icon"></i>
+                                </div>
+                            </div>
+
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.25rem;">
+                                <div class="form-group">
+                                    <label>Arrival Date *</label>
+                                    <div class="input-field">
+                                        <input type="date" id="arrivalDate" required>
+                                        <i class="fas fa-calendar-check input-icon"></i>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label>Departure Date *</label>
+                                    <div class="input-field">
+                                        <input type="date" id="departureDate" required>
+                                        <i class="fas fa-calendar-xmark input-icon"></i>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Purpose of Visit *</label>
+                                <div class="input-field">
+                                    <select id="purpose" required>
+                                        <option value="">Select purpose</option>
+                                        <option value="Tourism">Tourism / Vacation</option>
+                                        <option value="Business">Business Meeting</option>
+                                        <option value="Conference">Conference / Seminar</option>
+                                        <option value="Medical">Medical Treatment</option>
+                                        <option value="Study">Study / Education</option>
+                                        <option value="Family">Family Visit</option>
+                                    </select>
+                                    <i class="fas fa-briefcase input-icon"></i>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Document Upload Section -->
+                        <div style="padding: 1rem; background: var(--light-bg); border-radius: 12px; margin-bottom: 1.5rem;">
+                            <h4 style="margin: 0 0 1rem 0; font-size: 0.95rem; font-weight: 600; color: var(--dark-text);"><i class="fas fa-upload" style="color: var(--warning-orange); margin-right: 0.5rem;"></i>Upload Documents</h4>
+
+                            <div class="upload-card" id="uploadArea" onclick="document.getElementById('documents').click();" ondrop="handleDrop(event)" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" style="cursor: pointer;">
+                                <i class="fas fa-cloud-arrow-up upload-icon"></i>
+                                <p class="upload-text">Drop files here or click to upload</p>
+                                <p class="upload-subtext">Passport scan, photo, itinerary, etc.</p>
+                                <input type="file" id="documents" multiple accept=".pdf,.jpg,.jpeg,.png,.doc,.docx">
+                            </div>
+                            
+                            <!-- File Preview -->
+                            <div id="filePreview" style="margin-top: 1rem;">
+                                <!-- Files will be listed here -->
+                            </div>
+                        </div>
+
+                        <!-- Submit Button -->
+                        <div style="display: flex; gap: 1rem; margin-top: 2rem;">
+                            <button type="submit" class="btn btn-primary btn-full" style="flex: 1;">
+                                <i class="fas fa-paper-plane"></i> Submit Application
+                            </button>
+                            <button type="reset" class="btn btn-secondary btn-full" style="flex: 1;">
+                                <i class="fas fa-rotate-left"></i> Reset Form
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- RIGHT COLUMN: TRACKING + SUPPORT + PROCESSING TIMES -->
+            <div class="dashboard-card">
+                <div class="card-header orange">
+                    <div>
+                        <h3><i class="fas fa-binoculars"></i> Track & Support</h3>
+                    </div>
+                    <div class="icon-badge"><i class="fas fa-headset"></i></div>
+                </div>
+                <div class="card-content">
+                    <!-- Application Tracking -->
+                    <div style="margin-bottom: 2rem; padding: 1.25rem; background: linear-gradient(135deg, rgba(255, 140, 66, 0.05), rgba(255, 140, 66, 0.02)); border-radius: 12px; border-left: 4px solid var(--warning-orange);">
+                        <h4 style="margin: 0 0 1rem 0; font-size: 0.95rem; font-weight: 600; color: var(--dark-text); display: flex; align-items: center; gap: 0.5rem;">
+                            <i class="fas fa-location-crosshairs" style="color: var(--warning-orange);"></i> Track Your Application
+                        </h4>
+                        <div class="form-group">
+                            <label>Application Reference ID</label>
+                            <div class="input-field">
+                                <input type="text" id="trackingId" placeholder="e.g., VISA2024001" style="padding-left: 2.75rem;">
+                                <i class="fas fa-qrcode input-icon"></i>
+                            </div>
+                        </div>
+                        <button class="btn btn-primary btn-full btn-sm" onclick="trackApplication()" style="margin-top: 0.75rem;">
+                            <i class="fas fa-magnifying-glass"></i> Track Status
+                        </button>
+                    </div>
+
+                    <!-- Live Support Section -->
+                    <div style="margin-bottom: 2rem;">
+                        <h5 style="margin: 0 0 1rem 0; font-size: 0.9rem; font-weight: 600; color: var(--dark-text); display: flex; align-items: center; gap: 0.5rem;">
+                            <i class="fas fa-headset" style="color: var(--accent-purple);"></i> Need Help?
+                        </h5>
+                        
+                        <div class="support-option whatsapp" onclick="openWhatsApp()">
+                            <div class="support-icon"><i class="fab fa-whatsapp"></i></div>
+                            <div class="support-text">
+                                <h4>WhatsApp Support</h4>
+                                <p>Instant messages 24/7</p>
+                            </div>
+                        </div>
+
+                        <div class="support-option email" onclick="openEmail()">
+                            <div class="support-icon"><i class="fas fa-envelope"></i></div>
+                            <div class="support-text">
+                                <h4>Email Support</h4>
+                                <p>Response within 2 hours</p>
+                            </div>
+                        </div>
+
+                        <div class="support-option chat" onclick="openChat()">
+                            <div class="support-icon"><i class="fas fa-comments"></i></div>
+                            <div class="support-text">
+                                <h4>Live Chat</h4>
+                                <p>Talk to an agent now</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Processing Times -->
+                    <div style="border-top: 2px solid var(--border-color); padding-top: 1.5rem;">
+                        <h5 style="margin: 0 0 1rem 0; font-size: 0.9rem; font-weight: 600; color: var(--dark-text); display: flex; align-items: center; gap: 0.5rem;">
+                            <i class="fas fa-hourglass-end" style="color: var(--danger-red);"></i> Processing Times
+                        </h5>
+
+                        <div class="processing-card">
+                            <div class="country-flag">🇸🇬</div>
+                            <div class="processing-info">
+                                <h4>Singapore</h4>
+                                <p>Standard Visa</p>
+                            </div>
+                            <div style="text-align: right;">
+                                <span class="status-badge fast">3-5 days</span>
+                            </div>
+                        </div>
+
+                        <div class="processing-card">
+                            <div class="country-flag">🇯🇵</div>
+                            <div class="processing-info">
+                                <h4>Japan</h4>
+                                <p>Tourist Visa</p>
+                            </div>
+                            <div style="text-align: right;">
+                                <span class="status-badge medium">7-10 days</span>
+                            </div>
+                        </div>
+
+                        <div class="processing-card">
+                            <div class="country-flag">🇮🇳</div>
+                            <div class="processing-info">
+                                <h4>India</h4>
+                                <p>e-Visa</p>
+                            </div>
+                            <div style="text-align: right;">
+                                <span class="status-badge fast">1-3 days</span>
+                            </div>
+                        </div>
+
+                        <div class="processing-card">
+                            <div class="country-flag">🇺🇠</div>
+                            <div class="processing-info">
+                                <h4>United Kingdom</h4>
+                                <p>Standard Visa</p>
+                            </div>
+                            <div style="text-align: right;">
+                                <span class="status-badge slow">15-20 days</span>
+                            </div>
+                        </div>
+
+                        <div class="processing-card">
+                            <div class="country-flag">🇺🇸</div>
+                            <div class="processing-info">
+                                <h4>United States</h4>
+                                <p>Work Visa</p>
+                            </div>
+                            <div style="text-align: right;">
+                                <span class="status-badge slow">21-30 days</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- Floating WhatsApp Button -->
+    <div class="floating-whatsapp" onclick="openWhatsApp()" title="Chat with us on WhatsApp">
+        <i class="fab fa-whatsapp"></i>
+    </div>
+
+    <!-- Status Tracking Modal -->
+    <div id="statusModal" style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.7); z-index: 9999; display: none; align-items: center; justify-content: center; padding: 1rem;">
+        <div style="background: white; border-radius: 20px; max-width: 600px; width: 100%; max-height: 90vh; overflow-y: auto; box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);">
+            <!-- Modal Header -->
+            <div style="background: linear-gradient(135deg, #FF8C42, #FF7A2E); color: white; padding: 2rem; border-radius: 20px 20px 0 0; display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                    <h2 style="margin: 0 0 0.5rem 0; font-size: 1.5rem; font-weight: 700;">Application Status</h2>
+                    <p style="margin: 0; opacity: 0.95; font-size: 0.9rem;">Real-time tracking updates</p>
+                </div>
+                <button onclick="closeStatusModal()" style="background: rgba(255,255,255,0.3); border: none; color: white; font-size: 1.5rem; cursor: pointer; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; transition: background 0.2s ease;" onmouseover="this.style.background='rgba(255,255,255,0.5)'" onmouseout="this.style.background='rgba(255,255,255,0.3)'">
+                    ✕
+                </button>
+            </div>
+
+            <!-- Modal Body -->
+            <div style="padding: 2rem;">
+                <!-- Tracking ID -->
+                <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 2rem; padding: 1.5rem; background: linear-gradient(135deg, rgba(255, 140, 66, 0.05), rgba(255, 140, 66, 0.02)); border-radius: 12px; border-left: 4px solid #FF8C42;">
+                    <div style="font-size: 2rem;">📋</div>
+                    <div style="flex: 1;">
+                        <div style="font-size: 0.85rem; color: #6B7280; margin-bottom: 0.25rem;">Tracking Application ID</div>
+                        <div style="font-size: 1.1rem; font-weight: 700; color: #1F2937;" id="modalTrackingId">--</div>
+                    </div>
+                </div>
+
+                <!-- Status Badge -->
+                <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 2rem;">
+                    <div id="statusIcon" style="font-size: 2rem; width: 50px; height: 50px; display: flex; align-items: center; justify-content: center; background: rgba(16, 185, 129, 0.15); border-radius: 50%;">⏳</div>
+                    <div style="flex: 1;">
+                        <div style="font-size: 0.85rem; color: #6B7280;">Current Status</div>
+                        <div style="font-size: 1.25rem; font-weight: 700; color: #1F2937;" id="modalStatus">Under Review</div>
+                    </div>
+                    <div id="statusBadge" style="padding: 0.5rem 1rem; border-radius: 20px; background: rgba(16, 185, 129, 0.15); color: #047857; font-weight: 600; font-size: 0.9rem;">⏳ Processing</div>
+                </div>
+
+                <!-- Timeline Progress -->
+                <div style="margin-bottom: 2rem;">
+                    <div style="font-size: 0.9rem; font-weight: 600; color: #1F2937; margin-bottom: 1rem;">Processing Timeline</div>
+                    <div style="display: flex; justify-content: space-between; position: relative;">
+                        <!-- Timeline Steps -->
+                        <div style="flex: 1; text-align: center; position: relative;">
+                            <div style="width: 50px; height: 50px; background: linear-gradient(135deg, #0066FF, #0052CC); color: white; margin: 0 auto 0.75rem; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700;">✓</div>
+                            <div style="font-size: 0.8rem; font-weight: 600; color: #1F2937;">Application Received</div>
+                            <div style="font-size: 0.75rem; color: #6B7280; margin-top: 0.25rem;">Today</div>
+                        </div>
+                        <div style="flex: 1; text-align: center; position: relative;">
+                            <div style="width: 50px; height: 50px; background: linear-gradient(135deg, #FF8C42, #FF7A2E); color: white; margin: 0 auto 0.75rem; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700;">2</div>
+                            <div style="font-size: 0.8rem; font-weight: 600; color: #1F2937;">Under Review</div>
+                            <div style="font-size: 0.75rem; color: #6B7280; margin-top: 0.25rem;">In Progress</div>
+                        </div>
+                        <div style="flex: 1; text-align: center; position: relative;">
+                            <div style="width: 50px; height: 50px; background: #E5E7EB; color: #9CA3AF; margin: 0 auto 0.75rem; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700;">3</div>
+                            <div style="font-size: 0.8rem; font-weight: 600; color: #1F2937;">Approval</div>
+                            <div style="font-size: 0.75rem; color: #6B7280; margin-top: 0.25rem;">Pending</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Key Details -->
+                <div style="background: #F3F4F6; border-radius: 12px; padding: 1.5rem; margin-bottom: 2rem;">
+                    <div style="font-size: 0.9rem; font-weight: 600; color: #1F2937; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">
+                        <i class="fas fa-info-circle" style="color: #FF8C42;"></i> Application Details
+                    </div>
+                    
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                        <div>
+                            <div style="font-size: 0.8rem; color: #6B7280; margin-bottom: 0.25rem;">Destination</div>
+                            <div style="font-weight: 600; color: #1F2937;" id="modalDestination">Singapore</div>
+                        </div>
+                        <div>
+                            <div style="font-size: 0.8rem; color: #6B7280; margin-bottom: 0.25rem;">Visa Type</div>
+                            <div style="font-weight: 600; color: #1F2937;" id="modalVisaType">Single Entry</div>
+                        </div>
+                        <div>
+                            <div style="font-size: 0.8rem; color: #6B7280; margin-bottom: 0.25rem;">Submission Date</div>
+                            <div style="font-weight: 600; color: #1F2937;" id="modalSubmissionDate">April 12, 2026</div>
+                        </div>
+                        <div>
+                            <div style="font-size: 0.8rem; color: #6B7280; margin-bottom: 0.25rem;">Est. Approval</div>
+                            <div style="font-weight: 600; color: #047857;" id="modalEstimatedDate">April 17, 2026</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Next Steps -->
+                <div style="background: linear-gradient(135deg, rgba(16, 185, 129, 0.05), rgba(16, 185, 129, 0.02)); border-radius: 12px; padding: 1.5rem; border-left: 4px solid #10B981; margin-bottom: 2rem;">
+                    <div style="font-size: 0.9rem; font-weight: 600; color: #1F2937; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">
+                        <i class="fas fa-list-check" style="color: #10B981;"></i> What's Next?
+                    </div>
+                    <ul style="margin: 0; padding-left: 1.5rem; color: #6B7280; line-height: 1.8;">
+                        <li style="margin-bottom: 0.5rem;">We're reviewing your application documents</li>
+                        <li style="margin-bottom: 0.5rem;">You'll receive updates via email</li>
+                        <li style="margin-bottom: 0.5rem;">Approval decision within 5 business days</li>
+                        <li>Download your e-Visa from this portal</li>
+                    </ul>
+                </div>
+
+                <!-- Support Section -->
+                <div style="border-top: 1px solid #E5E7EB; padding-top: 1.5rem;">
+                    <div style="font-size: 0.9rem; font-weight: 600; color: #1F2937; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">
+                        <i class="fas fa-headset" style="color: #7C3AED;"></i> Need Help?
+                    </div>
+                    <div style="display: flex; gap: 1rem;">
+                        <button onclick="openWhatsApp()" style="flex: 1; padding: 0.75rem 1rem; background: #25D366; color: white; border: none; border-radius: 10px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 0.5rem; transition: background 0.2s ease;" onmouseover="this.style.background='#20BA5A'" onmouseout="this.style.background='#25D366'">
+                            <i class="fab fa-whatsapp"></i> WhatsApp
+                        </button>
+                        <button onclick="openEmail()" style="flex: 1; padding: 0.75rem 1rem; background: #0066FF; color: white; border: none; border-radius: 10px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 0.5rem; transition: background 0.2s ease;" onmouseover="this.style.background='#0052CC'" onmouseout="this.style.background='#0066FF'">
+                            <i class="fas fa-envelope"></i> Email
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Comprehensive Visa data database - 100+ Countries
+        const visaDatabase = {
+            // ASIA-PACIFIC (30+ countries)
+            'Singapore': { type: 'Single Entry', processing: '3-5 days', fee: '$100', validity: '90 days', stay: 'Up to 30 days', flag: '🇸🇬', region: 'Asia-Pacific' },
+            'Japan': { type: 'Tourist', processing: '5-7 days', fee: '$80', validity: '6 months', stay: 'Up to 90 days', flag: '🇯🇵', region: 'Asia-Pacific' },
+            'India': { type: 'e-Visa', processing: '1-3 days', fee: '$60', validity: '1 year', stay: 'Up to 60 days', flag: '🇮🇳', region: 'Asia-Pacific' },
+            'Thailand': { type: 'Tourist', processing: '5 days', fee: '$40', validity: '60 days', stay: 'Up to 30 days', flag: '🇹🇭', region: 'Asia-Pacific' },
+            'Malaysia': { type: 'Tourist', processing: '3-5 days', fee: '$50', validity: '3 months', stay: 'Up to 30 days', flag: '🇲🇾', region: 'Asia-Pacific' },
+            'Indonesia': { type: 'Tourist', processing: '0 days', fee: 'Free (VOA)', validity: '30 days', stay: 'Up to 30 days', flag: '🇮🇩', region: 'Asia-Pacific' },
+            'Vietnam': { type: 'e-Visa', processing: '1-3 days', fee: '$25', validity: '3 months', stay: 'Up to 30 days', flag: '🇻🇳', region: 'Asia-Pacific' },
+            'Philippines': { type: 'Tourist', processing: 'Instant', fee: 'Free (VEU)', validity: '30 days', stay: 'Up to 30 days', flag: '🇵🇭', region: 'Asia-Pacific' },
+            'South Korea': { type: 'Tourist', processing: '3-5 days', fee: '$70', validity: '6 months', stay: 'Up to 90 days', flag: '🇰🇷', region: 'Asia-Pacific' },
+            'China': { type: 'Single Entry', processing: '4-10 days', fee: '$140', validity: '3 months', stay: 'Up to 30 days', flag: '🇨🇳', region: 'Asia-Pacific' },
+            'Cambodia': { type: 'Tourist', processing: '1-2 days', fee: '$45', validity: '3 months', stay: 'Up to 30 days', flag: '🇰🇭', region: 'Asia-Pacific' },
+            'Laos': { type: 'Tourist', processing: '2-3 days', fee: '$45', validity: '30 days', stay: 'Up to 30 days', flag: '🇱🇦', region: 'Asia-Pacific' },
+            'Myanmar': { type: 'Tourist', processing: '3-4 days', fee: '$50', validity: '3 months', stay: 'Up to 28 days', flag: '🇲🇲', region: 'Asia-Pacific' },
+            'Taiwan': { type: 'Tourist', processing: '3-5 days', fee: '$70', validity: '6 months', stay: 'Up to 90 days', flag: '🇹🇼', region: 'Asia-Pacific' },
+            'Hong Kong': { type: 'Tourist', processing: 'Instant', fee: 'Free (VEU)', validity: '6 months', stay: 'Up to 30 days', flag: '🇭🇰', region: 'Asia-Pacific' },
+            'Macao': { type: 'Tourist', processing: 'Instant', fee: 'Free (VEU)', validity: '3 months', stay: 'Up to 30 days', flag: '🇲🇴', region: 'Asia-Pacific' },
+            'Pakistan': { type: 'Tourist', processing: '5-10 days', fee: '$100', validity: '6 months', stay: 'Up to 30 days', flag: '🇵🇰', region: 'Asia-Pacific' },
+            'Bangladesh': { type: 'Tourist', processing: '3-5 days', fee: '$60', validity: '3 months', stay: 'Up to 30 days', flag: '🇧🇩', region: 'Asia-Pacific' },
+            'Sri Lanka': { type: 'e-Visa', processing: '1 day', fee: '$35', validity: '30 days', stay: 'Up to 30 days', flag: '🇱🇰', region: 'Asia-Pacific' },
+            'Nepal': { type: 'Tourist', processing: '1-2 days', fee: '$40', validity: '60 days', stay: 'Up to 60 days', flag: '🇳🇵', region: 'Asia-Pacific' },
+            'Bhutan': { type: 'Tourist', processing: '3-5 days', fee: '$250', validity: '60 days', stay: 'Pre-arranged', flag: '🇧🇹', region: 'Asia-Pacific' },
+            'Mongolia': { type: 'Tourist', processing: '5-7 days', fee: '$85', validity: '3 months', stay: 'Up to 30 days', flag: '🇲🇳', region: 'Asia-Pacific' },
+            'Australia': { type: 'Tourist', processing: '5-10 days', fee: '$130', validity: '1 year', stay: 'Up to 12 months', flag: '🇦🇺', region: 'Asia-Pacific' },
+            'New Zealand': { type: 'Tourist', processing: '5-10 days', fee: '$125', validity: '9 months', stay: 'Up to 3 months', flag: '🇳🇿', region: 'Asia-Pacific' },
+            'Fiji': { type: 'Tourist', processing: 'Instant', fee: 'Free (VEU)', validity: '4 months', stay: 'Up to 30 days', flag: '🇫🇯', region: 'Asia-Pacific' },
+            'Papua New Guinea': { type: 'Tourist', processing: '5-10 days', fee: '$100', validity: '60 days', stay: 'Up to 60 days', flag: '🇵🇬', region: 'Asia-Pacific' },
+            
+            // MIDDLE EAST (15+ countries)
+            'United Arab Emirates': { type: 'Tourist', processing: 'Instant', fee: 'Free (VEU)', validity: '6 months', stay: 'Up to 30 days', flag: '🇦🇪', region: 'Middle East' },
+            'Saudi Arabia': { type: 'Tourist', processing: '5-10 days', fee: '$140', validity: '1 year', stay: 'Up to 90 days', flag: '🇸🇦', region: 'Middle East' },
+            'Qatar': { type: 'Tourist', processing: '3-5 days', fee: '$100', validity: '3 months', stay: 'Up to 30 days', flag: '🇶🇦', region: 'Middle East' },
+            'Oman': { type: 'Tourist', processing: '1-3 days', fee: '$80', validity: '30 days', stay: 'Up to 30 days', flag: '🇴🇲', region: 'Middle East' },
+            'Kuwait': { type: 'Tourist', processing: '5-10 days', fee: '$130', validity: '3 months', stay: 'Up to 30 days', flag: '🇰🇼', region: 'Middle East' },
+            'Bahrain': { type: 'Tourist', processing: '1-3 days', fee: '$100', validity: '3 months', stay: 'Up to 30 days', flag: '🇧🇭', region: 'Middle East' },
+            'Lebanon': { type: 'Tourist', processing: '5-10 days', fee: '$75', validity: '1 month', stay: 'Up to 30 days', flag: '🇱🇧', region: 'Middle East' },
+            'Jordan': { type: 'Tourist', processing: '1-2 days', fee: '$65', validity: '6 months', stay: 'Up to 30 days', flag: '🇯🇴', region: 'Middle East' },
+            'Israel': { type: 'Tourist', processing: '5-7 days', fee: '$100', validity: '6 months', stay: 'Up to 90 days', flag: '🇮🇱', region: 'Middle East' },
+            'Turkey': { type: 'e-Visa', processing: '1 day', fee: '$20', validity: '2 months', stay: 'Up to 30 days', flag: '🇹🇷', region: 'Middle East' },
+            'Egypt': { type: 'Tourist', processing: '3-5 days', fee: '$80', validity: '3 months', stay: 'Up to 30 days', flag: '🇪🇬', region: 'Middle East' },
+            'Iran': { type: 'Tourist', processing: '7-14 days', fee: '$100', validity: '3 months', stay: 'Up to 30 days', flag: '🇮🇷', region: 'Middle East' },
+            
+            // EUROPE (25+ countries)
+            'United Kingdom': { type: 'Standard', processing: '15-20 days', fee: '$120', validity: '6 months', stay: 'Up to 6 months', flag: '🇬🇧', region: 'Europe' },
+            'France': { type: 'Schengen', processing: '10-15 days', fee: '$100', validity: '6 months', stay: 'Up to 90 days', flag: '🇫🇷', region: 'Europe' },
+            'Germany': { type: 'Schengen', processing: '10-15 days', fee: '$100', validity: '6 months', stay: 'Up to 90 days', flag: '🇩🇪', region: 'Europe' },
+            'Italy': { type: 'Schengen', processing: '10-15 days', fee: '$100', validity: '6 months', stay: 'Up to 90 days', flag: '🇮🇹', region: 'Europe' },
+            'Spain': { type: 'Schengen', processing: '10-15 days', fee: '$100', validity: '6 months', stay: 'Up to 90 days', flag: '🇪🇸', region: 'Europe' },
+            'Netherlands': { type: 'Schengen', processing: '10-15 days', fee: '$100', validity: '6 months', stay: 'Up to 90 days', flag: '🇳🇱', region: 'Europe' },
+            'Belgium': { type: 'Schengen', processing: '10-15 days', fee: '$100', validity: '6 months', stay: 'Up to 90 days', flag: '🇧🇪', region: 'Europe' },
+            'Switzerland': { type: 'Schengen', processing: '10-15 days', fee: '$130', validity: '6 months', stay: 'Up to 90 days', flag: '🇨🇭', region: 'Europe' },
+            'Austria': { type: 'Schengen', processing: '10-15 days', fee: '$100', validity: '6 months', stay: 'Up to 90 days', flag: '🇦🇹', region: 'Europe' },
+            'Poland': { type: 'Schengen', processing: '10-15 days', fee: '$100', validity: '6 months', stay: 'Up to 90 days', flag: '🇵🇱', region: 'Europe' },
+            'Czech Republic': { type: 'Schengen', processing: '10-15 days', fee: '$100', validity: '6 months', stay: 'Up to 90 days', flag: '🇨🇿', region: 'Europe' },
+            'Sweden': { type: 'Schengen', processing: '10-15 days', fee: '$110', validity: '6 months', stay: 'Up to 90 days', flag: '🇸🇪', region: 'Europe' },
+            'Norway': { type: 'Schengen', processing: '10-15 days', fee: '$120', validity: '6 months', stay: 'Up to 90 days', flag: '🇳🇴', region: 'Europe' },
+            'Denmark': { type: 'Schengen', processing: '10-15 days', fee: '$100', validity: '6 months', stay: 'Up to 90 days', flag: '🇩🇰', region: 'Europe' },
+            'Finland': { type: 'Schengen', processing: '10-15 days', fee: '$100', validity: '6 months', stay: 'Up to 90 days', flag: '🇫🇮', region: 'Europe' },
+            'Greece': { type: 'Schengen', processing: '10-15 days', fee: '$100', validity: '6 months', stay: 'Up to 90 days', flag: '🇬🇷', region: 'Europe' },
+            'Portugal': { type: 'Schengen', processing: '10-15 days', fee: '$100', validity: '6 months', stay: 'Up to 90 days', flag: '🇵🇹', region: 'Europe' },
+            'Ireland': { type: 'Standard', processing: '10-15 days', fee: '$100', validity: '3 months', stay: 'Up to 3 months', flag: '🇮🇪', region: 'Europe' },
+            'Iceland': { type: 'Schengen', processing: '10-15 days', fee: '$110', validity: '6 months', stay: 'Up to 90 days', flag: '🇮🇸', region: 'Europe' },
+            'Hungary': { type: 'Schengen', processing: '10-15 days', fee: '$100', validity: '6 months', stay: 'Up to 90 days', flag: '🇭🇺', region: 'Europe' },
+            'Romania': { type: 'Schengen', processing: '10-15 days', fee: '$100', validity: '6 months', stay: 'Up to 90 days', flag: '🇷🇴', region: 'Europe' },
+            'Bulgaria': { type: 'Schengen', processing: '10-15 days', fee: '$100', validity: '6 months', stay: 'Up to 90 days', flag: '🇧🇬', region: 'Europe' },
+            'Croatia': { type: 'Schengen', processing: '10-15 days', fee: '$100', validity: '6 months', stay: 'Up to 90 days', flag: '🇭🇷', region: 'Europe' },
+            'Serbia': { type: 'Tourist', processing: '5-7 days', fee: '$80', validity: '3 months', stay: 'Up to 90 days', flag: '🇷🇸', region: 'Europe' },
+            'Ukraine': { type: 'Tourist', processing: '5-10 days', fee: '$65', validity: '3 months', stay: 'Up to 90 days', flag: '🇺🇦', region: 'Europe' },
+            'Russia': { type: 'Tourist', processing: '10-15 days', fee: '$140', validity: '3 months', stay: 'Up to 30 days', flag: '🇷🇺', region: 'Europe' },
+            
+            // AMERICAS (20+ countries)
+            'United States': { type: 'B1/B2', processing: '21-30 days', fee: '$150', validity: '10 years', stay: 'Varies', flag: '🇺🇸', region: 'Americas' },
+            'Canada': { type: 'Visitor', processing: '10-15 days', fee: '$110', validity: '10 years', stay: 'Up to 6 months', flag: '🇨🇦', region: 'Americas' },
+            'Mexico': { type: 'Tourist', processing: 'Instant', fee: 'Free (FMM)', validity: '6 months', stay: 'Up to 180 days', flag: '🇲🇽', region: 'Americas' },
+            'Brazil': { type: 'Tourist', processing: '10-15 days', fee: '$130', validity: '2-10 years', stay: 'Up to 90 days', flag: '🇧🇷', region: 'Americas' },
+            'Argentina': { type: 'Tourist', processing: 'Instant', fee: 'Free (IVP)', validity: '10 years', stay: 'Up to 90 days', flag: '🇦🇷', region: 'Americas' },
+            'Chile': { type: 'Tourist', processing: '5-10 days', fee: '$100', validity: '1 month', stay: 'Up to 90 days', flag: '🇨🇱', region: 'Americas' },
+            'Peru': { type: 'Tourist', processing: 'Instant', fee: 'Free (TIP)', validity: '3 months', stay: 'Up to 90 days', flag: '🇵🇪', region: 'Americas' },
+            'Colombia': { type: 'Tourist', processing: 'Instant', fee: 'Free (PEP)', validity: '10 years', stay: 'Up to 90 days', flag: '🇨🇴', region: 'Americas' },
+            'Ecuador': { type: 'Tourist', processing: 'Instant', fee: 'Free (VEC)', validity: '1 year', stay: 'Up to 90 days', flag: '🇪🇨', region: 'Americas' },
+            'Bolivia': { type: 'Tourist', processing: '1-2 days', fee: '$30', validity: '1 month', stay: 'Up to 30 days', flag: '🇧🇴', region: 'Americas' },
+            'Venezuela': { type: 'Tourist', processing: '2-3 days', fee: '$65', validity: '3 months', stay: 'Up to 60 days', flag: '🇻🇪', region: 'Americas' },
+            'Guyana': { type: 'Tourist', processing: '2-3 days', fee: '$50', validity: '1 month', stay: 'Up to 30 days', flag: '🇬🇾', region: 'Americas' },
+            'Suriname': { type: 'Tourist', processing: 'Instant', fee: 'Free (VES)', validity: '3 months', stay: 'Up to 90 days', flag: '🇸🇷', region: 'Americas' },
+            'Costa Rica': { type: 'Tourist', processing: 'Instant', fee: 'Free (SG)', validity: '6 months', stay: 'Up to 90 days', flag: '🇨🇷', region: 'Americas' },
+            'Panama': { type: 'Tourist', processing: 'Instant', fee: 'Free (TIP)', validity: '5 years', stay: 'Up to 180 days', flag: '🇵🇦', region: 'Americas' },
+            'Nicaragua': { type: 'Tourist', processing: 'Instant', fee: 'Free (TIP)', validity: '1 year', stay: 'Up to 90 days', flag: '🇳🇮', region: 'Americas' },
+            'Belize': { type: 'Tourist', processing: 'Instant', fee: 'Free (BZ)', validity: '1 month', stay: 'Up to 30 days', flag: '🇧🇿', region: 'Americas' },
+            'Jamaica': { type: 'Tourist', processing: '3-5 days', fee: '$80', validity: '6 months', stay: 'Up to 30 days', flag: '🇯🇲', region: 'Americas' },
+            'Cuba': { type: 'Tourist Card', processing: '2-3 days', fee: '$25', validity: '1 month', stay: 'Up to 30 days', flag: '🇨🇺', region: 'Americas' },
+            
+            // AFRICA (15+ countries)
+            'South Africa': { type: 'Tourist', processing: '5-7 days', fee: '$100', validity: '6-10 years', stay: 'Up to 90 days', flag: '🇿🇦', region: 'Africa' },
+            'Kenya': { type: 'e-Visa', processing: '1-3 days', fee: '$50', validity: '3 months', stay: 'Up to 90 days', flag: '🇰🇪', region: 'Africa' },
+            'Uganda': { type: 'e-Visa', processing: '1-2 days', fee: '$50', validity: '1 month', stay: 'Up to 30 days', flag: '🇺🇬', region: 'Africa' },
+            'Tanzania': { type: 'e-Visa', processing: '1-2 days', fee: '$50', validity: '3 months', stay: 'Up to 90 days', flag: '🇹🇿', region: 'Africa' },
+            'Ethiopia': { type: 'e-Visa', processing: '3-5 days', fee: '$50', validity: '2 months', stay: 'Up to 60 days', flag: '🇪🇹', region: 'Africa' },
+            'Rwanda': { type: 'e-Visa', processing: '1-2 days', fee: '$50', validity: '3 months', stay: 'Up to 30 days', flag: '🇷🇼', region: 'Africa' },
+            'Ghana': { type: 'Tourist', processing: '3-5 days', fee: '$80', validity: '3 months', stay: 'Up to 30 days', flag: '🇬🇭', region: 'Africa' },
+            'Senegal': { type: 'Tourist', processing: '3-5 days', fee: '$45', validity: '3 months', stay: 'Up to 90 days', flag: '🇸🇳', region: 'Africa' },
+            'Mauritius': { type: 'Tourist', processing: 'Instant', fee: 'Free (VEU)', validity: '1 month', stay: 'Up to 60 days', flag: '🇲🇺', region: 'Africa' },
+            'Madagascar': { type: 'Tourist', processing: '3-5 days', fee: '$37', validity: '90 days', stay: 'Up to 90 days', flag: '🇲🇬', region: 'Africa' },
+            'Morocco': { type: 'Tourist', processing: 'Instant', fee: 'Free (VEU)', validity: '3 months', stay: 'Up to 90 days', flag: '🇲🇦', region: 'Africa' },
+            'Tunisia': { type: 'Tourist', processing: 'Instant', fee: 'Free (VEU)', validity: '1 month', stay: 'Up to 30 days', flag: '🇹🇳', region: 'Africa' },
+            'Botswana': { type: 'Tourist', processing: 'Instant', fee: 'Free (VEU)', validity: '3 months', stay: 'Up to 90 days', flag: '🇧🇼', region: 'Africa' },
+            'Zambia': { type: 'e-Visa', processing: '1-3 days', fee: '$50', validity: '3 months', stay: 'Up to 90 days', flag: '🇿🇲', region: 'Africa' },
+            'Zimbabwe': { type: 'Tourist', processing: '3-5 days', fee: '$55', validity: '3 months', stay: 'Up to 30 days', flag: '🇿🇼', region: 'Africa' },
+        };
+
+        // Populate country dropdowns
+        function populateCountries() {
+            const countries = Object.keys(visaDatabase).sort();
+            
+            // Group countries by region
+            const regions = {};
+            countries.forEach(country => {
+                const region = visaDatabase[country].region || 'Other';
+                if (!regions[region]) regions[region] = [];
+                regions[region].push(country);
+            });
+            
+            const selects = ['visaCountry', 'applyCountry'];
+            
+            selects.forEach(selectId => {
+                const select = document.getElementById(selectId);
+                
+                // Sort regions for consistent display
+                const sortedRegions = Object.keys(regions).sort();
+                sortedRegions.forEach(region => {
+                    const optgroup = document.createElement('optgroup');
+                    optgroup.label = region + ' (' + regions[region].length + ' countries)';
+                    
+                    regions[region].forEach(country => {
+                        const option = document.createElement('option');
+                        option.value = country;
+                        option.textContent = visaDatabase[country].flag + ' ' + country;
+                        optgroup.appendChild(option);
+                    });
+                    
+                    select.appendChild(optgroup);
+                });
+            });
+        }
+
+        // Check visa requirements
+        function checkVisaRequirements() {
+            const country = document.getElementById('visaCountry').value;
+            const resultDiv = document.getElementById('visaResult');
+            
+            if (!country) {
+                alert('Please select a country');
+                return;
+            }
+
+            const visa = visaDatabase[country];
+            document.getElementById('countryName').textContent = country;
+            document.getElementById('visaType').textContent = visa.type;
+            document.getElementById('processingTime').textContent = visa.processing;
+            document.getElementById('visaFee').textContent = visa.fee;
+            document.getElementById('validity').textContent = visa.validity;
+            document.getElementById('visaBadge').textContent = visa.processing;
+            
+            resultDiv.style.display = 'block';
+        }
+
+        // Track application
+        function trackApplication() {
+            const trackingId = document.getElementById('trackingId').value;
+            if (!trackingId) {
+                alert('Please enter your application ID');
+                return;
+            }
+            
+            // Populate modal with data
+            document.getElementById('modalTrackingId').textContent = trackingId;
+            document.getElementById('modalDestination').textContent = 'Singapore';
+            document.getElementById('modalVisaType').textContent = 'Single Entry';
+            
+            // Calculate dates
+            const today = new Date();
+            const approvalDate = new Date(today.getTime() + 5 * 24 * 60 * 60 * 1000);
+            
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            document.getElementById('modalSubmissionDate').textContent = today.toLocaleDateString('en-US', options);
+            document.getElementById('modalEstimatedDate').textContent = approvalDate.toLocaleDateString('en-US', options);
+            
+            // Update status (simulated - in real app, fetch from database)
+            const statusOptions = [
+                { status: 'Received', badge: '✓ Received', icon: '📨', badgeStyle: 'background: rgba(16, 185, 129, 0.15); color: #047857;', progress: 1 },
+                { status: 'Under Review', badge: '⏳ Processing', icon: '🔍', badgeStyle: 'background: rgba(255, 140, 66, 0.15); color: #b45309;', progress: 2 },
+                { status: 'Documents Verified', badge: '✓ Verified', icon: '✅', badgeStyle: 'background: rgba(16, 185, 129, 0.15); color: #047857;', progress: 2 },
+                { status: 'Approved', badge: '✓ Approved', icon: '🎉', badgeStyle: 'background: rgba(16, 185, 129, 0.15); color: #047857;', progress: 3 }
+            ];
+            
+            const currentStatus = statusOptions[1]; // Default: Under Review
+            document.getElementById('modalStatus').textContent = currentStatus.status;
+            document.getElementById('statusBadge').textContent = currentStatus.badge;
+            document.getElementById('statusBadge').style.cssText = currentStatus.badgeStyle;
+            document.getElementById('statusIcon').textContent = currentStatus.icon;
+            document.getElementById('statusIcon').style.cssText = 'font-size: 2rem; width: 50px; height: 50px; display: flex; align-items: center; justify-content: center; background: rgba(255, 140, 66, 0.15); border-radius: 50%;';
+            
+            // Show modal
+            document.getElementById('statusModal').style.display = 'flex';
+        }
+        
+        function closeStatusModal() {
+            document.getElementById('statusModal').style.display = 'none';
+        }
+        
+        // Close modal when clicking outside
+        window.addEventListener('click', function(e) {
+            const modal = document.getElementById('statusModal');
+            if (e.target === modal) {
+                closeStatusModal();
+            }
+        });
+
+        // Support functions
+        function openWhatsApp() {
+            window.open('https://wa.me/919876543210?text=Hi%20YATRIKA,%20I%20need%20help%20with%20my%20visa%20application', '_blank');
+        }
+
+        function openEmail() {
+            window.location.href = 'mailto:support@yatrika.com';
+        }
+
+        function openChat() {
+            alert('Live chat opening...');
+        }
+
+        // Drag and drop
+        function handleDragOver(e) {
+            e.preventDefault();
+            e.currentTarget.classList.add('dragover');
+        }
+
+        function handleDragLeave(e) {
+            e.currentTarget.classList.remove('dragover');
+        }
+
+        function handleDrop(e) {
+            e.preventDefault();
+            e.currentTarget.classList.remove('dragover');
+            const files = e.dataTransfer.files;
+            document.getElementById('documents').files = files;
+            updateFilePreview(files);
+        }
+
+        // Handle file input change
+        document.addEventListener('DOMContentLoaded', function() {
+            const fileInput = document.getElementById('documents');
+            if (fileInput) {
+                fileInput.addEventListener('change', function(e) {
+                    updateFilePreview(this.files);
+                });
+            }
+        });
+
+        // Update file preview
+        function updateFilePreview(files) {
+            const preview = document.getElementById('filePreview');
+            preview.innerHTML = '';
+            
+            if (files.length === 0) {
+                return;
+            }
+            
+            const heading = document.createElement('div');
+            heading.style.cssText = 'font-size: 0.9rem; font-weight: 600; color: var(--dark-text); margin-bottom: 0.75rem; display: flex; align-items: center; gap: 0.5rem;';
+            heading.innerHTML = '<i class="fas fa-check-circle" style="color: var(--success-green);"></i> Selected Files (' + files.length + ')';
+            preview.appendChild(heading);
+            
+            const fileList = document.createElement('div');
+            fileList.style.cssText = 'display: flex; flex-direction: column; gap: 0.5rem;';
+            
+            for (let file of files) {
+                const fileItem = document.createElement('div');
+                fileItem.style.cssText = 'padding: 0.75rem 1rem; background: white; border-radius: 8px; border: 1px solid var(--border-color); display: flex; align-items: center; justify-content: space-between;';
+                
+                const fileIcon = getFileIcon(file.name);
+                const fileSize = (file.size / 1024).toFixed(2); // KB
+                
+                fileItem.innerHTML = `
+                    <div style="display: flex; align-items: center; gap: 0.75rem; flex: 1;">
+                        <i class="${fileIcon}" style="color: var(--primary-blue); font-size: 1.1rem;"></i>
+                        <div style="flex: 1;">
+                            <div style="font-size: 0.9rem; font-weight: 500; color: var(--dark-text);">${file.name}</div>
+                            <div style="font-size: 0.8rem; color: var(--light-text);">${fileSize} KB</div>
+                        </div>
+                    </div>
+                `;
+                
+                fileList.appendChild(fileItem);
+            }
+            
+            preview.appendChild(fileList);
+        }
+
+        // Get file icon based on extension
+        function getFileIcon(filename) {
+            const ext = filename.split('.').pop().toLowerCase();
+            const iconMap = {
+                'pdf': 'fas fa-file-pdf',
+                'jpg': 'fas fa-image',
+                'jpeg': 'fas fa-image',
+                'png': 'fas fa-image',
+                'doc': 'fas fa-file-word',
+                'docx': 'fas fa-file-word'
+            };
+            return iconMap[ext] || 'fas fa-file';
+        }
+
+        // Initialize
+        window.addEventListener('DOMContentLoaded', function() {
+            populateCountries();
+            
+            // Handle form submission
+            const form = document.getElementById('visaApplicationForm');
+            if (form) {
+                form.addEventListener('submit', async function(e) {
+                    e.preventDefault();
+                    
+                    // Validate all required fields
+                    const fullName = document.getElementById('fullName').value;
+                    const email = document.getElementById('email').value;
+                    const documents = document.getElementById('documents').files;
+                    const country = document.getElementById('visaCountry').value;
+                    
+                    if (!fullName) {
+                        alert('Please enter your full name');
+                        return;
+                    }
+                    if (!email) {
+                        alert('Please enter your email address');
+                        return;
+                    }
+                    if (documents.length === 0) {
+                        alert('Please upload at least one document');
+                        return;
+                    }
+                    if (!country) {
+                        alert('Please select a destination country');
+                        return;
+                    }
+
+                    const token = localStorage.getItem('access_token');
+                    if (!token) {
+                        alert('Please log in before submitting a visa application.');
+                        window.location.href = '/login';
+                        return;
+                    }
+
+                    const submitButton = form.querySelector('button[type="submit"]');
+                    const originalButtonText = submitButton ? submitButton.innerHTML : '';
+                    if (submitButton) {
+                        submitButton.disabled = true;
+                        submitButton.textContent = 'Submitting...';
+                    }
+
+                    const notes = [
+                        `Purpose: ${document.getElementById('purpose').value}`,
+                        `Departure date: ${document.getElementById('departureDate').value}`
+                    ].join('\n');
+
+                    try {
+                        const response = await fetch('/api/visa/apply', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'Authorization': `Bearer ${token}`
+                            },
+                            body: JSON.stringify({ country, notes })
+                        });
+                        const result = await response.json();
+                        if (!response.ok || !result.success) {
+                            throw new Error(result.error || 'Could not save the visa application.');
+                        }
+
+                        document.getElementById('trackingId').value = result.application_id;
+                        alert(`Application saved successfully.\n\nTracking ID: ${result.application_id}\nStatus: ${result.status}\n\nYou can find it in Dashboard > Visa.`);
+                    } catch (error) {
+                        alert(error.message || 'Could not submit the application. Please try again.');
+                    } finally {
+                        if (submitButton) {
+                            submitButton.disabled = false;
+                            submitButton.innerHTML = originalButtonText;
+                        }
+                    }
+                });
+            }
+        });
+    </script>
+
+</div>
+{% endblock %}

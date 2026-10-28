@@ -1,0 +1,7 @@
+0000000000000000000000000000000000000000 27bb28206e9e89ac0d88c76bd8b10f34e675553c Your Name <your_email@example.com> 1790502186 +0530	commit (initial): initial command
+27bb28206e9e89ac0d88c76bd8b10f34e675553c 0000000000000000000000000000000000000000 Your Name <your_email@example.com> 1790502214 +0530	Branch: renamed refs/heads/main to refs/heads/main
+27bb28206e9e89ac0d88c76bd8b10f34e675553c 27bb28206e9e89ac0d88c76bd8b10f34e675553c Your Name <your_email@example.com> 1790502214 +0530	Branch: renamed refs/heads/main to refs/heads/main
+27bb28206e9e89ac0d88c76bd8b10f34e675553c b812d6c09f44990a894693fa6f40b5430939843f Your Name <your_email@example.com> 1793186400 +0530	commit: initial commit
+b812d6c09f44990a894693fa6f40b5430939843f 0000000000000000000000000000000000000000 Your Name <your_email@example.com> 1793186498 +0530	Branch: renamed refs/heads/main to refs/heads/main
+b812d6c09f44990a894693fa6f40b5430939843f b812d6c09f44990a894693fa6f40b5430939843f Your Name <your_email@example.com> 1793186498 +0530	Branch: renamed refs/heads/main to refs/heads/main
+b812d6c09f44990a894693fa6f40b5430939843f 5d2b1c3c7e476f1ac0994f7cf96e93e65bdec275 Your Name <your_email@example.com> 1793187903 +0530	commit (amend): initial commit

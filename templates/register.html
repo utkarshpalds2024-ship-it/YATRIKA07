@@ -1,0 +1,534 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-gray-50 to-gray-100">
+    <div class="max-w-md w-full space-y-8">
+        <!-- Logo and Title -->
+        <div class="text-center" data-aos="fade-down">
+            <div class="flex justify-center mb-4">
+                <div class="bg-gradient-to-r from-green-600 to-blue-600 p-3 rounded-2xl shadow-lg">
+                    <i class="fas fa-user-plus text-white text-3xl"></i>
+                </div>
+            </div>
+            <h2 class="text-3xl font-extrabold text-gray-900">
+                Create Account
+            </h2>
+            <p class="mt-2 text-sm text-gray-600">
+                Join thousands of travelers worldwide
+            </p>
+        </div>
+        
+        <!-- Register Form Card -->
+        <div class="bg-white rounded-2xl shadow-xl p-8 space-y-6" data-aos="fade-up" data-aos-delay="100">
+            <!-- Social Registration Options -->
+            <div class="space-y-3">
+                <button onclick="socialRegister('google')" class="w-full flex items-center justify-center px-4 py-3 border border-gray-300 rounded-xl shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 transition-all duration-200">
+                    <i class="fab fa-google text-red-500 text-xl mr-3"></i>
+                    Sign up with Google
+                </button>
+                <button onclick="socialRegister('facebook')" class="w-full flex items-center justify-center px-4 py-3 border border-gray-300 rounded-xl shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 transition-all duration-200">
+                    <i class="fab fa-facebook text-blue-600 text-xl mr-3"></i>
+                    Sign up with Facebook
+                </button>
+            </div>
+            
+            <div class="relative">
+                <div class="absolute inset-0 flex items-center">
+                    <div class="w-full border-t border-gray-300"></div>
+                </div>
+                <div class="relative flex justify-center text-sm">
+                    <span class="px-2 bg-white text-gray-500">Or sign up with email</span>
+                </div>
+            </div>
+            
+            <!-- Registration Form -->
+            <form id="registerForm" class="space-y-5">
+                <!-- Username Field -->
+                <div>
+                    <label for="username" class="block text-sm font-medium text-gray-700 mb-1">
+                        <i class="fas fa-user mr-2 text-gray-400"></i>Username
+                    </label>
+                    <div class="relative">
+                        <input type="text" id="username" name="username" required 
+                               class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200"
+                               placeholder="Choose a username">
+                        <div class="absolute inset-y-0 right-0 pr-3 flex items-center">
+                            <i id="usernameCheckIcon" class="fas fa-check-circle text-gray-400 hidden"></i>
+                        </div>
+                    </div>
+                    <p id="usernameError" class="mt-1 text-xs text-red-500 hidden"></p>
+                    <p id="usernameHint" class="mt-1 text-xs text-gray-500">Username must be at least 3 characters</p>
+                </div>
+                
+                <!-- Email Field -->
+                <div>
+                    <label for="email" class="block text-sm font-medium text-gray-700 mb-1">
+                        <i class="fas fa-envelope mr-2 text-gray-400"></i>Email Address
+                    </label>
+                    <div class="relative">
+                        <input type="email" id="email" name="email" required 
+                               class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200"
+                               placeholder="Enter your email">
+                        <div class="absolute inset-y-0 right-0 pr-3 flex items-center">
+                            <i id="emailCheckIcon" class="fas fa-check-circle text-gray-400 hidden"></i>
+                        </div>
+                    </div>
+                    <p id="emailError" class="mt-1 text-xs text-red-500 hidden"></p>
+                </div>
+                
+                <!-- Password Field -->
+                <div>
+                    <label for="password" class="block text-sm font-medium text-gray-700 mb-1">
+                        <i class="fas fa-lock mr-2 text-gray-400"></i>Password
+                    </label>
+                    <div class="relative">
+                        <input type="password" id="password" name="password" required 
+                               class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200"
+                               placeholder="Create a strong password">
+                        <button type="button" onclick="togglePasswordVisibility()" class="absolute inset-y-0 right-0 pr-3 flex items-center">
+                            <i id="passwordToggleIcon" class="fas fa-eye text-gray-400 hover:text-gray-600 transition-colors"></i>
+                        </button>
+                    </div>
+                    
+                    <!-- Password Strength Meter -->
+                    <div class="mt-2">
+                        <div class="flex items-center justify-between mb-1">
+                            <span class="text-xs text-gray-500">Password strength:</span>
+                            <span id="passwordStrengthText" class="text-xs font-semibold">Weak</span>
+                        </div>
+                        <div class="h-1.5 bg-gray-200 rounded-full overflow-hidden">
+                            <div id="passwordStrengthBar" class="h-full w-0 bg-red-500 transition-all duration-300"></div>
+                        </div>
+                        <ul class="mt-2 space-y-1">
+                            <li id="lengthCheck" class="text-xs text-gray-500 flex items-center">
+                                <i class="fas fa-circle text-[6px] mr-2"></i>At least 8 characters
+                            </li>
+                            <li id="uppercaseCheck" class="text-xs text-gray-500 flex items-center">
+                                <i class="fas fa-circle text-[6px] mr-2"></i>At least one uppercase letter
+                            </li>
+                            <li id="numberCheck" class="text-xs text-gray-500 flex items-center">
+                                <i class="fas fa-circle text-[6px] mr-2"></i>At least one number
+                            </li>
+                            <li id="specialCheck" class="text-xs text-gray-500 flex items-center">
+                                <i class="fas fa-circle text-[6px] mr-2"></i>At least one special character
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <!-- Confirm Password Field -->
+                <div>
+                    <label for="confirmPassword" class="block text-sm font-medium text-gray-700 mb-1">
+                        <i class="fas fa-check-circle mr-2 text-gray-400"></i>Confirm Password
+                    </label>
+                    <div class="relative">
+                        <input type="password" id="confirmPassword" name="confirmPassword" required 
+                               class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200"
+                               placeholder="Confirm your password">
+                        <div class="absolute inset-y-0 right-0 pr-3 flex items-center">
+                            <i id="confirmPasswordIcon" class="fas fa-times-circle text-red-500"></i>
+                        </div>
+                    </div>
+                    <p id="passwordMatchError" class="mt-1 text-xs text-red-500 hidden"></p>
+                </div>
+                
+                <!-- Terms and Conditions -->
+                <div class="flex items-center">
+                    <input type="checkbox" id="terms" required class="h-4 w-4 text-green-600 focus:ring-green-500 border-gray-300 rounded">
+                    <label for="terms" class="ml-2 block text-sm text-gray-700">
+                        I agree to the 
+                        <a href="#" class="text-green-600 hover:text-green-500">Terms of Service</a>
+                        and 
+                        <a href="#" class="text-green-600 hover:text-green-500">Privacy Policy</a>
+                    </label>
+                </div>
+                
+                <button type="submit" id="registerButton" class="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-xl text-white bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-all duration-200 transform hover:scale-105">
+                    <span class="absolute left-0 inset-y-0 flex items-center pl-3">
+                        <i class="fas fa-user-plus text-white group-hover:translate-x-1 transition-transform"></i>
+                    </span>
+                    Create Account
+                </button>
+            </form>
+            
+            <!-- Login Link -->
+            <p class="text-center text-sm text-gray-600">
+                Already have an account?
+                <a href="/login" class="font-medium text-green-600 hover:text-green-500 transition-colors">
+                    Sign in here
+                </a>
+            </p>
+        </div>
+        
+        <!-- Additional Info -->
+        <div class="text-center text-xs text-gray-500" data-aos="fade-up" data-aos-delay="200">
+            <p>By creating an account, you'll get access to:</p>
+            <p class="mt-1">✓ Smart trip planning ✓ Real-time assistance ✓ Travel community</p>
+        </div>
+    </div>
+</div>
+
+<script>
+let isLoading = false;
+
+// Toggle password visibility
+function togglePasswordVisibility() {
+    const passwordInput = document.getElementById('password');
+    const toggleIcon = document.getElementById('passwordToggleIcon');
+    
+    if (passwordInput.type === 'password') {
+        passwordInput.type = 'text';
+        toggleIcon.classList.remove('fa-eye');
+        toggleIcon.classList.add('fa-eye-slash');
+    } else {
+        passwordInput.type = 'password';
+        toggleIcon.classList.remove('fa-eye-slash');
+        toggleIcon.classList.add('fa-eye');
+    }
+}
+
+// Social registration (demo function)
+function socialRegister(provider) {
+    if (typeof showToast === 'function') {
+        showToast(`Signing up with ${provider}...`, 'info');
+    } else {
+        alert(`Signing up with ${provider}...`);
+    }
+    
+    setTimeout(() => {
+        if (typeof showToast === 'function') {
+            showToast(`${provider} registration coming soon!`, 'info');
+        } else {
+            alert(`${provider} registration coming soon!`);
+        }
+    }, 1000);
+}
+
+// Password strength checker
+function checkPasswordStrength(password) {
+    let strength = 0;
+    const checks = {
+        length: password.length >= 8,
+        uppercase: /[A-Z]/.test(password),
+        number: /[0-9]/.test(password),
+        special: /[!@#$%^&*(),.?":{}|<>]/.test(password)
+    };
+    
+    // Update UI
+    updateCheckmark('lengthCheck', checks.length);
+    updateCheckmark('uppercaseCheck', checks.uppercase);
+    updateCheckmark('numberCheck', checks.number);
+    updateCheckmark('specialCheck', checks.special);
+    
+    // Calculate strength
+    if (checks.length) strength++;
+    if (checks.uppercase) strength++;
+    if (checks.number) strength++;
+    if (checks.special) strength++;
+    
+    // Update strength meter
+    const strengthBar = document.getElementById('passwordStrengthBar');
+    const strengthText = document.getElementById('passwordStrengthText');
+    
+    if (strength <= 1) {
+        strengthBar.style.width = '25%';
+        strengthBar.className = 'h-full bg-red-500';
+        strengthText.textContent = 'Weak';
+        strengthText.className = 'text-xs font-semibold text-red-500';
+    } else if (strength === 2) {
+        strengthBar.style.width = '50%';
+        strengthBar.className = 'h-full bg-orange-500';
+        strengthText.textContent = 'Fair';
+        strengthText.className = 'text-xs font-semibold text-orange-500';
+    } else if (strength === 3) {
+        strengthBar.style.width = '75%';
+        strengthBar.className = 'h-full bg-yellow-500';
+        strengthText.textContent = 'Good';
+        strengthText.className = 'text-xs font-semibold text-yellow-600';
+    } else {
+        strengthBar.style.width = '100%';
+        strengthBar.className = 'h-full bg-green-500';
+        strengthText.textContent = 'Strong';
+        strengthText.className = 'text-xs font-semibold text-green-500';
+    }
+    
+    return checks;
+}
+
+function updateCheckmark(elementId, isValid) {
+    const element = document.getElementById(elementId);
+    const icon = element.querySelector('i');
+    
+    if (isValid) {
+        icon.className = 'fas fa-check-circle text-green-500 text-xs mr-2';
+        element.className = 'text-xs text-green-600 flex items-center';
+    } else {
+        icon.className = 'fas fa-circle text-gray-400 text-[6px] mr-2';
+        element.className = 'text-xs text-gray-500 flex items-center';
+    }
+}
+
+// Real-time validation
+document.getElementById('username').addEventListener('input', function() {
+    const username = this.value;
+    const usernameError = document.getElementById('usernameError');
+    const usernameHint = document.getElementById('usernameHint');
+    const checkIcon = document.getElementById('usernameCheckIcon');
+    
+    if (username.length < 3) {
+        usernameError.textContent = 'Username must be at least 3 characters';
+        usernameError.classList.remove('hidden');
+        usernameHint.classList.add('hidden');
+        checkIcon.classList.add('hidden');
+        this.classList.add('border-red-500');
+    } else if (!/^[a-zA-Z0-9_]+$/.test(username)) {
+        usernameError.textContent = 'Username can only contain letters, numbers, and underscores';
+        usernameError.classList.remove('hidden');
+        usernameHint.classList.add('hidden');
+        checkIcon.classList.add('hidden');
+        this.classList.add('border-red-500');
+    } else {
+        usernameError.classList.add('hidden');
+        usernameHint.classList.remove('hidden');
+        checkIcon.classList.remove('hidden');
+        checkIcon.className = 'fas fa-check-circle text-green-500';
+        this.classList.remove('border-red-500');
+        this.classList.add('border-green-500');
+    }
+});
+
+document.getElementById('email').addEventListener('input', function() {
+    const email = this.value;
+    const emailError = document.getElementById('emailError');
+    const checkIcon = document.getElementById('emailCheckIcon');
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    
+    if (!emailRegex.test(email)) {
+        emailError.textContent = 'Please enter a valid email address';
+        emailError.classList.remove('hidden');
+        checkIcon.classList.add('hidden');
+        this.classList.add('border-red-500');
+    } else {
+        emailError.classList.add('hidden');
+        checkIcon.classList.remove('hidden');
+        checkIcon.className = 'fas fa-check-circle text-green-500';
+        this.classList.remove('border-red-500');
+        this.classList.add('border-green-500');
+    }
+});
+
+document.getElementById('password').addEventListener('input', function() {
+    checkPasswordStrength(this.value);
+    checkPasswordMatch();
+});
+
+document.getElementById('confirmPassword').addEventListener('input', function() {
+    checkPasswordMatch();
+});
+
+function checkPasswordMatch() {
+    const password = document.getElementById('password').value;
+    const confirmPassword = document.getElementById('confirmPassword').value;
+    const matchError = document.getElementById('passwordMatchError');
+    const confirmIcon = document.getElementById('confirmPasswordIcon');
+    
+    if (confirmPassword.length > 0) {
+        if (password !== confirmPassword) {
+            matchError.textContent = 'Passwords do not match';
+            matchError.classList.remove('hidden');
+            confirmIcon.className = 'fas fa-times-circle text-red-500';
+            document.getElementById('confirmPassword').classList.add('border-red-500');
+            return false;
+        } else {
+            matchError.classList.add('hidden');
+            confirmIcon.className = 'fas fa-check-circle text-green-500';
+            document.getElementById('confirmPassword').classList.remove('border-red-500');
+            document.getElementById('confirmPassword').classList.add('border-green-500');
+            return true;
+        }
+    }
+    return false;
+}
+
+// Form submission
+document.getElementById('registerForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    if (isLoading) return;
+    
+    const username = document.getElementById('username').value.trim();
+    const email = document.getElementById('email').value.trim();
+    const password = document.getElementById('password').value;
+    const confirmPassword = document.getElementById('confirmPassword').value;
+    const terms = document.getElementById('terms').checked;
+    const registerButton = document.getElementById('registerButton');
+    
+    // Validate all fields
+    if (username.length < 3) {
+        showToast('Username must be at least 3 characters', 'error');
+        document.getElementById('username').focus();
+        return;
+    }
+    
+    if (!/^[a-zA-Z0-9_]+$/.test(username)) {
+        showToast('Username can only contain letters, numbers, and underscores', 'error');
+        document.getElementById('username').focus();
+        return;
+    }
+    
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+        showToast('Please enter a valid email address', 'error');
+        document.getElementById('email').focus();
+        return;
+    }
+    
+    if (password.length < 8) {
+        showToast('Password must be at least 8 characters', 'error');
+        document.getElementById('password').focus();
+        return;
+    }
+    
+    if (password !== confirmPassword) {
+        showToast('Passwords do not match', 'error');
+        document.getElementById('confirmPassword').focus();
+        return;
+    }
+    
+    if (!terms) {
+        showToast('Please agree to the Terms of Service and Privacy Policy', 'error');
+        return;
+    }
+    
+    // Show loading state
+    isLoading = true;
+    const originalButtonHTML = registerButton.innerHTML;
+    registerButton.innerHTML = `
+        <span class="absolute left-0 inset-y-0 flex items-center pl-3">
+            <i class="fas fa-spinner fa-spin"></i>
+        </span>
+        Creating account...
+    `;
+    registerButton.disabled = true;
+    
+    try {
+        const res = await fetch('/api/register', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username, email, password })
+        });
+        
+        const data = await res.json();
+        
+        if (res.ok) {
+            showToast('Registration successful! Redirecting to login...', 'success');
+            
+            setTimeout(() => {
+                window.location.href = '/login';
+            }, 2000);
+        } else {
+            let errorMessage = data.msg || 'Registration failed';
+            
+            if (data.msg === 'Username already exists') {
+                errorMessage = 'Username is already taken. Please choose another.';
+                document.getElementById('username').focus();
+            } else if (data.msg === 'Email already exists') {
+                errorMessage = 'Email is already registered. Please login instead.';
+                document.getElementById('email').focus();
+            }
+            
+            showToast(errorMessage, 'error');
+            
+            // Reset button
+            registerButton.innerHTML = originalButtonHTML;
+            registerButton.disabled = false;
+            isLoading = false;
+        }
+    } catch (error) {
+        console.error('Registration error:', error);
+        showToast('Network error. Please check your connection.', 'error');
+        
+        // Reset button
+        registerButton.innerHTML = originalButtonHTML;
+        registerButton.disabled = false;
+        isLoading = false;
+    }
+});
+
+// Add focus effects
+const inputs = document.querySelectorAll('input');
+inputs.forEach(input => {
+    input.addEventListener('focus', function() {
+        this.classList.add('ring-2', 'ring-green-500', 'ring-opacity-50');
+    });
+    input.addEventListener('blur', function() {
+        this.classList.remove('ring-2', 'ring-green-500', 'ring-opacity-50');
+    });
+});
+</script>
+
+<style>
+/* Additional styles for registration page */
+@keyframes fadeInScale {
+    from {
+        opacity: 0;
+        transform: scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+.fade-in-scale {
+    animation: fadeInScale 0.3s ease-out;
+}
+
+/* Password strength meter animation */
+#passwordStrengthBar {
+    transition: width 0.3s ease, background-color 0.3s ease;
+}
+
+/* Input focus effects */
+input:focus {
+    outline: none;
+}
+
+/* Custom checkbox styling */
+input[type="checkbox"] {
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+input[type="checkbox"]:checked {
+    background-color: #10b981;
+    border-color: #10b981;
+}
+
+/* Loading spinner animation */
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.fa-spinner {
+    animation: spin 1s linear infinite;
+}
+
+/* Smooth transitions */
+input, button {
+    transition: all 0.3s ease;
+}
+
+/* Card hover effect */
+.bg-white {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.bg-white:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.02);
+}
+</style>
+{% endblock %}

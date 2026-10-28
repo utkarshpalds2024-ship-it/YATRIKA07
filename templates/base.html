@@ -1,0 +1,2189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <meta name="description" content="YATRIKA - Your Complete Travel Companion. Plan, book flights, hotels, trains, buses, cabs, cruises, and experience travel like never before.">
+    <title>YATRIKA - Smart Travel Platform</title>
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    
+    <!-- AOS Animation Library -->
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    
+    <!-- Socket.IO -->
+    <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+    
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    
+    <!-- Chart.js for Analytics -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+    
+    <style>
+        /* Custom Tailwind Config */
+        .container-custom {
+            max-width: 1280px;
+            margin-left: auto;
+            margin-right: auto;
+            padding-left: 1rem;
+            padding-right: 1rem;
+        }
+        
+        @media (min-width: 640px) {
+            .container-custom {
+                padding-left: 1.5rem;
+                padding-right: 1.5rem;
+            }
+        }
+        
+        @media (min-width: 1024px) {
+            .container-custom {
+                padding-left: 2rem;
+                padding-right: 2rem;
+            }
+        }
+        
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 10px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+        
+        /* Smooth Scroll */
+        html {
+            scroll-behavior: smooth;
+        }
+        
+        /* Dropdown Menu Animation */
+        .dropdown-enter {
+            opacity: 0;
+            transform: scale(0.95);
+        }
+        
+        .dropdown-enter-active {
+            opacity: 1;
+            transform: scale(1);
+            transition: opacity 200ms, transform 200ms;
+        }
+        
+        /* Booking Type Icons */
+        .booking-icon {
+            transition: all 0.3s ease;
+        }
+        
+        .booking-icon:hover {
+            transform: translateY(-2px);
+        }
+
+        .control-btn {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 2.5rem;
+            height: 2.5rem;
+            border-radius: 0.875rem;
+            border: 1px solid rgba(226, 232, 240, 0.9);
+            background: rgba(255, 255, 255, 0.75);
+            backdrop-filter: blur(10px);
+            color: #334155;
+            transition: all 0.25s ease;
+        }
+
+        .control-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 24px rgba(15, 23, 42, 0.12);
+            border-color: rgba(59, 130, 246, 0.35);
+            color: #2563eb;
+        }
+
+        .badge-count {
+            position: absolute;
+            top: -0.35rem;
+            right: -0.35rem;
+            min-width: 1.1rem;
+            height: 1.1rem;
+            border-radius: 9999px;
+            background: #ef4444;
+            color: #fff;
+            font-size: 0.65rem;
+            font-weight: 700;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 0.25rem;
+            border: 2px solid #fff;
+        }
+
+        .notif-pulse {
+            animation: notifPulse 1.6s infinite;
+        }
+
+        @keyframes notifPulse {
+            0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.45); }
+            70% { box-shadow: 0 0 0 12px rgba(239, 68, 68, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+        }
+
+        .premium-dropdown {
+            position: absolute;
+            right: -12px;
+            top: calc(100% + 0.6rem);
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(14px);
+            border: 1px solid rgba(226, 232, 240, 0.9);
+            border-radius: 1rem;
+            box-shadow: 0 20px 48px rgba(15, 23, 42, 0.25);
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(8px);
+            transition: all 0.22s ease;
+            z-index: 1000;
+            max-height: 90vh;
+            overflow-y: auto;
+            width: 380px;
+            min-width: 320px;
+        }
+
+        .premium-dropdown.open {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+        
+        @media (max-width: 640px) {
+            .premium-dropdown {
+                width: 320px;
+                right: auto;
+                left: -140px;
+            }
+        }
+
+        .menu-item {
+            display: flex;
+            align-items: center;
+            gap: 0.55rem;
+            width: 100%;
+            padding: 0.65rem 0.9rem;
+            border-radius: 0.7rem;
+            color: #334155;
+            font-size: 0.86rem;
+            transition: all 0.2s ease;
+        }
+
+        .menu-item:hover {
+            background: rgba(59, 130, 246, 0.1);
+            color: #1d4ed8;
+        }
+
+        .theme-dark body {
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            color: #e2e8f0;
+        }
+
+        .theme-dark #navbar {
+            background: rgba(15, 23, 42, 0.92);
+            border-bottom: 1px solid rgba(51, 65, 85, 0.9);
+        }
+
+        .theme-dark .premium-dropdown,
+        .theme-dark .mobile-menu,
+        .theme-dark .control-btn {
+            background: rgba(15, 23, 42, 0.9);
+            color: #e2e8f0;
+            border-color: rgba(71, 85, 105, 0.8);
+        }
+
+        .theme-dark .menu-item {
+            color: #cbd5e1;
+        }
+
+        .theme-dark .menu-item:hover {
+            background: rgba(51, 65, 85, 0.7);
+            color: #fff;
+        }
+
+        .mobile-profile-drawer {
+            position: fixed;
+            top: 0;
+            right: -100%;
+            width: min(88vw, 360px);
+            height: 100vh;
+            background: rgba(255, 255, 255, 0.92);
+            backdrop-filter: blur(14px);
+            z-index: 80;
+            box-shadow: -12px 0 30px rgba(15, 23, 42, 0.18);
+            transition: right 0.25s ease;
+            overflow-y: auto;
+        }
+
+        .mobile-profile-drawer.open {
+            right: 0;
+        }
+
+        .drawer-backdrop {
+            position: fixed;
+            inset: 0;
+            background: rgba(2, 6, 23, 0.45);
+            opacity: 0;
+            visibility: hidden;
+            z-index: 70;
+            transition: all 0.2s ease;
+        }
+
+        .drawer-backdrop.open {
+            opacity: 1;
+            visibility: visible;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 font-['Inter'] antialiased">
+    <!-- Loading Overlay -->
+    <div id="loading-overl
+    ay" class="fixed inset-0 bg-white z-50 flex items-center justify-center transition-opacity duration-500 hidden">
+        <div class="text-center">
+            <div class="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mb-4"></div>
+            <p class="text-gray-600">Loading...</p>
+        </div>
+    </div>
+    
+    <!-- Top Notification Bar -->
+    <div id="notification-bar" class="bg-gradient-to-r from-blue-500 to-purple-600 text-white py-2 hidden">
+        <div class="container-custom text-center">
+            <span id="notification-message"></span>
+            <button onclick="closeNotificationBar()" class="ml-4 text-white hover:text-gray-200">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+    </div>
+    
+    <!-- Navbar -->
+    <nav class="bg-white shadow-lg sticky top-0 z-50 transition-all duration-300" id="navbar">
+        <div class="container-custom">
+            <div class="flex justify-between items-center h-16">
+                <!-- Logo -->
+                <div class="flex items-center space-x-3">
+                    <a href="/" class="flex items-center group">
+                        <div class="relative h-14 w-14 rounded-xl bg-gradient-to-br from-blue-600 via-indigo-600 to-purple-600 shadow-lg flex items-center justify-center transform transition-transform group-hover:scale-110 duration-300">
+                            <i class="fas fa-dove text-white text-2xl -rotate-12"></i>
+                        </div>
+                        <div class="ml-2 hidden sm:block">
+                            <span class="font-bold text-lg bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                                YATRIKA
+                            </span>
+                            <p class="text-xs text-gray-500">Travel Platform</p>
+                        </div>
+                    </a>
+                </div>
+                
+                <!-- Desktop Navigation -->
+                <div class="hidden md:flex items-center space-x-1">
+                    <a href="/" class="nav-link px-3 py-2 rounded-md text-sm font-medium transition-all duration-300 hover:bg-blue-50 hover:text-blue-600">
+                        <i class="fas fa-home mr-1"></i><span data-i18n="nav.home">Home</span>
+                    </a>
+                    
+                    <!-- Bookings Dropdown -->
+                    <div class="relative group">
+                        <button class="nav-link px-3 py-2 rounded-md text-sm font-medium transition-all duration-300 hover:bg-blue-50 hover:text-blue-600 inline-flex items-center">
+                            <i class="fas fa-ticket-alt mr-1"></i><span data-i18n="nav.book">Book</span>
+                            <i class="fas fa-chevron-down ml-1 text-xs"></i>
+                        </button>
+                        <div class="absolute left-0 mt-2 w-64 bg-white rounded-lg shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 z-50">
+                            <div class="py-2">
+                                <p class="px-4 py-1 text-xs font-semibold text-gray-500 uppercase">✈️ Air/ocean Travel</p>
+                                <a href="/booking?type=flight" class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600">
+                                    <i class="fas fa-plane text-blue-600 w-5 mr-3"></i>
+                                    <span>Book Flight</span>
+                                </a>
+                                <a href="/booking?type=cruise" class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600">
+                                    <i class="fas fa-ship text-cyan-600 w-5 mr-3"></i>
+                                    <span>Book Cruise</span>
+                                </a>
+                                <div class="border-t border-gray-200 my-1"></div>
+                                <p class="px-4 py-1 text-xs font-semibold text-gray-500 uppercase">🚂 Rail Travel</p>
+                                <a href="/booking?type=train" class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600">
+                                    <i class="fas fa-train text-orange-600 w-5 mr-3"></i>
+                                    <span>Book Train</span>
+                                </a>
+                                <div class="border-t border-gray-200 my-1"></div>
+                                <p class="px-4 py-1 text-xs font-semibold text-gray-500 uppercase">🏨 Accommodation</p>
+                                <a href="/booking?type=hotel" class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600">
+                                    <i class="fas fa-hotel text-green-600 w-5 mr-3"></i>
+                                    <span>Book Hotel</span>
+                                </a>
+                                <div class="border-t border-gray-200 my-1"></div>
+                                <p class="px-4 py-1 text-xs font-semibold text-gray-500 uppercase">🚗 Ground Transport</p>
+                                <a href="/booking?type=bus" class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600">
+                                    <i class="fas fa-bus text-purple-600 w-5 mr-3"></i>
+                                    <span>Book Bus</span>
+                                </a>
+                                <a href="/booking?type=cab" class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600">
+                                    <i class="fas fa-taxi text-yellow-600 w-5 mr-3"></i>
+                                    <span>Book Cab</span>
+                                </a>
+                                <div class="border-t border-gray-200 my-1"></div>
+                                <a href="/live-flights" class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600">
+                                    <i class="fas fa-plane-departure text-indigo-600 w-5 mr-3"></i>
+                                    <span>Live Flight Tracker</span>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <a href="/planner" class="nav-link px-3 py-2 rounded-md text-sm font-medium transition-all duration-300 hover:bg-blue-50 hover:text-blue-600">
+                        <i class="fas fa-map-marked-alt mr-1"></i><span data-i18n="nav.plan_trip">Plan Trip</span>
+                    </a>
+                    
+                    <a href="/dashboard" class="nav-link px-3 py-2 rounded-md text-sm font-medium transition-all duration-300 hover:bg-blue-50 hover:text-blue-600">
+                        <i class="fas fa-chart-line mr-1"></i><span data-i18n="nav.dashboard">Dashboard</span>
+                    </a>
+                    
+                    <a href="/smart-map" class="nav-link px-3 py-2 rounded-md text-sm font-medium transition-all duration-300 hover:bg-blue-50 hover:text-blue-600">
+                        <i class="fas fa-map-marked-alt mr-1"></i><span data-i18n="nav.smart_map">Smart Map</span>
+                    </a>
+                    
+                    <a href="/stories" class="nav-link px-3 py-2 rounded-md text-sm font-medium transition-all duration-300 hover:bg-blue-50 hover:text-blue-600">
+                        <i class="fas fa-book-open mr-1"></i><span data-i18n="nav.stories">Stories</span>
+                    </a>
+                    
+                    <a href="/visa" class="nav-link px-3 py-2 rounded-md text-sm font-medium transition-all duration-300 hover:bg-blue-50 hover:text-blue-600">
+                        <i class="fas fa-passport mr-1"></i><span data-i18n="nav.visa">Visa</span>
+                    </a>
+                </div>
+                
+                <!-- Auth Links & User Menu -->
+                <div class="hidden md:flex items-center space-x-4">
+                    <div id="auth-links" class="flex items-center space-x-2">
+                        <!-- Static Premium Account Dropdown: Always Visible -->
+                        <div class="relative" style="display:inline-block">
+                            <button id="account-dropdown-btn" aria-haspopup="true" aria-expanded="false" class="flex items-center gap-2 px-2 py-1.5 rounded-xl border border-slate-200 bg-white/80 hover:bg-blue-50 transition focus:outline-none">
+                                <div class="w-9 h-9 rounded-full bg-gradient-to-r from-blue-500 to-purple-600 flex items-center justify-center text-white text-sm font-bold">A</div>
+                                <div class="text-left hidden lg:block">
+                                    <div class="text-xs font-semibold text-slate-700">Account</div>
+                                    <div class="text-[11px] text-slate-500">Control Center</div>
+                                </div>
+                                <i class="fas fa-chevron-down text-xs text-slate-500"></i>
+                            </button>
+                            <div id="account-dropdown-menu" class="premium-dropdown p-3" tabindex="-1" aria-label="Account Dropdown">
+                                <div class="rounded-xl bg-gradient-to-r from-blue-600 to-purple-600 text-white p-3 mb-2">
+                                    <div class="font-semibold">Account Name</div>
+                                    <div class="text-xs text-blue-100">user@email.com</div>
+                                    <div class="mt-2 grid grid-cols-3 gap-1 text-xs">
+                                        <div>💰 0 YC</div>
+                                        <div>🔥 0 day</div>
+                                        <div>🏆 #0</div>
+                                    </div>
+                                    <a href="/dashboard#gamification" class="inline-block mt-2 text-xs px-2 py-1 bg-white/20 rounded-md" data-i18n="profile.redeem">Redeem Rewards</a>
+                                </div>
+                                <div class="space-y-1">
+                                    <a href="/profile" class="menu-item"><i class="fas fa-user"></i><span data-i18n="profile.my_profile">My Profile</span></a>
+                                    <a href="/profile#edit" class="menu-item"><i class="fas fa-user-edit"></i><span data-i18n="profile.edit_profile">Edit Profile</span></a>
+                                    <a href="/planner" class="menu-item"><i class="fas fa-route"></i><span data-i18n="profile.my_trips">My Trips</span></a>
+                                    <a href="/wishlist" class="menu-item"><i class="fas fa-heart text-pink-500"></i><span data-i18n="profile.wishlist">Wishlist</span></a>
+                                    <a href="/notifications" class="menu-item"><i class="fas fa-bell"></i><span data-i18n="profile.notifications">Notifications</span></a>
+                                    <div class="border-t border-gray-200 my-1"></div>
+                                    <button class="menu-item w-full text-left" onclick="toggleMenu('language-menu')"><i class="fas fa-globe"></i><span data-i18n="profile.language">Language</span></button>
+                                    <div id="language-menu" class="hidden ml-3 mt-1 p-2 rounded-lg bg-gray-50 border border-gray-200">
+                                        <div class="grid grid-cols-2 gap-1 text-xs">
+                                            <button class="menu-item text-center py-1 text-[11px]" onclick="setLanguage('en', 'English')">English</button>
+                                            <button class="menu-item text-center py-1 text-[11px]" onclick="setLanguage('hi', 'Hindi')">Hindi</button>
+                                            <button class="menu-item text-center py-1 text-[11px]" onclick="setLanguage('mr', 'Marathi')">Marathi</button>
+                                            <button class="menu-item text-center py-1 text-[11px]" onclick="setLanguage('fr', 'French')">French</button>
+                                            <button class="menu-item text-center py-1 text-[11px]" onclick="setLanguage('de', 'German')">German</button>
+                                            <button class="menu-item text-center py-1 text-[11px]" onclick="setLanguage('es', 'Spanish')">Spanish</button>
+                                            <button class="menu-item text-center py-1 text-[11px]" onclick="setLanguage('ja', 'Japanese')">Japanese</button>
+                                        </div>
+                                    </div>
+                                    <!-- Premium Pass & Credits Section -->
+                                    <div class="px-2 py-1.5 rounded-lg bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200">
+                                        <div class="flex items-center justify-between mb-2">
+                                            <span class="font-semibold text-xs text-amber-900">💳 Travel Credits</span>
+                                            <span class="text-xs font-bold text-amber-600">₹0.00</span>
+                                        </div>
+                                        <div class="grid grid-cols-2 gap-1">
+                                            <a href="/buy-pass" class="text-center px-2 py-1 rounded text-xs font-medium bg-amber-500 text-white hover:bg-amber-600 transition">Buy Credits</a>
+                                            <a href="/travel-pass" class="text-center px-2 py-1 rounded text-xs font-medium bg-blue-500 text-white hover:bg-blue-600 transition">Travel Pass</a>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Currency Exchange & Cards -->
+                                    <button class="menu-item w-full text-left" onclick="toggleCurrencyConverter()"><i class="fas fa-exchange-alt"></i><span>💱 Currency & Cards</span><i class="fas fa-chevron-right text-xs float-right"></i></button>
+                                    <div id="currency-converter" class="hidden ml-3 mt-1 p-3 rounded-lg bg-gradient-to-br from-cyan-50 to-blue-50 border border-cyan-200 space-y-2 max-h-64 overflow-y-auto">
+                                        <div class="text-xs font-semibold text-cyan-900 mb-2">💱 Convert Currency</div>
+                                        <div class="flex gap-2 text-xs">
+                                            <input type="number" id="convertAmount" placeholder="Amount" class="flex-1 px-2 py-1 rounded border border-cyan-300 focus:outline-none focus:ring-1 focus:ring-blue-400" value="1">
+                                            <select id="convertFrom" class="flex-1 px-2 py-1 rounded border border-cyan-300 focus:outline-none focus:ring-1 focus:ring-blue-400">
+                                                <option value="USD">USD 🇺🇸</option>
+                                                <option value="EUR">EUR 🇪🇺</option>
+                                                <option value="GBP">GBP 🇬🇧</option>
+                                                <option value="INR" selected>INR 🇮🇳</option>
+                                                <option value="JPY">JPY 🇯🇵</option>
+                                                <option value="AUD">AUD 🇦🇺</option>
+                                                <option value="CAD">CAD 🇨🇦</option>
+                                            </select>
+                                        </div>
+                                        <div class="flex gap-1 justify-center text-xs">
+                                            <button onclick="convertCurrency()" class="px-3 py-1 rounded text-xs font-medium bg-blue-500 text-white hover:bg-blue-600 transition">Convert</button>
+                                            <span id="currency-result" class="px-2 py-1 rounded bg-white border border-cyan-300 text-xs font-semibold text-cyan-900">—</span>
+                                        </div>
+                                        <div class="border-t border-cyan-200 pt-2 mt-2">
+                                            <div class="text-xs font-semibold text-cyan-900 mb-1">💳 My Cards</div>
+                                            <div class="text-xs text-cyan-700">📌 Coming soon - Add your payment cards for quick transactions</div>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Additional Useful Features -->
+                                    <a href="/profile#documents" class="menu-item"><i class="fas fa-file-certificate"></i><span>🗂️ Travel Documents</span></a>
+                                    <a href="/profile#preferences" class="menu-item"><i class="fas fa-sliders-h"></i><span>⚙️ Preferences</span></a>
+                                    <a href="/referral" class="menu-item"><i class="fas fa-share-alt"></i><span>🎁 Referral Program</span></a>
+                                    
+                                    <div class="border-t border-gray-200 my-1"></div>
+                                    
+                                    <!-- Theme Toggle -->
+                                    <div class="px-2 py-1.5 rounded-lg bg-slate-50 border border-slate-200 text-xs">
+                                        <div class="font-semibold mb-1" data-i18n="profile.theme_toggle">🎨 Theme</div>
+                                        <div class="flex gap-1">
+                                            <button class="px-2 py-1 rounded text-xs bg-white border border-slate-300 hover:bg-slate-100 transition" onclick="applyTheme('light')" data-i18n="theme.light">☀️ Light</button>
+                                            <button class="px-2 py-1 rounded text-xs bg-white border border-slate-300 hover:bg-slate-100 transition" onclick="applyTheme('dark')" data-i18n="theme.dark">🌙 Dark</button>
+                                            <button class="px-2 py-1 rounded text-xs bg-white border border-slate-300 hover:bg-slate-100 transition" onclick="applyTheme('auto')" data-i18n="theme.auto">🔄 Auto</button>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="border-t border-gray-200 my-1"></div>
+                                    
+                                    <!-- Account Security & Support -->
+                                    <a href="/support" class="menu-item"><i class="fas fa-comments"></i><span data-i18n="profile.help_support">💬 Help & Support</span></a>
+                                    <a href="/profile#security" class="menu-item"><i class="fas fa-shield-alt"></i><span>🔐 Account Security</span></a>
+                                    
+                                    <button onclick="logout()" class="menu-item text-rose-600 w-full text-left"><i class="fas fa-door-open"></i><span data-i18n="profile.logout">Logout</span></button>
+                                </div>
+                            </div>
+                        </div>
+                        <script>
+                        // Account Dropdown Toggle - Enhanced
+                        document.addEventListener('DOMContentLoaded', function() {
+                            const btn = document.getElementById('account-dropdown-btn');
+                            const menu = document.getElementById('account-dropdown-menu');
+                            if (!btn || !menu) {
+                                console.log('Account dropdown elements not found');
+                                return;
+                            }
+                            
+                            console.log('Account dropdown initialized successfully');
+                            
+                            function openMenu() {
+                                menu.classList.add('open');
+                                btn.setAttribute('aria-expanded', 'true');
+                            }
+                            function closeMenu() {
+                                menu.classList.remove('open');
+                                btn.setAttribute('aria-expanded', 'false');
+                            }
+                            
+                            btn.addEventListener('click', function(e) {
+                                e.stopPropagation();
+                                if (menu.classList.contains('open')) {
+                                    closeMenu();
+                                } else {
+                                    openMenu();
+                                }
+                            });
+                            
+                            document.addEventListener('click', function(e) {
+                                if (!menu.contains(e.target) && !btn.contains(e.target)) {
+                                    closeMenu();
+                                }
+                            });
+                            
+                            document.addEventListener('keydown', function(e) {
+                                if (e.key === 'Escape') closeMenu();
+                            });
+                        });
+                        </script>
+                    </div>
+                </div>
+                
+                <!-- Mobile Menu Button -->
+                <div class="flex md:hidden">
+                    <button type="button" class="mobile-menu-button inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500 transition-all duration-200">
+                        <span class="sr-only">Open main menu</span>
+                        <i class="fas fa-bars text-xl"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Mobile Menu -->
+        <div class="mobile-menu hidden md:hidden bg-white border-t border-gray-200 shadow-lg">
+            <div class="px-2 pt-2 pb-3 space-y-1">
+                <a href="/" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-blue-50 transition-all duration-200">
+                    <i class="fas fa-home mr-2"></i><span data-i18n="nav.home">Home</span>
+                </a>
+                
+                <!-- Bookings Section in Mobile -->
+                <div class="border-t border-gray-200 pt-2 mt-2">
+                    <p class="px-3 py-1 text-xs font-semibold text-gray-500 uppercase">✈️ Air/Ocean Travel</p>
+                    <a href="/booking?type=flight" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-blue-50">
+                        <i class="fas fa-plane text-blue-600 w-6 mr-2"></i>Book Flight
+                    </a>
+                    <a href="/booking?type=cruise" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-blue-50">
+                        <i class="fas fa-ship text-cyan-600 w-6 mr-2"></i>Book Cruise
+                    </a>
+                    
+                    <p class="px-3 py-1 mt-2 text-xs font-semibold text-gray-500 uppercase">🚂 Rail Travel</p>
+                    <a href="/booking?type=train" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-blue-50">
+                        <i class="fas fa-train text-orange-600 w-6 mr-2"></i>Book Train
+                    </a>
+                    
+                    <p class="px-3 py-1 mt-2 text-xs font-semibold text-gray-500 uppercase">🏨 Accommodation</p>
+                    <a href="/booking?type=hotel" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-blue-50">
+                        <i class="fas fa-hotel text-green-600 w-6 mr-2"></i>Book Hotel
+                    </a>
+                    
+                    <p class="px-3 py-1 mt-2 text-xs font-semibold text-gray-500 uppercase">🚗 Ground Transport</p>
+                    <a href="/booking?type=bus" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-blue-50">
+                        <i class="fas fa-bus text-purple-600 w-6 mr-2"></i>Book Bus
+                    </a>
+                    <a href="/booking?type=cab" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-blue-50">
+                        <i class="fas fa-taxi text-yellow-600 w-6 mr-2"></i>Book Cab
+                    </a>
+                    
+                    <div class="border-t border-gray-200 my-2"></div>
+                    <a href="/live-flights" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-blue-50">
+                        <i class="fas fa-plane-departure w-6 mr-2"></i>Live Flight Tracker
+                    </a>
+                </div>
+                
+                <a href="/planner" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-blue-50">
+                    <i class="fas fa-map-marked-alt mr-2"></i><span data-i18n="nav.plan_trip">Plan Trip</span>
+                </a>
+                <a href="/dashboard" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-blue-50">
+                    <i class="fas fa-chart-line mr-2"></i><span data-i18n="nav.dashboard">Dashboard</span>
+                </a>
+                <a href="/smart-map" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-blue-50">
+                    <i class="fas fa-map-marked-alt mr-2"></i><span data-i18n="nav.smart_map">Smart Map</span>
+                </a>
+                <a href="/stories" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-blue-50">
+                    <i class="fas fa-book-open mr-2"></i><span data-i18n="nav.stories">Stories</span>
+                </a>
+                <a href="/visa" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-blue-50">
+                    <i class="fas fa-passport mr-2"></i><span data-i18n="nav.visa">Visa</span>
+                </a>
+                <button id="mobile-user-center-btn" class="w-full text-left px-3 py-2 rounded-md text-base font-medium text-blue-700 bg-blue-50 hover:bg-blue-100">
+                    <i class="fas fa-user-cog mr-2"></i>User Control Center
+                </button>
+                <div id="mobile-auth-links" class="pt-4 mt-2 border-t border-gray-200"></div>
+            </div>
+        </div>
+    </nav>
+    <!-- Voice Translator Script: Robust Error Handling -->
+    <script>
+    // Voice Translator (Floating Button) - Robust Error Handling
+    window.addEventListener('DOMContentLoaded', function() {
+        if (!('webkitSpeechRecognition' in window || 'SpeechRecognition' in window)) return;
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        let recognition;
+        try {
+            recognition = new SpeechRecognition();
+        } catch (e) {
+            return;
+        }
+        recognition.continuous = false;
+        recognition.interimResults = false;
+        recognition.lang = 'en-US';
+
+        // Add your floating button and UI logic here if not already present
+        // ...existing code for floating button...
+
+        recognition.onerror = function(event) {
+            if (event.error === 'no-speech') {
+                // Optionally show a user-friendly message or ignore
+                console.warn('No speech detected. Please try again.');
+                // Optionally restart recognition or notify user
+                // recognition.start(); // Uncomment to auto-restart
+            } else if (event.error === 'not-allowed') {
+                alert('Microphone access denied. Please allow microphone access.');
+            } else {
+                console.error('Speech Recognition Error:', event.error, event);
+            }
+        };
+        // ...existing recognition.onresult and other handlers...
+    });
+    </script>
+
+    <div id="drawer-backdrop" class="drawer-backdrop"></div>
+    <aside id="mobile-profile-drawer" class="mobile-profile-drawer">
+        <div class="p-4 border-b border-slate-200 flex items-center justify-between">
+            <h3 class="font-semibold">User Control Center</h3>
+            <button onclick="toggleMobileDrawer(false)" class="control-btn w-9 h-9"><i class="fas fa-times"></i></button>
+        </div>
+        <div id="mobile-drawer-content" class="p-4"></div>
+    </aside>
+    
+    <!-- Main Content -->
+    <main class="min-h-screen">
+        {% block content %}{% endblock %}
+    </main>
+    
+    <!-- Footer -->
+    <footer class="bg-gradient-to-br from-gray-900 to-gray-800 text-white mt-20">
+        <div class="container-custom py-12">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+                <!-- Brand -->
+                <div>
+                    <div class="flex items-center mb-4">
+                        <i class="fas fa-plane-departure text-blue-400 text-2xl mr-2"></i>
+                        <span class="font-bold text-xl">YATRIKA</span>
+                    </div>
+                    <p class="text-gray-400 text-sm leading-relaxed">
+                        Your ultimate travel companion for seamless journeys, smart planning, and unforgettable experiences.
+                    </p>
+                    <div class="flex space-x-4 mt-4">
+                        <a href="#" class="text-gray-400 hover:text-white transition-colors duration-300">
+                            <i class="fab fa-facebook-f text-xl"></i>
+                        </a>
+                        <a href="#" class="text-gray-400 hover:text-white transition-colors duration-300">
+                            <i class="fab fa-twitter text-xl"></i>
+                        </a>
+                        <a href="#" class="text-gray-400 hover:text-white transition-colors duration-300">
+                            <i class="fab fa-instagram text-xl"></i>
+                        </a>
+                        <a href="#" class="text-gray-400 hover:text-white transition-colors duration-300">
+                            <i class="fab fa-linkedin-in text-xl"></i>
+                        </a>
+                    </div>
+                </div>
+                
+                <!-- Quick Links -->
+                <div>
+                    <h3 class="text-lg font-semibold mb-4">Quick Links</h3>
+                    <ul class="space-y-2">
+                        <li><a href="/planner" class="text-gray-400 hover:text-white text-sm transition-colors duration-200">Trip Planner</a></li>
+                        <li><a href="/booking" class="text-gray-400 hover:text-white text-sm transition-colors duration-200">Book Now</a></li>
+                        <li><a href="/smart-map" class="text-gray-400 hover:text-white text-sm transition-colors duration-200">Smart Map</a></li>
+                        <li><a href="/stories" class="text-gray-400 hover:text-white text-sm transition-colors duration-200">Travel Stories</a></li>
+                        <li><a href="/visa" class="text-gray-400 hover:text-white text-sm transition-colors duration-200">Visa Services</a></li>
+                    </ul>
+                </div>
+                
+                <!-- Booking Types -->
+                <div>
+                    <h3 class="text-lg font-semibold mb-4">Book With Us</h3>
+                    <ul class="space-y-2">
+                        <li><a href="/booking?type=flight" class="text-gray-400 hover:text-white text-sm transition-colors duration-200">
+                            <i class="fas fa-plane mr-2"></i>Flights
+                        </a></li>
+                        <li><a href="/booking?type=cruise" class="text-gray-400 hover:text-white text-sm transition-colors duration-200">
+                            <i class="fas fa-ship mr-2"></i>Cruises
+                        </a></li>
+                        <li><a href="/booking?type=train" class="text-gray-400 hover:text-white text-sm transition-colors duration-200">
+                            <i class="fas fa-train mr-2"></i>Trains
+                        </a></li>
+                        <li><a href="/booking?type=hotel" class="text-gray-400 hover:text-white text-sm transition-colors duration-200">
+                            <i class="fas fa-hotel mr-2"></i>Hotels
+                        </a></li>
+                        <li><a href="/booking?type=bus" class="text-gray-400 hover:text-white text-sm transition-colors duration-200">
+                            <i class="fas fa-bus mr-2"></i>Buses
+                        </a></li>
+                        <li><a href="/booking?type=cab" class="text-gray-400 hover:text-white text-sm transition-colors duration-200">
+                            <i class="fas fa-taxi mr-2"></i>Cabs
+                        </a></li>
+                    </ul>
+                </div>
+                
+                <!-- Support -->
+                <div>
+                    <h3 class="text-lg font-semibold mb-4">Support</h3>
+                    <ul class="space-y-2">
+                        <li><a href="#" class="text-gray-400 hover:text-white text-sm transition-colors duration-200">Help Center</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white text-sm transition-colors duration-200">Contact Us</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white text-sm transition-colors duration-200">FAQs</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white text-sm transition-colors duration-200">Cancellation Policy</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white text-sm transition-colors duration-200">Privacy Policy</a></li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="border-t border-gray-700 mt-8 pt-8 text-center">
+                <p class="text-gray-500 text-sm">&copy; 2026 YATRIKA. All rights reserved. | Made with <i class="fas fa-heart text-red-500"></i> for travelers worldwide</p>
+            </div>
+        </div>
+    </footer>
+    
+    <!-- Back to Top Button -->
+    <button id="back-to-top" class="fixed bottom-6 right-6 w-14 h-14 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-110 hidden z-50 flex items-center justify-center bg-gradient-to-r from-blue-600 to-blue-700 text-white hover:from-blue-700 hover:to-blue-800">
+        <i class="fas fa-arrow-up text-lg"></i>
+    </button>
+    
+    <!-- Scripts -->
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    
+    <script>
+        // Initialize AOS
+        AOS.init({
+            duration: 1000,
+            once: true,
+            offset: 100
+        });
+        
+        // Back to Top Button
+        const backToTopBtn = document.getElementById('back-to-top');
+        window.addEventListener('scroll', () => {
+            if (window.pageYOffset > 300) {
+                backToTopBtn.classList.remove('hidden');
+                backToTopBtn.classList.add('flex');
+            } else {
+                backToTopBtn.classList.add('hidden');
+                backToTopBtn.classList.remove('flex');
+            }
+        });
+        
+        backToTopBtn.addEventListener('click', () => {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+        
+        // Navbar scroll effect
+        const navbar = document.getElementById('navbar');
+        let lastScroll = 0;
+        window.addEventListener('scroll', () => {
+            const currentScroll = window.pageYOffset;
+            if (currentScroll > 100) {
+                navbar.classList.add('shadow-xl');
+                if (currentScroll > lastScroll && currentScroll > 200) {
+                    navbar.style.transform = 'translateY(-100%)';
+                } else {
+                    navbar.style.transform = 'translateY(0)';
+                }
+            } else {
+                navbar.classList.remove('shadow-xl');
+                navbar.style.transform = 'translateY(0)';
+            }
+            lastScroll = currentScroll;
+        });
+        
+        // Mobile menu toggle
+        const mobileMenuButton = document.querySelector('.mobile-menu-button');
+        const mobileMenu = document.querySelector('.mobile-menu');
+        if (mobileMenuButton && mobileMenu) {
+            mobileMenuButton.addEventListener('click', () => {
+                mobileMenu.classList.toggle('hidden');
+                mobileMenuButton.classList.toggle('active');
+            });
+        }
+        
+        // Loading overlay
+        window.addEventListener('load', () => {
+            const loader = document.getElementById('loading-overlay');
+            if (loader) {
+                setTimeout(() => {
+                    loader.classList.add('hidden');
+                }, 500);
+            }
+        });
+        
+        // Show loading on page transitions
+        document.querySelectorAll('a').forEach(link => {
+            link.addEventListener('click', function(e) {
+                if (this.href && this.href !== window.location.href && !this.hasAttribute('target')) {
+                    const loader = document.getElementById('loading-overlay');
+                    if (loader) {
+                        loader.classList.remove('hidden');
+                    }
+                }
+            });
+        });
+        
+        // Notification bar functions
+        function showNotification(message, duration = 5000) {
+            const notificationBar = document.getElementById('notification-bar');
+            const notificationMessage = document.getElementById('notification-message');
+            if (notificationBar && notificationMessage) {
+                notificationMessage.textContent = message;
+                notificationBar.classList.remove('hidden');
+                setTimeout(() => {
+                    notificationBar.classList.add('hidden');
+                }, duration);
+            }
+        }
+        
+        function closeNotificationBar() {
+            const notificationBar = document.getElementById('notification-bar');
+            if (notificationBar) {
+                notificationBar.classList.add('hidden');
+            }
+        }
+        
+        // Newsletter subscription
+        const newsletterForm = document.getElementById('newsletter-form');
+        if (newsletterForm) {
+            newsletterForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const email = e.target.querySelector('input[type="email"]').value;
+                showNotification('Thank you for subscribing!', 3000);
+                e.target.reset();
+            });
+        }
+        
+        // Toast notification function
+        function showToast(message, type = 'success') {
+            const toast = document.createElement('div');
+            toast.className = `fixed bottom-4 right-4 z-50 px-4 py-2 rounded shadow-lg text-white transition-all transform translate-y-0 opacity-100 ${
+                type === 'success' ? 'bg-green-500' : type === 'error' ? 'bg-red-500' : 'bg-blue-500'
+            }`;
+            toast.innerHTML = `
+                <div class="flex items-center space-x-2">
+                    <i class="fas ${type === 'success' ? 'fa-check-circle' : type === 'error' ? 'fa-exclamation-circle' : 'fa-info-circle'}"></i>
+                    <span>${message}</span>
+                </div>
+            `;
+            document.body.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transform = 'translateY(20px)';
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+        
+        // Expose functions globally
+        window.showNotification = showNotification;
+        window.closeNotificationBar = closeNotificationBar;
+        window.showToast = showToast;
+        
+        const languageNames = {
+            en: 'English',
+            hi: 'Hindi',
+            mr: 'Marathi',
+            fr: 'French',
+            de: 'German',
+            es: 'Spanish',
+            ja: 'Japanese'
+        };
+
+        const uiState = {
+            currentUser: null,
+            translations: {},
+            wishlist: [],
+            notifications: []
+        };
+
+        async function loadTranslations(languageCode) {
+            try {
+                const res = await fetch(`/static/translations/${languageCode}.json`);
+                if (!res.ok) throw new Error('Language file not found');
+                uiState.translations = await res.json();
+            } catch (_) {
+                try {
+                    const fallback = await fetch('/static/translations/en.json');
+                    uiState.translations = await fallback.json();
+                } catch (e) {
+                    uiState.translations = {};
+                }
+            }
+        }
+
+        function t(key, fallback = '') {
+            return uiState.translations[key] || fallback || key;
+        }
+
+        function applyTranslations() {
+            document.querySelectorAll('[data-i18n]').forEach(node => {
+                const key = node.getAttribute('data-i18n');
+                node.textContent = t(key, node.textContent);
+            });
+        }
+
+        async function setLanguage(languageCode, languageLabel) {
+            localStorage.setItem('app_language', languageCode);
+            const langCurrentEl = document.getElementById('language-current');
+            if (langCurrentEl) {
+                langCurrentEl.textContent = languageLabel || languageNames[languageCode] || 'English';
+            }
+            await loadTranslations(languageCode);
+            applyTranslations();
+            hideAllMenus();
+
+            const token = localStorage.getItem('access_token');
+            if (token) {
+                fetch('/api/profile/preferences', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ language: languageCode })
+                }).catch(() => {});
+            }
+        }
+
+        function applyTheme(themeMode) {
+            localStorage.setItem('app_theme_mode', themeMode);
+            const root = document.documentElement;
+            root.classList.remove('theme-dark');
+            if (themeMode === 'dark') {
+                root.classList.add('theme-dark');
+                return;
+            }
+            if (themeMode === 'auto') {
+                const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+                if (prefersDark) root.classList.add('theme-dark');
+            }
+        }
+
+        function initTheme() {
+            applyTheme(localStorage.getItem('app_theme_mode') || 'light');
+        }
+
+        function getDefaultNotifications() {
+            return [
+                { id: 1, text: 'Booking confirmed for Goa flight', read: false, type: 'booking' },
+                { id: 2, text: 'Visa status updated: In Review', read: false, type: 'visa' },
+                { id: 3, text: 'Trip reminder: Ratnagiri in 2 days', read: false, type: 'trip' },
+                { id: 4, text: 'Reward earned: +40 YC', read: true, type: 'reward' },
+                { id: 5, text: 'Companion match request received', read: false, type: 'friend' },
+                { id: 6, text: 'Weather alert: Rain expected tomorrow', read: true, type: 'weather' }
+            ];
+        }
+
+        function getDefaultWishlist() {
+            return [
+                { id: 1, kind: 'destinations', title: 'Kyoto, Japan' },
+                { id: 2, kind: 'hotels', title: 'Blue Lagoon Resort' },
+                { id: 3, kind: 'attractions', title: 'Eiffel Tower Night Tour' }
+            ];
+        }
+
+        function loadSavedPanels() {
+            const savedWishlist = localStorage.getItem('wishlist_items');
+            const savedNotifications = localStorage.getItem('navbar_notifications');
+            uiState.wishlist = savedWishlist ? JSON.parse(savedWishlist) : getDefaultWishlist();
+            uiState.notifications = savedNotifications ? JSON.parse(savedNotifications) : getDefaultNotifications();
+        }
+
+        function persistPanels() {
+            localStorage.setItem('wishlist_items', JSON.stringify(uiState.wishlist));
+            localStorage.setItem('navbar_notifications', JSON.stringify(uiState.notifications));
+        }
+
+        function updateCounters() {
+            const wishlistCount = uiState.wishlist.length;
+            const unread = uiState.notifications.filter(n => !n.read).length;
+            const wishlistBadge = document.getElementById('wishlist-count');
+            const notifBadge = document.getElementById('notif-count');
+            const wishlistTotal = document.getElementById('wishlist-total');
+
+            if (wishlistTotal) {
+                wishlistTotal.textContent = String(wishlistCount);
+            }
+            if (wishlistBadge) {
+                wishlistBadge.textContent = String(wishlistCount);
+                wishlistBadge.classList.toggle('hidden', wishlistCount === 0);
+            }
+            if (notifBadge) {
+                notifBadge.textContent = String(unread);
+                notifBadge.classList.toggle('hidden', unread === 0);
+            }
+
+            const notifBtn = document.getElementById('notifications-btn');
+            if (notifBtn) {
+                notifBtn.classList.toggle('notif-pulse', unread > 0);
+            }
+        }
+
+        function renderWishlist() {
+            const container = document.getElementById('wishlist-items');
+            const mobileContainer = document.getElementById('wishlist-items-mobile');
+            
+            const html = !uiState.wishlist.length 
+                ? '<p class="text-xs text-slate-500 p-2">No saved items yet.</p>'
+                : uiState.wishlist.map(item => `
+                    <div class="rounded-xl border border-slate-200 bg-white/80 p-2.5">
+                        <div class="flex items-center justify-between gap-2">
+                            <div>
+                                <div class="text-xs uppercase text-slate-500">${t(`wishlist.${item.kind}`, item.kind)}</div>
+                                <div class="text-sm font-semibold text-slate-700">${item.title}</div>
+                            </div>
+                            <div class="flex gap-1.5">
+                                <button class="px-2 py-1 text-[11px] rounded-md bg-blue-100 text-blue-700 hover:bg-blue-200" onclick="moveWishlistToBooking(${item.id})">${t('wishlist.move_to_booking', 'Move to Booking')}</button>
+                                <button class="px-2 py-1 text-[11px] rounded-md bg-rose-100 text-rose-700 hover:bg-rose-200" onclick="removeWishlistItem(${item.id})">${t('wishlist.remove', 'Remove')}</button>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+
+            if (container) container.innerHTML = html;
+            if (mobileContainer) mobileContainer.innerHTML = html;
+            updateCounters();
+        }
+
+        function renderNotifications() {
+            const container = document.getElementById('notification-items');
+            const mobileContainer = document.getElementById('notification-items-mobile');
+
+            const html = !uiState.notifications.length
+                ? '<p class="text-xs text-slate-500 p-2">No notifications.</p>'
+                : uiState.notifications.map(n => `
+                    <div class="rounded-xl border ${n.read ? 'border-slate-200 bg-white/70' : 'border-blue-200 bg-blue-50'} p-2.5">
+                        <div class="flex items-center justify-between gap-2">
+                            <p class="text-sm ${n.read ? 'text-slate-600' : 'text-slate-800 font-semibold'}">${n.text}</p>
+                            ${n.read ? '' : `<button class='text-[11px] px-2 py-1 rounded-md bg-slate-100 hover:bg-slate-200' onclick='markNotificationRead(${n.id})'>Read</button>`}
+                        </div>
+                    </div>
+                `).join('');
+
+            if (container) container.innerHTML = html;
+            if (mobileContainer) mobileContainer.innerHTML = html;
+            updateCounters();
+        }
+
+        function markNotificationRead(id) {
+            uiState.notifications = uiState.notifications.map(n => n.id === id ? { ...n, read: true } : n);
+            persistPanels();
+            renderNotifications();
+        }
+
+        function markAllNotificationsRead() {
+            uiState.notifications = uiState.notifications.map(n => ({ ...n, read: true }));
+            persistPanels();
+            renderNotifications();
+        }
+
+        function clearNotifications() {
+            uiState.notifications = [];
+            persistPanels();
+            renderNotifications();
+        }
+
+        function removeWishlistItem(id) {
+            uiState.wishlist = uiState.wishlist.filter(item => item.id !== id);
+            persistPanels();
+            renderWishlist();
+        }
+
+        function moveWishlistToBooking(id) {
+            const item = uiState.wishlist.find(w => w.id === id);
+            removeWishlistItem(id);
+            showToast(item ? `${item.title} moved to booking flow` : 'Moved to booking', 'info');
+            setTimeout(() => { window.location.href = '/booking'; }, 120);
+        }
+
+        function hideAllMenus() {
+            ['language-menu', 'wishlist-menu', 'notifications-menu', 'profile-menu'].forEach(id => {
+                const menu = document.getElementById(id);
+                if (menu) menu.classList.remove('open');
+            });
+        }
+
+        function toggleMenu(menuId) {
+            const menu = document.getElementById(menuId);
+            if (!menu) return;
+            // Handle both 'open' class (premium-dropdown) and 'hidden' class (nested menus)
+            if (menu.classList.contains('hidden')) {
+                // This is a nested menu with 'hidden' class
+                menu.classList.toggle('hidden');
+            } else if (menu.classList.contains('premium-dropdown')) {
+                // This is a premium-dropdown menu
+                const willOpen = !menu.classList.contains('open');
+                hideAllMenus();
+                if (willOpen) menu.classList.add('open');
+            }
+        }
+
+        function toggleMobileDrawer(openState) {
+            const drawer = document.getElementById('mobile-profile-drawer');
+            const backdrop = document.getElementById('drawer-backdrop');
+            if (!drawer || !backdrop) return;
+            const shouldOpen = typeof openState === 'boolean' ? openState : !drawer.classList.contains('open');
+            drawer.classList.toggle('open', shouldOpen);
+            backdrop.classList.toggle('open', shouldOpen);
+        }
+
+        async function fetchWalletMeta() {
+            const token = localStorage.getItem('access_token');
+            if (!token) return { yc: 0, streak: 0, rank: '-' };
+            try {
+                const res = await fetch('/api/gamification/dashboard', {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (!res.ok) return { yc: 0, streak: 0, rank: '-' };
+                const data = await res.json();
+                return {
+                    yc: data.wallet?.yc_balance || 0,
+                    streak: data.streak?.current || 0,
+                    rank: data.rank || '-'
+                };
+            } catch (_) {
+                return { yc: 0, streak: 0, rank: '-' };
+            }
+        }
+
+        function toggleCurrencyConverter() {
+            const converter = document.getElementById('currency-converter');
+            if (converter) {
+                converter.classList.toggle('hidden');
+            }
+        }
+
+        async function convertCurrency() {
+            const amount = document.getElementById('convertAmount');
+            const fromSelect = document.getElementById('convertFrom');
+            
+            if (!amount || !fromSelect) {
+                showToast('Currency converter not initialized', 'error');
+                return;
+            }
+            
+            const amountValue = parseFloat(amount.value);
+            const fromCurrency = fromSelect.value;
+
+            if (!amountValue || amountValue <= 0) {
+                showToast('Please enter a valid amount', 'error');
+                return;
+            }
+
+            try {
+                // Use a simple mock exchange rate for demo (in production, use real API)
+                const rates = {
+                    'USD': { 'EUR': 0.92, 'GBP': 0.79, 'INR': 83.12, 'JPY': 149.50, 'AUD': 1.53, 'CAD': 1.36 },
+                    'EUR': { 'USD': 1.09, 'GBP': 0.86, 'INR': 90.54, 'JPY': 162.50, 'AUD': 1.67, 'CAD': 1.48 },
+                    'GBP': { 'USD': 1.27, 'EUR': 1.16, 'INR': 105.31, 'JPY': 189.10, 'AUD': 1.94, 'CAD': 1.72 },
+                    'INR': { 'USD': 0.012, 'EUR': 0.011, 'GBP': 0.0095, 'JPY': 1.80, 'AUD': 0.018, 'CAD': 0.016 },
+                    'JPY': { 'USD': 0.0067, 'EUR': 0.0062, 'GBP': 0.0053, 'INR': 0.56, 'AUD': 0.010, 'CAD': 0.0091 },
+                    'AUD': { 'USD': 0.65, 'EUR': 0.60, 'GBP': 0.52, 'INR': 54.44, 'JPY': 97.71, 'CAD': 1.01 },
+                    'CAD': { 'USD': 0.74, 'EUR': 0.68, 'GBP': 0.58, 'INR': 61.77, 'JPY': 109.77, 'AUD': 0.99 }
+                };
+
+                if (!rates[fromCurrency]) {
+                    showToast('Conversion not available', 'error');
+                    return;
+                }
+
+                // For demo, convert to all other currencies
+                const resultEl = document.getElementById('currency-result');
+                if (!resultEl) return;
+
+                const conversions = [];
+                for (const [toCur, rate] of Object.entries(rates[fromCurrency])) {
+                    const result = (amountValue * rate).toFixed(2);
+                    conversions.push(`${amountValue} ${fromCurrency} = ${result} ${toCur}`);
+                }
+
+                resultEl.innerHTML = `
+                    <div class="text-left text-xs">
+                        <div class="font-bold text-blue-600">${amountValue} ${fromCurrency} equals:</div>
+                        ${conversions.slice(0, 3).map(c => `<div class="text-cyan-700">• ${c}</div>`).join('')}
+                        <div class="text-gray-500 text-[10px] mt-1">(Demo rates)</div>
+                    </div>
+                `;
+                
+                showToast('Conversion done ✓', 'success');
+            } catch (error) {
+                console.error('Conversion error:', error);
+                showToast('Failed to convert currency', 'error');
+            }
+        }
+
+        function swapCurrencies() {
+            const fromEl = document.getElementById('convertFrom');
+            const toEl = document.getElementById('convertTo');
+            const temp = fromEl.value;
+            fromEl.value = toEl.value;
+            toEl.value = temp;
+        }
+
+        // Switch between currency converter tabs
+        function switchCurrencyTab(tab) {
+            // Hide all tabs
+            document.getElementById('converter-tab').classList.add('hidden');
+            document.getElementById('cards-tab').classList.add('hidden');
+            document.getElementById('notes-tab').classList.add('hidden');
+
+            // Remove active state from all buttons
+            document.querySelector('.tab-btn-converter').classList.remove('bg-blue-100', 'border-blue-300', 'text-blue-600');
+            document.querySelector('.tab-btn-cards').classList.remove('bg-blue-100', 'border-blue-300', 'text-blue-600');
+            document.querySelector('.tab-btn-notes').classList.remove('bg-blue-100', 'border-blue-300', 'text-blue-600');
+
+            // Show selected tab
+            if (tab === 'converter') {
+                document.getElementById('converter-tab').classList.remove('hidden');
+                document.querySelector('.tab-btn-converter').classList.add('bg-white', 'border-blue-300', 'text-blue-600');
+            } else if (tab === 'cards') {
+                document.getElementById('cards-tab').classList.remove('hidden');
+                document.querySelector('.tab-btn-cards').classList.add('bg-white', 'border-blue-300', 'text-blue-600');
+            } else if (tab === 'notes') {
+                document.getElementById('notes-tab').classList.remove('hidden');
+                document.querySelector('.tab-btn-notes').classList.add('bg-white', 'border-blue-300', 'text-blue-600');
+            }
+        }
+
+        // Buy product function
+        function buyProduct(productName, price, type, quantity = 1) {
+            if (type === 'notes') {
+                if (!quantity || quantity <= 0) {
+                    showToast('Please enter a valid quantity', 'error');
+                    return;
+                }
+                price = parseFloat(price) * quantity;
+                showToast(`Added ${quantity} units of ${productName} to cart. Total: ₹${price.toFixed(2)}`, 'success');
+            } else {
+                showToast(`Added ${productName} to cart. Price: ₹${price}`, 'success');
+            }
+            
+            // In a real app, this would add to cart and redirect to checkout
+            setTimeout(() => {
+                // Could redirect to checkout page
+                console.log(`Product: ${productName}, Price: ${price}, Type: ${type}`);
+            }, 1000);
+        }
+
+        function bindControlButtons() {
+            const mapping = [
+                { btn: 'language-btn', menu: 'language-menu' },
+                { btn: 'wishlist-btn', menu: 'wishlist-menu' },
+                { btn: 'notifications-btn', menu: 'notifications-menu' },
+                { btn: 'profile-btn', menu: 'profile-menu' }
+            ];
+            mapping.forEach(({ btn, menu }) => {
+                const btnEl = document.getElementById(btn);
+                if (btnEl && !btnEl.dataset.bound) {
+                    btnEl.dataset.bound = '1';
+                    btnEl.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        toggleMenu(menu);
+                    });
+                }
+            });
+
+            const mobileBtn = document.getElementById('mobile-user-center-btn');
+            const drawerBackdrop = document.getElementById('drawer-backdrop');
+            if (mobileBtn && !mobileBtn.dataset.bound) {
+                mobileBtn.dataset.bound = '1';
+                mobileBtn.addEventListener('click', () => toggleMobileDrawer(true));
+            }
+            if (drawerBackdrop && !drawerBackdrop.dataset.bound) {
+                drawerBackdrop.dataset.bound = '1';
+                drawerBackdrop.addEventListener('click', () => toggleMobileDrawer(false));
+            }
+
+            document.addEventListener('click', (e) => {
+                if (!e.target.closest('.premium-dropdown') && !e.target.closest('.control-btn') && !e.target.closest('#profile-btn')) {
+                    hideAllMenus();
+                }
+            });
+        }
+
+        async function updateNavbarAuth() {
+            const token = localStorage.getItem('access_token');
+            const authLinks = document.getElementById('auth-links');
+            const mobileAuthLinks = document.getElementById('mobile-auth-links');
+            const mobileDrawerContent = document.getElementById('mobile-drawer-content');
+            if (!authLinks) return;
+
+            if (token && token !== 'null' && token !== 'undefined') {
+                fetch('/api/me', {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                })
+                .then(res => {
+                    if (res.ok) return res.json();
+                    throw new Error('Token invalid');
+                })
+                .then(async (user) => {
+                    uiState.currentUser = user;
+                    const wallet = await fetchWalletMeta();
+                    const email = user.email || `${user.username}@yatrika.app`;
+
+                    authLinks.innerHTML = `
+                        <div class="relative">
+                            <button id="profile-btn" class="flex items-center gap-2 px-2 py-1.5 rounded-xl border border-slate-200 bg-white/80 hover:bg-blue-50 transition">
+                                <div class="w-9 h-9 rounded-full bg-gradient-to-r from-blue-500 to-purple-600 flex items-center justify-center text-white text-sm font-bold">${user.username.charAt(0).toUpperCase()}</div>
+                                <div class="text-left hidden lg:block">
+                                    <div class="text-xs font-semibold text-slate-700">${user.username}</div>
+                                    <div class="text-[11px] text-slate-500">Control Center</div>
+                                </div>
+                                <i class="fas fa-chevron-down text-xs text-slate-500"></i>
+                            </button>
+                            <div id="profile-menu" class="premium-dropdown w-full sm:w-96 max-h-96 overflow-y-auto p-3">
+                                <div class="rounded-xl bg-gradient-to-r from-blue-600 to-purple-600 text-white p-3 mb-2">
+                                    <div class="font-semibold">${user.username}</div>
+                                    <div class="text-xs text-blue-100">${email}</div>
+                                    <div class="mt-2 grid grid-cols-3 gap-1 text-xs">
+                                        <div>💰 ${wallet.yc} YC</div>
+                                        <div>🔥 ${wallet.streak} day</div>
+                                        <div>🏆 #${wallet.rank}</div>
+                                    </div>
+                                    <a href="/dashboard#gamification" class="inline-block mt-2 text-xs px-2 py-1 bg-white/20 rounded-md" data-i18n="profile.redeem">Redeem Rewards</a>
+                                </div>
+                                <div class="space-y-1">
+                                    <a href="/profile" class="menu-item"><i class="fas fa-user"></i><span data-i18n="profile.my_profile">My Profile</span></a>
+                                    <a href="/profile#edit" class="menu-item"><i class="fas fa-user-edit"></i><span data-i18n="profile.edit_profile">Edit Profile</span></a>
+                                    <a href="/planner" class="menu-item"><i class="fas fa-route"></i><span data-i18n="profile.my_trips">My Trips</span></a>
+                                    <button class="menu-item w-full text-left" onclick="toggleMenu('wishlist-menu')"><i class="fas fa-heart text-pink-500"></i><span data-i18n="profile.wishlist">Wishlist</span></button>
+                                    <div id="wishlist-menu" class="hidden ml-3 mt-1 p-2 rounded-lg bg-gray-50 border border-gray-200">
+                                        <div class="flex items-center justify-between mb-2 px-1">
+                                            <h3 class="font-semibold text-xs" data-i18n="wishlist.title">Wishlist</h3>
+                                            <span class="text-xs text-slate-500">(<span id="wishlist-total">0</span>)</span>
+                                        </div>
+                                        <div id="wishlist-items" class="space-y-1 max-h-40 overflow-y-auto"></div>
+                                    </div>
+                                    <button class="menu-item w-full text-left" onclick="toggleMenu('notifications-menu')"><i class="fas fa-bell"></i><span data-i18n="profile.notifications">Notifications</span></button>
+                                    <div id="notifications-menu" class="hidden ml-3 mt-1 p-2 rounded-lg bg-gray-50 border border-gray-200">
+                                        <div class="flex items-center justify-between mb-2 px-1">
+                                            <h3 class="font-semibold text-xs" data-i18n="notif.title">Notifications</h3>
+                                            <div class="flex gap-1">
+                                                <button class="text-xs text-blue-600 hover:underline" onclick="markAllNotificationsRead()">Mark read</button>
+                                                <button class="text-xs text-red-600 hover:underline" onclick="clearNotifications()">Clear</button>
+                                            </div>
+                                        </div>
+                                        <div id="notification-items" class="space-y-1 max-h-40 overflow-y-auto"></div>
+                                    </div>
+                                    <button class="menu-item w-full text-left" onclick="toggleMenu('language-menu')"><i class="fas fa-globe"></i><span data-i18n="profile.language">Language</span></button>
+                                    <div id="language-menu" class="hidden ml-3 mt-1 p-2 rounded-lg bg-gray-50 border border-gray-200">
+                                        <div class="grid grid-cols-2 gap-1 text-xs">
+                                            <button class="menu-item text-center py-1 text-[11px]" onclick="setLanguage('en', 'English')">English</button>
+                                            <button class="menu-item text-center py-1 text-[11px]" onclick="setLanguage('hi', 'Hindi')">Hindi</button>
+                                            <button class="menu-item text-center py-1 text-[11px]" onclick="setLanguage('mr', 'Marathi')">Marathi</button>
+                                            <button class="menu-item text-center py-1 text-[11px]" onclick="setLanguage('fr', 'French')">French</button>
+                                            <button class="menu-item text-center py-1 text-[11px]" onclick="setLanguage('de', 'German')">German</button>
+                                            <button class="menu-item text-center py-1 text-[11px]" onclick="setLanguage('es', 'Spanish')">Spanish</button>
+                                            <button class="menu-item text-center py-1 text-[11px]" onclick="setLanguage('ja', 'Japanese')">Japanese</button>
+                                        </div>
+                                    </div>
+                                    <button class="menu-item" onclick="toggleCurrencyConverter()"><i class="fas fa-exchange-alt"></i><span>💱 Currency Exchange & Cards</span></button>
+                                    <div id="currency-converter" class="hidden mt-2 p-4 rounded-lg bg-gradient-to-br from-blue-50 to-cyan-50 border border-blue-200 space-y-3 max-h-80 overflow-y-auto">
+                                        
+                                        <!-- Currency Converter Tab -->
+                                        <div class="flex gap-2 mb-3">
+                                            <button onclick="switchCurrencyTab('converter')" class="flex-1 px-2 py-1 text-xs font-bold bg-white border border-blue-300 text-blue-600 rounded-lg tab-btn-converter">Exchange</button>
+                                            <button onclick="switchCurrencyTab('cards')" class="flex-1 px-2 py-1 text-xs font-bold bg-white border border-blue-200 text-gray-600 rounded-lg tab-btn-cards">Cards</button>
+                                            <button onclick="switchCurrencyTab('notes')" class="flex-1 px-2 py-1 text-xs font-bold bg-white border border-blue-200 text-gray-600 rounded-lg tab-btn-notes">Notes</button>
+                                        </div>
+
+                                        <!-- Tab 1: Currency Converter -->
+                                        <div id="converter-tab" class="space-y-2">
+                                            <div>
+                                                <label class="block text-xs font-semibold text-gray-700 mb-1">Amount</label>
+                                                <input type="number" id="convertAmount" value="1000" min="1" step="0.01" class="w-full px-2 py-1.5 text-sm border border-blue-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                            </div>
+                                            <div class="grid grid-cols-2 gap-2">
+                                                <div>
+                                                    <label class="block text-xs font-semibold text-gray-700 mb-1">From</label>
+                                                    <select id="convertFrom" class="w-full px-2 py-1.5 text-sm border border-blue-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                                        <option>USD</option><option>EUR</option><option>GBP</option><option>INR</option><option>JPY</option>
+                                                        <option>AUD</option><option>CAD</option><option>CHF</option><option>CNY</option><option>SEK</option>
+                                                        <option>NZD</option><option>SGD</option><option>HKD</option><option>MXN</option><option>BRL</option>
+                                                        <option>AED</option><option>KRW</option><option>THB</option>
+                                                    </select>
+                                                </div>
+                                                <div>
+                                                    <label class="block text-xs font-semibold text-gray-700 mb-1">To</label>
+                                                    <select id="convertTo" class="w-full px-2 py-1.5 text-sm border border-blue-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                                        <option>EUR</option><option>USD</option><option>GBP</option><option>INR</option><option>JPY</option>
+                                                        <option>AUD</option><option>CAD</option><option>CHF</option><option>CNY</option><option>SEK</option>
+                                                        <option>NZD</option><option>SGD</option><option>HKD</option><option>MXN</option><option>BRL</option>
+                                                        <option>AED</option><option>KRW</option><option>THB</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="flex gap-2">
+                                                <button onclick="convertCurrency()" class="flex-1 px-2 py-1.5 text-xs font-semibold bg-gradient-to-r from-blue-500 to-cyan-500 text-white rounded-lg hover:shadow-md transition">Convert</button>
+                                                <button onclick="swapCurrencies()" class="px-2 py-1.5 text-xs font-semibold bg-white border border-blue-200 text-blue-600 rounded-lg hover:bg-blue-50 transition"><i class="fas fa-exchange-alt"></i></button>
+                                            </div>
+                                            <div id="convertResult" class="hidden p-2 rounded-lg bg-white border border-green-300">
+                                                <div class="text-xs text-gray-600">Rate: <span id="exchangeRate">-</span></div>
+                                                <div class="font-bold text-lg text-green-600"><span id="resultAmount">-</span> <span id="resultCurrency">-</span></div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Tab 2: Multi-Currency Cards -->
+                                        <div id="cards-tab" class="hidden space-y-2">
+                                            <div class="space-y-2">
+                                                <!-- Card 1: Global Travel Card -->
+                                                <div class="p-2 rounded-lg bg-white border border-blue-200">
+                                                    <div class="flex justify-between items-start mb-1">
+                                                        <div>
+                                                            <div class="font-bold text-xs text-blue-900">🌍 Global Travel Card</div>
+                                                            <div class="text-xs text-gray-600">Multi-currency (30+ currencies)</div>
+                                                        </div>
+                                                        <div class="text-right">
+                                                            <div class="font-bold text-xs text-blue-600">₹499</div>
+                                                            <div class="text-xs text-gray-500">Annual</div>
+                                                        </div>
+                                                    </div>
+                                                    <button onclick="buyProduct('Global Travel Card', 499, 'card')" class="w-full px-2 py-1 text-xs font-bold bg-gradient-to-r from-green-500 to-emerald-500 text-white rounded-lg hover:shadow-md transition">Buy Now</button>
+                                                </div>
+
+                                                <!-- Card 2: Premium Forex Card -->
+                                                <div class="p-2 rounded-lg bg-white border border-purple-200">
+                                                    <div class="flex justify-between items-start mb-1">
+                                                        <div>
+                                                            <div class="font-bold text-xs text-purple-900">💎 Premium Forex Card</div>
+                                                            <div class="text-xs text-gray-600">Platinum access + 0% commission</div>
+                                                        </div>
+                                                        <div class="text-right">
+                                                            <div class="font-bold text-xs text-purple-600">₹999</div>
+                                                            <div class="text-xs text-gray-500">Annual</div>
+                                                        </div>
+                                                    </div>
+                                                    <button onclick="buyProduct('Premium Forex Card', 999, 'card')" class="w-full px-2 py-1 text-xs font-bold bg-gradient-to-r from-purple-500 to-indigo-500 text-white rounded-lg hover:shadow-md transition">Buy Now</button>
+                                                </div>
+
+                                                <!-- Card 3: Business Card -->
+                                                <div class="p-2 rounded-lg bg-white border border-orange-200">
+                                                    <div class="flex justify-between items-start mb-1">
+                                                        <div>
+                                                            <div class="font-bold text-xs text-orange-900">💼 Business Travel Card</div>
+                                                            <div class="text-xs text-gray-600">24/7 support + Concierge</div>
+                                                        </div>
+                                                        <div class="text-right">
+                                                            <div class="font-bold text-xs text-orange-600">₹1,499</div>
+                                                            <div class="text-xs text-gray-500">Annual</div>
+                                                        </div>
+                                                    </div>
+                                                    <button onclick="buyProduct('Business Travel Card', 1499, 'card')" class="w-full px-2 py-1 text-xs font-bold bg-gradient-to-r from-orange-500 to-amber-500 text-white rounded-lg hover:shadow-md transition">Buy Now</button>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Tab 3: Foreign Currency Notes -->
+                                        <div id="notes-tab" class="hidden space-y-2">
+                                            <div class="space-y-2">
+                                                <!-- USD Notes -->
+                                                <div class="p-2 rounded-lg bg-white border border-green-200">
+                                                    <div class="flex justify-between items-start mb-1">
+                                                        <div>
+                                                            <div class="font-bold text-xs text-green-900">🇺🇸 US Dollar (USD)</div>
+                                                            <div class="text-xs text-gray-600">100, 50, 20, 10 notes</div>
+                                                        </div>
+                                                        <div class="text-right">
+                                                            <div class="font-bold text-xs text-green-600">₹82.50</div>
+                                                            <div class="text-xs text-gray-500">per $1</div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="flex gap-1 mb-2">
+                                                        <input type="number" id="usd-amount" placeholder="Amount ($)" min="1" class="flex-1 px-1.5 py-1 text-xs border border-green-200 rounded-lg">
+                                                    </div>
+                                                    <button onclick="buyProduct('USD Notes', 'variable', 'notes', document.getElementById('usd-amount').value)" class="w-full px-2 py-1 text-xs font-bold bg-gradient-to-r from-green-500 to-emerald-500 text-white rounded-lg hover:shadow-md transition">Buy Now</button>
+                                                </div>
+
+                                                <!-- EUR Notes -->
+                                                <div class="p-2 rounded-lg bg-white border border-blue-200">
+                                                    <div class="flex justify-between items-start mb-1">
+                                                        <div>
+                                                            <div class="font-bold text-xs text-blue-900">🇪🇺 Euro (EUR)</div>
+                                                            <div class="text-xs text-gray-600">100, 50, 20, 10 notes</div>
+                                                        </div>
+                                                        <div class="text-right">
+                                                            <div class="font-bold text-xs text-blue-600">₹90.25</div>
+                                                            <div class="text-xs text-gray-500">per €1</div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="flex gap-1 mb-2">
+                                                        <input type="number" id="eur-amount" placeholder="Amount (€)" min="1" class="flex-1 px-1.5 py-1 text-xs border border-blue-200 rounded-lg">
+                                                    </div>
+                                                    <button onclick="buyProduct('EUR Notes', 'variable', 'notes', document.getElementById('eur-amount').value)" class="w-full px-2 py-1 text-xs font-bold bg-gradient-to-r from-blue-500 to-cyan-500 text-white rounded-lg hover:shadow-md transition">Buy Now</button>
+                                                </div>
+
+                                                <!-- GBP Notes -->
+                                                <div class="p-2 rounded-lg bg-white border border-red-200">
+                                                    <div class="flex justify-between items-start mb-1">
+                                                        <div>
+                                                            <div class="font-bold text-xs text-red-900">🇬🇧 British Pound (GBP)</div>
+                                                            <div class="text-xs text-gray-600">50, 20, 10, 5 notes</div>
+                                                        </div>
+                                                        <div class="text-right">
+                                                            <div class="font-bold text-xs text-red-600">₹104.75</div>
+                                                            <div class="text-xs text-gray-500">per £1</div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="flex gap-1 mb-2">
+                                                        <input type="number" id="gbp-amount" placeholder="Amount (£)" min="1" class="flex-1 px-1.5 py-1 text-xs border border-red-200 rounded-lg">
+                                                    </div>
+                                                    <button onclick="buyProduct('GBP Notes', 'variable', 'notes', document.getElementById('gbp-amount').value)" class="w-full px-2 py-1 text-xs font-bold bg-gradient-to-r from-red-500 to-pink-500 text-white rounded-lg hover:shadow-md transition">Buy Now</button>
+                                                </div>
+
+                                                <!-- JPY Notes -->
+                                                <div class="p-2 rounded-lg bg-white border border-yellow-200">
+                                                    <div class="flex justify-between items-start mb-1">
+                                                        <div>
+                                                            <div class="font-bold text-xs text-yellow-900">🇯🇵 Japanese Yen (JPY)</div>
+                                                            <div class="text-xs text-gray-600">10000, 5000, 1000 notes</div>
+                                                        </div>
+                                                        <div class="text-right">
+                                                            <div class="font-bold text-xs text-yellow-600">₹0.62</div>
+                                                            <div class="text-xs text-gray-500">per ¥1</div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="flex gap-1 mb-2">
+                                                        <input type="number" id="jpy-amount" placeholder="Amount (¥)" min="1" class="flex-1 px-1.5 py-1 text-xs border border-yellow-200 rounded-lg">
+                                                    </div>
+                                                    <button onclick="buyProduct('JPY Notes', 'variable', 'notes', document.getElementById('jpy-amount').value)" class="w-full px-2 py-1 text-xs font-bold bg-gradient-to-r from-yellow-500 to-orange-500 text-white rounded-lg hover:shadow-md transition">Buy Now</button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="px-2 py-1.5 rounded-lg bg-slate-50 border border-slate-200 text-xs">
+                                        <div class="font-semibold mb-1" data-i18n="profile.theme_toggle">Theme Toggle</div>
+                                        <div class="flex gap-1">
+                                            <button class="px-2 py-1 rounded bg-white border border-slate-200" onclick="applyTheme('light')" data-i18n="theme.light">Light</button>
+                                            <button class="px-2 py-1 rounded bg-white border border-slate-200" onclick="applyTheme('dark')" data-i18n="theme.dark">Dark</button>
+                                            <button class="px-2 py-1 rounded bg-white border border-slate-200" onclick="applyTheme('auto')" data-i18n="theme.auto">Auto</button>
+                                        </div>
+                                    </div>
+                                    <a href="/support" class="menu-item"><i class="fas fa-comments"></i><span data-i18n="profile.help_support">Help & Support</span></a>
+                                    <button onclick="logout()" class="menu-item text-rose-600"><i class="fas fa-door-open"></i><span data-i18n="profile.logout">Logout</span></button>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+
+                    if (mobileAuthLinks) {
+                        mobileAuthLinks.innerHTML = `
+                            <a href="/profile" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-blue-50">
+                                <i class="fas fa-user mr-2"></i><span data-i18n="profile.my_profile">My Profile</span>
+                            </a>
+                            <button onclick="logout()" class="block w-full text-left px-3 py-2 rounded-md text-base font-medium text-red-600 hover:bg-red-50">
+                                <i class="fas fa-door-open mr-2"></i><span data-i18n="profile.logout">Logout</span>
+                            </button>
+                        `;
+                    }
+
+                    if (mobileDrawerContent) {
+                        mobileDrawerContent.innerHTML = `
+                            <div class="rounded-xl bg-gradient-to-r from-blue-600 to-purple-600 text-white p-3 mb-3">
+                                <div class="font-semibold">${user.username}</div>
+                                <div class="text-xs text-blue-100">${email}</div>
+                                <div class="mt-2 text-xs">💰 ${wallet.yc} YC · 🔥 ${wallet.streak} day · 🏆 #${wallet.rank}</div>
+                            </div>
+                            <div class="space-y-1">
+                                <a href="/profile" class="menu-item"><i class="fas fa-user"></i><span data-i18n="profile.my_profile">My Profile</span></a>
+                                <a href="/profile#edit" class="menu-item"><i class="fas fa-user-edit"></i><span data-i18n="profile.edit_profile">Edit Profile</span></a>
+                                <a href="/planner" class="menu-item"><i class="fas fa-route"></i><span data-i18n="profile.my_trips">My Trips</span></a>
+                                <div class="border-t border-gray-300 my-1"></div>
+                                <button class="menu-item w-full text-left" onclick="toggleMenu('wishlist-menu-mobile')"><i class="fas fa-heart text-pink-500"></i><span data-i18n="profile.wishlist">Wishlist</span></button>
+                                <div id="wishlist-menu-mobile" class="hidden ml-4 mt-1 space-y-1 p-2 rounded-lg bg-gray-100 border border-gray-300">
+                                    <div id="wishlist-items-mobile" class="space-y-1 max-h-40 overflow-y-auto"></div>
+                                </div>
+                                <button class="menu-item w-full text-left" onclick="toggleMenu('notifications-menu-mobile')"><i class="fas fa-bell"></i><span data-i18n="profile.notifications">Notifications</span></button>
+                                <div id="notifications-menu-mobile" class="hidden ml-4 mt-1 space-y-1 p-2 rounded-lg bg-gray-100 border border-gray-300">
+                                    <div id="notification-items-mobile" class="space-y-1 max-h-40 overflow-y-auto"></div>
+                                </div>
+                                <button class="menu-item w-full text-left" onclick="toggleMenu('language-menu-mobile')"><i class="fas fa-globe"></i><span data-i18n="profile.language">Language</span></button>
+                                <div id="language-menu-mobile" class="hidden ml-4 mt-1 grid grid-cols-2 gap-1 p-2 rounded-lg bg-gray-100 border border-gray-300">
+                                    <button class="menu-item text-center py-1 text-xs" onclick="setLanguage('en', 'English')">English</button>
+                                    <button class="menu-item text-center py-1 text-xs" onclick="setLanguage('hi', 'Hindi')">Hindi</button>
+                                    <button class="menu-item text-center py-1 text-xs" onclick="setLanguage('mr', 'Marathi')">Marathi</button>
+                                    <button class="menu-item text-center py-1 text-xs" onclick="setLanguage('fr', 'French')">French</button>
+                                    <button class="menu-item text-center py-1 text-xs" onclick="setLanguage('de', 'German')">German</button>
+                                    <button class="menu-item text-center py-1 text-xs" onclick="setLanguage('es', 'Spanish')">Spanish</button>
+                                    <button class="menu-item text-center py-1 text-xs" onclick="setLanguage('ja', 'Japanese')">Japanese</button>
+                                </div>
+                                <div class="border-t border-gray-300 my-1"></div>
+                                <div class="pt-2">
+                                    <div class="text-xs font-semibold text-slate-500 mb-1" data-i18n="profile.theme_toggle">Theme Toggle</div>
+                                    <div class="flex gap-1">
+                                        <button class="px-2 py-1 rounded bg-white border border-slate-200 text-xs" onclick="applyTheme('light')" data-i18n="theme.light">Light</button>
+                                        <button class="px-2 py-1 rounded bg-white border border-slate-200 text-xs" onclick="applyTheme('dark')" data-i18n="theme.dark">Dark</button>
+                                        <button class="px-2 py-1 rounded bg-white border border-slate-200 text-xs" onclick="applyTheme('auto')" data-i18n="theme.auto">Auto</button>
+                                    </div>
+                                </div>
+                                <a href="/support" class="menu-item"><i class="fas fa-comments"></i><span data-i18n="profile.help_support">Help & Support</span></a>
+                                <button onclick="logout()" class="menu-item text-rose-600"><i class="fas fa-door-open"></i><span data-i18n="profile.logout">Logout</span></button>
+                            </div>
+                        `;
+                    }
+
+                    bindControlButtons();
+                    renderWishlist();
+                    renderNotifications();
+                    applyTranslations();
+                })
+                .catch(() => {
+                    localStorage.removeItem('access_token');
+                    showUnauth(authLinks, mobileAuthLinks, mobileDrawerContent);
+                });
+            } else {
+                showUnauth(authLinks, mobileAuthLinks, mobileDrawerContent);
+            }
+        }
+
+        function showUnauth(authLinks, mobileAuthLinks, mobileDrawerContent) {
+            const html = `
+                <a href="/login" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 transition-all duration-200">
+                    <i class="fas fa-sign-in-alt mr-2"></i>Login
+                </a>
+                <a href="/register" class="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 transition-all duration-200">
+                    <i class="fas fa-user-plus mr-2"></i>Register
+                </a>
+            `;
+            if (authLinks) authLinks.innerHTML = html;
+            if (mobileAuthLinks) mobileAuthLinks.innerHTML = html;
+            if (mobileDrawerContent) {
+                mobileDrawerContent.innerHTML = '<p class="text-sm text-slate-600">Please login to open your control center.</p>';
+            }
+            bindControlButtons();
+        }
+
+        function hideAllMenus() {
+            const menus = ['language-menu', 'wishlist-menu', 'notifications-menu', 'profile-menu', 'account-dropdown-menu'];
+            menus.forEach(id => {
+                const menu = document.getElementById(id);
+                if (menu) {
+                    menu.classList.add('hidden');
+                    menu.classList.remove('open');
+                }
+            });
+        }
+        
+        function logout() {
+            if (confirm('Are you sure you want to logout?')) {
+                localStorage.removeItem('access_token');
+                window.location.href = '/';
+            }
+        }
+        
+        // Check URL for booking type parameter on booking page
+        function handleBookingTypeParam() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const bookingType = urlParams.get('type');
+            if (bookingType && window.location.pathname === '/booking' && typeof selectType === 'function') {
+                setTimeout(() => {
+                    selectType(bookingType);
+                }, 100);
+            }
+        }
+        
+        // Run on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            const lang = localStorage.getItem('app_language') || 'en';
+            const langCurrentEl = document.getElementById('language-current');
+            if (langCurrentEl) {
+                langCurrentEl.textContent = languageNames[lang] || 'English';
+            }
+            loadSavedPanels();
+            initTheme();
+            setLanguage(lang, languageNames[lang] || 'English');
+            updateNavbarAuth();
+            handleBookingTypeParam();
+            bindControlButtons();
+        });
+        
+        // Expose logout function globally
+        window.logout = logout;
+        window.setLanguage = setLanguage;
+        window.applyTheme = applyTheme;
+        window.toggleCurrencyConverter = toggleCurrencyConverter;
+        window.convertCurrency = convertCurrency;
+        window.markAllNotificationsRead = markAllNotificationsRead;
+        window.clearNotifications = clearNotifications;
+        window.markNotificationRead = markNotificationRead;
+        window.removeWishlistItem = removeWishlistItem;
+        window.moveWishlistToBooking = moveWishlistToBooking;
+        window.toggleMenu = toggleMenu;
+        window.toggleMobileDrawer = toggleMobileDrawer;
+        window.hideAllMenus = hideAllMenus;
+    </script>
+    
+    <!-- Floating Voice Translator Feature -->
+    <div id="voiceTranslatorWidget" style="position: fixed; bottom: 2rem; left: 2rem; z-index: 9998; font-family: 'Inter', sans-serif;">
+        <!-- Floating Mic Button -->
+        <button id="voiceMicBtn" onclick="toggleVoiceTranslator()" style="
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #0066FF 0%, #0052CC 100%);
+            color: white;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            box-shadow: 0 8px 24px rgba(0, 102, 255, 0.35);
+            transition: all 0.3s ease;
+            animation: float 3s ease-in-out infinite;
+        " onmouseover="this.style.transform='scale(1.1)'; this.style.boxShadow='0 12px 32px rgba(0, 102, 255, 0.45)'" onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='0 8px 24px rgba(0, 102, 255, 0.35)'">
+            🎙️
+        </button>
+
+        <!-- Voice Translator Popup -->
+        <div id="voiceTranslatorPopup" style="
+            position: absolute;
+            bottom: 80px;
+            left: 0;
+            width: 380px;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 16px 48px rgba(0, 0, 0, 0.12);
+            display: none;
+            flex-direction: column;
+            overflow: hidden;
+            animation: slideUpIn 0.3s ease;
+        ">
+            <!-- Header -->
+            <div style="
+                background: linear-gradient(135deg, #0066FF 0%, #0052CC 100%);
+                color: white;
+                padding: 1.25rem;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+            ">
+                <div style="font-weight: 600; font-size: 1rem;">Voice Translator</div>
+                <button onclick="closeVoiceTranslator()" style="
+                    background: rgba(255,255,255,0.3);
+                    border: none;
+                    color: white;
+                    width: 28px;
+                    height: 28px;
+                    border-radius: 50%;
+                    cursor: pointer;
+                    font-size: 16px;
+                    transition: background 0.2s;
+                " onmouseover="this.style.background='rgba(255,255,255,0.5)'" onmouseout="this.style.background='rgba(255,255,255,0.3)'">
+                    ✕
+                </button>
+            </div>
+
+            <!-- Content -->
+            <div style="padding: 1.5rem; display: flex; flex-direction: column; gap: 1.25rem; max-height: 450px; overflow-y: auto;">
+                
+                <!-- Language Selection -->
+                <div style="display: flex; align-items: center; gap: 0.75rem;">
+                    <label style="font-size: 0.85rem; font-weight: 600; color: #6B7280; flex: 0 0 60px;">Translate to:</label>
+                    <select id="translationLanguage" style="
+                        flex: 1;
+                        padding: 0.625rem 0.75rem;
+                        border: 1px solid #E5E7EB;
+                        border-radius: 8px;
+                        font-size: 0.9rem;
+                        background: white;
+                        cursor: pointer;
+                        transition: border-color 0.2s;
+                    " onchange="updateTranslationLanguage(this.value)">
+                        <option value="hi">🇮🇳 Hindi</option>
+                        <option value="ja">🇯🇵 Japanese</option>
+                        <option value="ko">🇰🇷 Korean</option>
+                        <option value="fr">🇫🇷 French</option>
+                        <option value="es">🇪🇸 Spanish</option>
+                        <option value="de">🇩🇪 German</option>
+                        <option value="pt">🇵🇹 Portuguese</option>
+                        <option value="zh">🇨🇳 Chinese</option>
+                    </select>
+                </div>
+
+                <!-- Record Button -->
+                <button id="recordBtn" onclick="startVoiceRecording()" style="
+                    width: 100%;
+                    padding: 0.875rem;
+                    background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+                    color: white;
+                    border: none;
+                    border-radius: 8px;
+                    font-weight: 600;
+                    cursor: pointer;
+                    font-size: 0.95rem;
+                    transition: all 0.3s;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    gap: 0.5rem;
+                " onmouseover="this.style.background='linear-gradient(135deg, #059669 0%, #047857 100%)'" onmouseout="this.style.background='linear-gradient(135deg, #10B981 0%, #059669 100%)'">
+                    <span id="recordBtnText">🎤 Start Recording</span>
+                </button>
+
+                <!-- Original Text -->
+                <div id="originalTextContainer" style="display: none;">
+                    <div style="font-size: 0.8rem; font-weight: 600; color: #6B7280; margin-bottom: 0.5rem;">Original Text:</div>
+                    <div id="originalText" style="
+                        padding: 0.875rem;
+                        background: #F3F4F6;
+                        border-radius: 8px;
+                        font-size: 0.9rem;
+                        color: #1F2937;
+                        min-height: 40px;
+                        word-break: break-word;
+                    "></div>
+                </div>
+
+                <!-- Translated Text -->
+                <div id="translatedTextContainer" style="display: none;">
+                    <div style="font-size: 0.8rem; font-weight: 600; color: #6B7280; margin-bottom: 0.5rem;">Translated Text:</div>
+                    <div id="translatedText" style="
+                        padding: 0.875rem;
+                        background: linear-gradient(135deg, rgba(0, 102, 255, 0.05) 0%, rgba(0, 102, 255, 0.02) 100%);
+                        border: 1px solid rgba(0, 102, 255, 0.2);
+                        border-radius: 8px;
+                        font-size: 0.9rem;
+                        color: #1F2937;
+                        min-height: 40px;
+                        word-break: break-word;
+                    "></div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div id="actionButtonsContainer" style="display: none; display: flex; gap: 0.75rem;">
+                    <button onclick="speakTranslation()" style="
+                        flex: 1;
+                        padding: 0.75rem;
+                        background: #7C3AED;
+                        color: white;
+                        border: none;
+                        border-radius: 8px;
+                        font-weight: 600;
+                        cursor: pointer;
+                        font-size: 0.9rem;
+                        transition: background 0.2s;
+                    " onmouseover="this.style.background='#6D28D9'" onmouseout="this.style.background='#7C3AED'">
+                        🔊 Speak
+                    </button>
+                    <button onclick="copyTranslation()" style="
+                        flex: 1;
+                        padding: 0.75rem;
+                        background: #0066FF;
+                        color: white;
+                        border: none;
+                        border-radius: 8px;
+                        font-weight: 600;
+                        cursor: pointer;
+                        font-size: 0.9rem;
+                        transition: background 0.2s;
+                    " onmouseover="this.style.background='#0052CC'" onmouseout="this.style.background='#0066FF'">
+                        📋 Copy
+                    </button>
+                </div>
+
+                <!-- Loading Spinner -->
+                <div id="loadingSpinner" style="display: none; text-align: center; padding: 1rem;">
+                    <div style="
+                        width: 32px;
+                        height: 32px;
+                        border: 3px solid #E5E7EB;
+                        border-top-color: #0066FF;
+                        border-radius: 50%;
+                        animation: spin 0.8s linear infinite;
+                        margin: 0 auto;
+                    "></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Voice Translator Styles -->
+    <style>
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-12px); }
+        }
+
+        @keyframes slideUpIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        #voiceTranslatorPopup::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        #voiceTranslatorPopup::-webkit-scrollbar-track {
+            background: #F3F4F6;
+        }
+
+        #voiceTranslatorPopup::-webkit-scrollbar-thumb {
+            background: #D1D5DB;
+            border-radius: 3px;
+        }
+
+        #voiceTranslatorPopup::-webkit-scrollbar-thumb:hover {
+            background: #9CA3AF;
+        }
+    </style>
+
+    <!-- Voice Translator JavaScript -->
+    <script>
+        let recognition;
+        let isRecording = false;
+        let currentTranslationLang = 'hi';
+        let silenceTimeout;
+
+        // Initialize Speech Recognition
+        function initSpeechRecognition() {
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            if (!SpeechRecognition) {
+                showToast('Speech Recognition not supported in your browser', 'error');
+                return false;
+            }
+            recognition = new SpeechRecognition();
+            recognition.continuous = true;
+            recognition.interimResults = true;
+            recognition.maxAlternatives = 1;
+            recognition.lang = 'en-US';
+
+            recognition.onstart = () => {
+                isRecording = true;
+                document.getElementById('recordBtn').innerHTML = '<span style="animation: pulse 1.5s infinite;">🎤 Recording... Speak now</span>';
+                // Reset silence timeout on start
+                clearTimeout(silenceTimeout);
+                showToast('Listening... Speak clearly', 'success');
+            };
+
+            recognition.onresult = (event) => {
+                clearTimeout(silenceTimeout);
+                let transcript = '';
+                let isFinal = false;
+                
+                for (let i = event.resultIndex; i < event.results.length; i++) {
+                    transcript += event.results[i][0].transcript + ' ';
+                    if (event.results[i].isFinal) {
+                        isFinal = true;
+                    }
+                }
+                
+                transcript = transcript.trim();
+                
+                if (transcript) {
+                    document.getElementById('originalText').textContent = transcript;
+                    document.getElementById('originalTextContainer').style.display = 'block';
+                    
+                    // Only translate when speech is final
+                    if (isFinal) {
+                        recognition.stop();
+                        translateText(transcript, currentTranslationLang);
+                    }
+                }
+                
+                // Set timeout to auto-stop if no speech after 3 seconds
+                if (!isFinal) {
+                    silenceTimeout = setTimeout(() => {
+                        if (isRecording) {
+                            recognition.stop();
+                        }
+                    }, 3000);
+                }
+            };
+
+            recognition.onerror = (event) => {
+                clearTimeout(silenceTimeout);
+                let errorMsg = event.error;
+                
+                // Provide user-friendly error messages
+                if (event.error === 'no-speech') {
+                    errorMsg = 'No speech detected. Please speak clearly and try again.';
+                } else if (event.error === 'network') {
+                    errorMsg = 'Network error. Check your internet connection.';
+                } else if (event.error === 'not-allowed') {
+                    errorMsg = 'Microphone access denied. Please allow microphone access.';
+                }
+                
+                console.error('Speech Recognition Error:', event.error, event);
+                showToast(errorMsg, 'error');
+                document.getElementById('recordBtn').innerHTML = '🎤 Start Recording';
+                isRecording = false;
+            };
+
+            recognition.onend = () => {
+                clearTimeout(silenceTimeout);
+                document.getElementById('recordBtn').innerHTML = '🎤 Start Recording';
+                isRecording = false;
+            };
+
+            return true;
+        }
+
+        function toggleVoiceTranslator() {
+            const popup = document.getElementById('voiceTranslatorPopup');
+            if (popup.style.display === 'none') {
+                popup.style.display = 'flex';
+                if (!recognition) {
+                    initSpeechRecognition();
+                }
+            } else {
+                closeVoiceTranslator();
+            }
+        }
+
+        function closeVoiceTranslator() {
+            document.getElementById('voiceTranslatorPopup').style.display = 'none';
+            if (isRecording && recognition) {
+                recognition.abort();
+            }
+        }
+
+        function startVoiceRecording() {
+            if (!recognition) {
+                if (!initSpeechRecognition()) {
+                    return;
+                }
+            }
+            
+            if (isRecording) {
+                recognition.stop();
+                isRecording = false;
+                document.getElementById('recordBtn').innerHTML = '🎤 Start Recording';
+            } else {
+                try {
+                    // Request microphone permission first
+                    navigator.mediaDevices.getUserMedia({ audio: true }).then(() => {
+                        // Clear previous results
+                        document.getElementById('originalTextContainer').style.display = 'none';
+                        document.getElementById('translatedTextContainer').style.display = 'none';
+                        document.getElementById('actionButtonsContainer').style.display = 'none';
+                        document.getElementById('loadingSpinner').style.display = 'none';
+                        
+                        // Start recording
+                        try {
+                            recognition.start();
+                        } catch (e) {
+                            console.error('Error starting recognition:', e);
+                            showToast('Error starting recording. Try refreshing the page.', 'error');
+                        }
+                    }).catch((err) => {
+                        console.error('Microphone access error:', err);
+                        showToast('Microphone access denied. Please check your browser permissions.', 'error');
+                        document.getElementById('recordBtn').innerHTML = '🎤 Start Recording';
+                    });
+                } catch (e) {
+                    console.error('Error accessing microphone:', e);
+                    // Fallback: try to start anyway (for browsers that don't support getUserMedia)
+                    try {
+                        document.getElementById('originalTextContainer').style.display = 'none';
+                        document.getElementById('translatedTextContainer').style.display = 'none';
+                        document.getElementById('actionButtonsContainer').style.display = 'none';
+                        recognition.start();
+                    } catch (err) {
+                        showToast('Could not access microphone. Check permissions and try again.', 'error');
+                    }
+                }
+            }
+        }
+
+        function updateTranslationLanguage(lang) {
+            currentTranslationLang = lang;
+            const originalText = document.getElementById('originalText').textContent;
+            if (originalText) {
+                translateText(originalText, lang);
+            }
+        }
+
+        async function translateText(text, targetLang) {
+            document.getElementById('loadingSpinner').style.display = 'block';
+            
+            try {
+                // Using MyMemory Translation API (free, no API key needed)
+                const response = await fetch(
+                    `https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=en|${targetLang}`
+                );
+                const data = await response.json();
+                
+                if (data.responseStatus === 200) {
+                    const translatedText = data.responseData.translatedText;
+                    document.getElementById('translatedText').textContent = translatedText;
+                    document.getElementById('translatedTextContainer').style.display = 'block';
+                    document.getElementById('actionButtonsContainer').style.display = 'flex';
+                    document.getElementById('loadingSpinner').style.display = 'none';
+                } else {
+                    showToast('Translation failed', 'error');
+                    document.getElementById('loadingSpinner').style.display = 'none';
+                }
+            } catch (error) {
+                console.error('Translation error:', error);
+                showToast('Translation service error', 'error');
+                document.getElementById('loadingSpinner').style.display = 'none';
+            }
+        }
+
+        function speakTranslation() {
+            const translatedText = document.getElementById('translatedText').textContent;
+            if (!translatedText) return;
+
+            const utterance = new SpeechSynthesisUtterance(translatedText);
+            utterance.lang = getLangCode(currentTranslationLang);
+            utterance.rate = 0.9;
+            window.speechSynthesis.speak(utterance);
+        }
+
+        function getLangCode(shortLang) {
+            const langMap = {
+                'hi': 'hi-IN',
+                'ja': 'ja-JP',
+                'ko': 'ko-KR',
+                'fr': 'fr-FR',
+                'es': 'es-ES',
+                'de': 'de-DE',
+                'pt': 'pt-BR',
+                'zh': 'zh-CN'
+            };
+            return langMap[shortLang] || 'en-US';
+        }
+
+        function copyTranslation() {
+            const translatedText = document.getElementById('translatedText').textContent;
+            navigator.clipboard.writeText(translatedText).then(() => {
+                showToast('Copied to clipboard!', 'success');
+            }).catch(err => {
+                showToast('Failed to copy', 'error');
+            });
+        }
+
+        // Add pulse animation style
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes pulse {
+                0%, 100% { opacity: 1; }
+                50% { opacity: 0.7; }
+            }
+        `;
+        document.head.appendChild(style);
+
+        // Make functions globally accessible
+        window.toggleVoiceTranslator = toggleVoiceTranslator;
+        window.closeVoiceTranslator = closeVoiceTranslator;
+        window.startVoiceRecording = startVoiceRecording;
+        window.updateTranslationLanguage = updateTranslationLanguage;
+        window.speakTranslation = speakTranslation;
+        window.copyTranslation = copyTranslation;
+    </script>
+
+    {% block scripts %}{% endblock %}
+</body>
+</html>

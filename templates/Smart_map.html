@@ -1,0 +1,1298 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="relative h-screen w-full overflow-hidden">
+    <!-- Map Container -->
+    <div id="map" class="absolute inset-0 z-0 transition-all duration-500"></div>
+
+    <!-- Modern Top Bar -->
+    <div class="absolute top-4 left-1/2 transform -translate-x-1/2 z-20 w-[90%] max-w-4xl">
+        <div class="bg-white/90 backdrop-blur-xl rounded-2xl shadow-2xl border border-white/20 px-5 py-3 flex flex-wrap items-center justify-center gap-3">
+            <i class="fas fa-map-marked-alt text-blue-600 text-xl"></i>
+            <div class="flex-1 min-w-[200px]">
+                <div class="relative">
+                    <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-sm"></i>
+                    <input type="text" id="searchInput" placeholder="Search for a place..." 
+                           class="w-full pl-10 pr-4 py-2 bg-gray-100/80 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 text-sm">
+                </div>
+            </div>
+            <button id="searchBtn" class="bg-gradient-to-r from-blue-500 to-blue-600 text-white px-5 py-2 rounded-xl text-sm font-medium hover:shadow-lg hover:scale-105 transition">Search</button>
+            <button id="routePlannerBtn" class="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-5 py-2 rounded-xl text-sm font-medium hover:shadow-lg hover:scale-105 transition">Route</button>
+            <div class="flex items-center gap-2 px-3 py-1.5 bg-gray-100/80 rounded-xl">
+                <i class="fas fa-cloud-sun text-yellow-500"></i>
+                <span id="weatherTemp" class="text-sm font-semibold">--°C</span>
+            </div>
+            <button id="themeToggle" class="w-8 h-8 rounded-full bg-gray-200 hover:bg-gray-300 transition flex items-center justify-center">
+                <i class="fas fa-moon text-gray-700"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- Sidebar -->
+    <div class="absolute left-4 top-20 z-20 w-80">
+        <div class="bg-white/95 backdrop-blur-xl rounded-2xl shadow-2xl border border-white/20 overflow-hidden">
+            <div class="bg-gradient-to-r from-blue-600 to-purple-600 px-5 py-4">
+                <h3 class="text-white font-semibold flex items-center gap-2"><i class="fas fa-layer-group"></i> Map Layers</h3>
+            </div>
+            <div class="p-4 space-y-3">
+                <div class="flex items-center justify-between p-2 hover:bg-gray-50 rounded-xl transition">
+                    <span class="text-sm font-medium"><i class="fas fa-fire text-red-500 mr-2"></i> Popular Places (estimate)</span>
+                    <label class="relative inline-flex items-center cursor-pointer">
+                        <input type="checkbox" id="toggleCrowd" class="sr-only peer">
+                        <div class="w-10 h-5 bg-gray-300 rounded-full peer peer-checked:bg-blue-600 peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all"></div>
+                    </label>
+                </div>
+                <div class="flex items-center justify-between p-2 hover:bg-gray-50 rounded-xl transition">
+                    <span class="text-sm font-medium"><i class="fas fa-user-friends text-green-500 mr-2"></i> Travel Companions</span>
+                    <input type="checkbox" id="toggleCompanions" class="toggle-switch">
+                </div>
+                <div class="flex items-center justify-between p-2 hover:bg-gray-50 rounded-xl transition">
+                    <span class="text-sm font-medium"><i class="fas fa-camera text-purple-500 mr-2"></i> Local Experiences</span>
+                    <input type="checkbox" id="toggleAttractions" class="toggle-switch">
+                </div>
+                <div class="flex items-center justify-between p-2 hover:bg-gray-50 rounded-xl transition">
+                    <span class="text-sm font-medium"><i class="fas fa-ambulance text-red-600 mr-2"></i> Emergency Services</span>
+                    <input type="checkbox" id="toggleEmergency" class="toggle-switch">
+                </div>
+                <div class="flex items-center justify-between p-2 hover:bg-gray-50 rounded-xl transition">
+                    <span class="text-sm font-medium"><i class="fas fa-parking text-gray-600 mr-2"></i> Smart Parking</span>
+                    <input type="checkbox" id="toggleParking" class="toggle-switch">
+                </div>
+            </div>
+            <div class="border-t border-gray-100 p-4">
+                <div class="flex justify-between items-center mb-3">
+                    <span class="text-sm font-medium"><i class="fas fa-users text-blue-500 mr-2"></i> Nearby Companions</span>
+                    <span id="companionCount" class="bg-blue-100 text-blue-700 px-2.5 py-0.5 rounded-full text-xs">0</span>
+                </div>
+                <button id="findNearbyBtn" class="w-full bg-gradient-to-r from-blue-500 to-purple-600 text-white py-2.5 rounded-xl text-sm font-semibold hover:shadow-lg transition flex items-center justify-center gap-2">📍 Find Near Me</button>
+                <button id="requestsBtn" class="w-full mt-2 bg-white border border-gray-200 text-gray-700 py-2 rounded-xl text-sm font-semibold hover:bg-gray-50 transition flex items-center justify-center gap-2">Companion Requests <span id="requestCount" class="bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full text-xs">0</span></button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Companion Form Modal -->
+    <div id="companionModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center hidden">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md mx-4 p-6">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-xl font-semibold text-gray-800">Join Companion Finder</h3>
+                <button id="closeCompanionModal" class="text-gray-400 hover:text-gray-600">&times;</button>
+            </div>
+            <form id="companionForm">
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
+                        <input type="text" id="compName" required class="w-full p-2.5 border rounded-xl">
+                    </div>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Age</label>
+                            <input type="number" id="compAge" required class="w-full p-2.5 border rounded-xl">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Gender</label>
+                            <select id="compGender" class="w-full p-2.5 border rounded-xl">
+                                <option value="Male">Male</option>
+                                <option value="Female">Female</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Destination</label>
+                        <input type="text" id="compDestination" required class="w-full p-2.5 border rounded-xl">
+                    </div>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Start Date</label>
+                            <input type="date" id="compStartDate" required class="w-full p-2.5 border rounded-xl">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">End Date</label>
+                            <input type="date" id="compEndDate" required class="w-full p-2.5 border rounded-xl">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Bio / Interests</label>
+                        <textarea id="compBio" rows="3" class="w-full p-2.5 border rounded-xl" placeholder="Tell others about yourself..."></textarea>
+                    </div>
+                    <button type="submit" class="w-full bg-gradient-to-r from-green-500 to-teal-500 text-white py-2.5 rounded-xl font-semibold">Start Sharing Location</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Companion Requests Panel -->
+    <div id="requestsPanel" class="absolute left-4 bottom-20 z-20 w-80 bg-white/95 backdrop-blur-xl rounded-2xl shadow-2xl hidden">
+        <div class="p-4">
+            <div class="flex justify-between items-center mb-3">
+                <h4 class="font-semibold">Companion Requests</h4>
+                <button id="closeRequestsPanel" class="text-gray-400">&times;</button>
+            </div>
+            <div id="requestsList" class="space-y-2 max-h-96 overflow-y-auto">
+                <!-- Requests will appear here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- FAB Buttons -->
+    <div class="absolute right-4 top-20 z-20 flex flex-col gap-3">
+        <button id="locateBtn" class="w-12 h-12 bg-white/90 backdrop-blur rounded-2xl shadow-xl flex items-center justify-center hover:scale-110 transition"><i class="fas fa-location-arrow text-blue-600 text-xl"></i></button>
+        <button id="clearRouteBtn" class="w-12 h-12 bg-white/90 backdrop-blur rounded-2xl shadow-xl hidden"><i class="fas fa-times text-red-500"></i></button>
+        <button id="sosBtn" class="w-12 h-12 bg-red-500/90 rounded-2xl shadow-xl flex items-center justify-center animate-pulse"><i class="fas fa-exclamation-triangle text-white text-xl"></i></button>
+    </div>
+
+    <!-- Route Sidebar -->
+    <div id="routeSidebar" class="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 z-30 w-96 bg-white/95 backdrop-blur-xl rounded-2xl shadow-2xl p-5 hidden">
+        <div class="flex justify-between items-center mb-4">
+            <h4><i class="fas fa-route text-blue-500"></i> Plan Route</h4>
+            <button id="closeRouteBtn" class="text-gray-400">&times;</button>
+        </div>
+        <input type="text" id="routeStart" placeholder="Start point" class="w-full p-3 border rounded-xl mb-3">
+        <input type="text" id="routeEnd" placeholder="Destination" class="w-full p-3 border rounded-xl mb-3">
+        <select id="routeMode" class="w-full p-3 border rounded-xl mb-4">
+            <option value="driving">🚗 Driving</option>
+            <option value="walking">🚶 Walking</option>
+            <option value="cycling">🚲 Cycling</option>
+        </select>
+        <button id="getRouteBtn" class="w-full bg-blue-600 text-white py-3 rounded-xl">Get Route</button>
+        <div id="routeInfo" class="text-sm mt-3"></div>
+    </div>
+
+    <div id="toastContainer" class="fixed bottom-4 left-1/2 transform -translate-x-1/2 z-30 flex flex-col gap-2 pointer-events-none"></div>
+</div>
+
+<!-- Leaflet CSS/JS -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://unpkg.com/leaflet.heat@0.2.0/dist/leaflet-heat.js"></script>
+<script src="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.js"></script>
+
+<style>
+    .toggle-switch { 
+        appearance: none; 
+        width: 36px; 
+        height: 20px; 
+        background: #ccc; 
+        border-radius: 20px; 
+        position: relative; 
+        cursor: pointer; 
+    }
+    .toggle-switch:checked { 
+        background: #3b82f6; 
+    }
+    .toggle-switch::before { 
+        content: ''; 
+        width: 16px; 
+        height: 16px; 
+        background: white; 
+        border-radius: 50%; 
+        position: absolute; 
+        top: 2px; 
+        left: 2px; 
+        transition: 0.2s; 
+    }
+    .toggle-switch:checked::before { 
+        left: 18px; 
+    }
+    .custom-marker { 
+        background: transparent; 
+        border: none; 
+    }
+    .leaflet-routing-container { 
+        display: none; 
+    }
+    /* OpenStreetMap does not require a project API key. Keep markers and UI
+       crisp while applying the night theme only to the base tiles. */
+    #map.smart-map-dark .leaflet-tile-pane {
+        filter: brightness(0.58) contrast(1.12) saturate(0.72) hue-rotate(180deg);
+    }
+    .toast { 
+        animation: fadeInUp 0.3s ease; 
+        pointer-events: auto; 
+        background: rgba(0,0,0,0.8); 
+        backdrop-filter: blur(8px); 
+        color: white; 
+        padding: 10px 20px; 
+        border-radius: 40px; 
+    }
+    @keyframes fadeInUp { 
+        from { opacity: 0; transform: translateY(20px); } 
+        to { opacity: 1; transform: translateY(0); } 
+    }
+    .request-card {
+        background: #f9fafb;
+        border-radius: 12px;
+        padding: 12px;
+        transition: all 0.2s;
+    }
+    .request-card:hover {
+        background: #f3f4f6;
+    }
+    .request-actions button {
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 500;
+    }
+</style>
+
+<script>
+    // Smart Map specific variables
+    let smartMap;
+    let baseTileLayerSmart;
+    let userMarkerSmart;
+    let heatLayerSmart;
+    let companionMarkersSmart = {};
+    let attractionMarkersSmart = {};
+    let emergencyMarkersSmart = {};
+    let parkingMarkersSmart = {};
+    let watchIdSmart = null;
+    let routingControlSmart = null;
+    let isDarkModeSmart = false;
+    let currentUserProfile = null;
+    let pendingRequests = [];
+    let isCompanionLayerActive = false;
+    let parkingFormSubmitted = false;
+    let parkingPreferences = { vehicleType: 'car', type: 'any' };
+    let isLoadingCompanions = false;
+    let isLoadingAttractions = false;
+    let isLoadingEmergency = false;
+    let isLoadingParking = false;
+    let moveEndDebounce = null;
+    let tileErrorNotified = false;
+    let primaryTileNoticeSmart = false;
+    let tileErrorCountSmart = 0;
+    let baseTileFallbackSmart = false;
+    let isLoadingCrowd = false;
+    let isLoadingWeather = false;
+    let companionRefreshIntervalSmart = null;
+    let lastCompanionLocationUpdateSmart = 0;
+
+    function getToken() { return localStorage.getItem('access_token'); }
+    let smartMapRewardTracked = false;
+
+    async function trackSmartMapUse(reason = 'map_interaction') {
+        if (smartMapRewardTracked) return;
+        const token = getToken();
+        if (!token) return;
+        try {
+            const res = await fetch('/api/gamification/event', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({ event_type: 'smart_map_use', event_ref: reason, meta: { reason } })
+            });
+            if (res.ok) {
+                smartMapRewardTracked = true;
+            }
+        } catch (e) {
+            console.warn('Smart map reward tracking failed:', e);
+        }
+    }
+
+    function showToast(msg, type='info') {
+        const container = document.getElementById('toastContainer');
+        const toast = document.createElement('div');
+        const icon = type === 'success' ? 'fa-check-circle' : type === 'error' ? 'fa-exclamation-triangle' : 'fa-info-circle';
+        toast.className = `toast flex items-center gap-2 text-sm`;
+        toast.innerHTML = `<i class="fas ${icon}"></i> ${msg}`;
+        container.appendChild(toast);
+        setTimeout(() => toast.remove(), 3000);
+    }
+
+    function addBaseMapLayer() {
+        baseTileLayerSmart = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+            maxZoom: 19,
+            crossOrigin: true
+        });
+        baseTileLayerSmart.on('tileerror', () => {
+            tileErrorCountSmart++;
+            if (tileErrorCountSmart >= 3 && !baseTileFallbackSmart) {
+                baseTileFallbackSmart = true;
+                smartMap.removeLayer(baseTileLayerSmart);
+                baseTileLayerSmart = L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+                    attribution: '&copy; OpenStreetMap contributors &copy; CARTO',
+                    subdomains: 'abcd',
+                    maxZoom: 20
+                });
+                let fallbackErrors = 0;
+                baseTileLayerSmart.on('tileerror', () => {
+                    fallbackErrors++;
+                    if (fallbackErrors >= 3 && !tileErrorNotified) {
+                        tileErrorNotified = true;
+                        showToast('Map providers are unreachable. Check your internet connection.', 'error');
+                    }
+                });
+                baseTileLayerSmart.addTo(smartMap);
+                showToast('Switching to backup map tiles...', 'info');
+            } else if (!baseTileFallbackSmart && !primaryTileNoticeSmart) {
+                primaryTileNoticeSmart = true;
+                showToast('Primary map tiles are slow; trying a backup provider.', 'info');
+            }
+        });
+        baseTileLayerSmart.addTo(smartMap);
+    }
+
+    function initMap(lat, lng) {
+        const mapElement = document.getElementById('map');
+        if (typeof L === 'undefined') {
+            mapElement.innerHTML = '<div class="h-full flex items-center justify-center bg-slate-100 text-red-600 font-medium">Unable to load the map library. Please refresh after checking your internet connection.</div>';
+            return false;
+        }
+        smartMap = L.map('map', { zoomControl: true, preferCanvas: true }).setView([lat, lng], 12);
+        addBaseMapLayer();
+        setTimeout(() => smartMap.invalidateSize(), 100);
+        return true;
+    }
+
+    // Theme Toggle
+    document.getElementById('themeToggle').addEventListener('click', () => {
+        isDarkModeSmart = !isDarkModeSmart;
+        document.getElementById('map').classList.toggle('smart-map-dark', isDarkModeSmart);
+        document.getElementById('themeToggle').innerHTML = isDarkModeSmart ? '<i class="fas fa-sun"></i>' : '<i class="fas fa-moon"></i>';
+        showToast(isDarkModeSmart ? 'Dark map theme enabled' : 'Light map theme enabled', 'info');
+    });
+
+    // ========== HELPER: FETCH WITH TIMEOUT ==========
+    async function fetchWithTimeout(url, options = {}, timeout = 15000) {
+        const controller = new AbortController();
+        const id = setTimeout(() => controller.abort(), timeout);
+        try {
+            const response = await fetch(url, { ...options, signal: controller.signal });
+            clearTimeout(id);
+            return response;
+        } catch (error) {
+            clearTimeout(id);
+            throw error;
+        }
+    }
+
+    // ========== CROWD DENSITY ==========
+    async function loadCrowdHeatmap(centerLat = null, centerLng = null) {
+        if (!smartMap) return;
+        if (isLoadingCrowd) return;
+        if (!window.L || typeof L.heatLayer !== 'function') {
+            showToast('Crowd-density layer is unavailable. Please refresh and try again.', 'error');
+            document.getElementById('toggleCrowd').checked = false;
+            return;
+        }
+        let lat = centerLat, lng = centerLng;
+        if (lat == null || lng == null) {
+            const center = smartMap.getCenter();
+            lat = center.lat;
+            lng = center.lng;
+        }
+        isLoadingCrowd = true;
+        try {
+            const res = await fetchWithTimeout(`/api/crowd/heatmap?lat=${lat}&lng=${lng}&radius=5000`, {}, 20000);
+            if (!res.ok) throw new Error(`Crowd endpoint returned ${res.status}`);
+            const data = await res.json();
+            if (heatLayerSmart) {
+                smartMap.removeLayer(heatLayerSmart);
+                heatLayerSmart = null;
+            }
+            if (data.success && data.points && data.points.length > 0) {
+                heatLayerSmart = L.heatLayer(data.points, { radius: 25, blur: 15, maxZoom: 17, gradient: {0.2: 'blue', 0.5: 'yellow', 0.8: 'red'} });
+                heatLayerSmart.addTo(smartMap);
+                showToast('Showing estimated activity around mapped popular places; live crowd counts are unavailable.', 'info');
+            } else {
+                showToast('No crowd data available for this area', 'info');
+            }
+        } catch(e) {
+            console.warn('Crowd heatmap unavailable:', e.message || e);
+            showToast('Could not load popular-place activity. Try again when the map service is reachable.', 'warning');
+        } finally {
+            isLoadingCrowd = false;
+        }
+    }
+
+    async function searchCrowdForPlace() {
+        const place = document.getElementById('searchInput').value.trim();
+        if (!place) {
+            showToast('Enter a place name to see crowd data', 'error');
+            return;
+        }
+        try {
+            const geoRes = await fetchWithTimeout(`/api/geocode?place=${encodeURIComponent(place)}`, {}, 20000);
+            const geoData = await geoRes.json();
+            if (geoData.lat != null && geoData.lng != null) {
+                smartMap.setView([geoData.lat, geoData.lng], 14);
+                await loadCrowdHeatmap(geoData.lat, geoData.lng);
+                L.marker([geoData.lat, geoData.lng]).addTo(smartMap)
+                    .bindPopup(`<b>${escapeHtml(place)}</b><br>Live crowd and wait-time data is unavailable.`)
+                    .openPopup();
+            } else {
+                showToast('Place not found', 'error');
+            }
+        } catch(e) { showToast('Search failed', 'error'); }
+    }
+
+    // ========== COMPANION FINDER ==========
+    document.getElementById('toggleCompanions').addEventListener('change', async (e) => {
+        if (e.target.checked) {
+            const token = getToken();
+            if (!token) {
+                showToast('Please login first', 'error');
+                e.target.checked = false;
+                return;
+            }
+            if (!currentUserProfile || !currentUserProfile.latitude || !currentUserProfile.longitude) {
+                document.getElementById('companionModal').classList.remove('hidden');
+                isCompanionLayerActive = true;
+                showToast('Fill the form and share location to find companions', 'info');
+            } else {
+                isCompanionLayerActive = true;
+                smartMap.setView([currentUserProfile.latitude, currentUserProfile.longitude], 14);
+                loadCompanions();
+                startLocationTracking();
+                startCompanionPolling();
+                showToast('Companion finder activated', 'success');
+            }
+        } else {
+            isCompanionLayerActive = false;
+            if (watchIdSmart) navigator.geolocation.clearWatch(watchIdSmart);
+            watchIdSmart = null;
+            if (companionRefreshIntervalSmart) clearInterval(companionRefreshIntervalSmart);
+            companionRefreshIntervalSmart = null;
+            Object.values(companionMarkersSmart).forEach(m => smartMap.removeLayer(m));
+            companionMarkersSmart = {};
+            showToast('Companion finder deactivated', 'info');
+        }
+    });
+
+    document.getElementById('companionForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const token = getToken();
+        if (!token) {
+            showToast('Please login first', 'error');
+            return;
+        }
+        if (!navigator.geolocation) {
+            showToast('Location sharing is required for companion finder', 'error');
+            return;
+        }
+
+        const profile = {
+            name: document.getElementById('compName').value,
+            age: document.getElementById('compAge').value,
+            gender: document.getElementById('compGender').value,
+            destination: document.getElementById('compDestination').value,
+            start_date: document.getElementById('compStartDate').value,
+            end_date: document.getElementById('compEndDate').value,
+            bio: document.getElementById('compBio').value
+        };
+
+        navigator.geolocation.getCurrentPosition(async (pos) => {
+            profile.latitude = pos.coords.latitude;
+            profile.longitude = pos.coords.longitude;
+            try {
+                const res = await fetch('/api/companion/profile', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                    body: JSON.stringify(profile)
+                });
+                if (res.ok) {
+                    currentUserProfile = profile;
+                    smartMap.setView([profile.latitude, profile.longitude], 14);
+                    document.getElementById('companionModal').classList.add('hidden');
+                    showToast('Location shared. Showing nearby companions...', 'success');
+                    isCompanionLayerActive = true;
+                    startLocationTracking();
+                    startCompanionPolling();
+                    loadCompanions();
+                } else {
+                    showToast('Error saving profile', 'error');
+                }
+            } catch (err) {
+                console.error('Companion profile save error:', err);
+                showToast('Network error', 'error');
+            }
+        }, () => {
+            showToast('Please allow location access to continue', 'error');
+        }, { enableHighAccuracy: true, timeout: 10000, maximumAge: 10000 });
+    });
+
+    document.getElementById('closeCompanionModal').addEventListener('click', () => {
+        document.getElementById('companionModal').classList.add('hidden');
+        document.getElementById('toggleCompanions').checked = false;
+        isCompanionLayerActive = false;
+    });
+
+    async function loadCompanions() {
+        if (isLoadingCompanions) return;
+        const token = getToken();
+        if (!token) return;
+        const center = smartMap.getCenter();
+        if (!center || center.lat == null || center.lng == null) return;
+
+        isLoadingCompanions = true;
+        try {
+            const res = await fetchWithTimeout(`/api/companion/nearby-enhanced?lat=${center.lat}&lng=${center.lng}&radius=20`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            }, 15000);
+            const data = await res.json();
+            
+            if (!Array.isArray(data)) {
+                console.warn('Invalid companions data:', data);
+                document.getElementById('companionCount').innerText = '0';
+                return;
+            }
+            
+            document.getElementById('companionCount').innerText = data.length;
+            Object.values(companionMarkersSmart).forEach(m => smartMap.removeLayer(m));
+            companionMarkersSmart = {};
+            
+            data.forEach(c => {
+                const connectionText = c.connection_status && c.connection_status !== 'none' ? c.connection_status : 'not connected';
+                const actionLabel = c.is_mock ? 'Contact Demo' : 'Send Request';
+                const popup = `<b>${escapeHtml(c.name || c.username || 'Traveler')}</b><br>📍 ${escapeHtml(c.destination || 'Anywhere')}<br>🎯 ${escapeHtml(c.looking_for || 'Travel buddy')}<br>📏 ${c.distance_km || 0} km away<br>🤝 ${c.compatibility || 60}% match<br>🔗 ${escapeHtml(connectionText)}<br><button class="mt-2 bg-blue-500 text-white px-3 py-1 rounded-lg text-xs" onclick="connectWith('${c.user_id}', ${c.is_mock ? 'true' : 'false'}, '${escapeHtml(c.contact || '').replace(/'/g, "\\'")}')">${actionLabel}</button>`;
+                const marker = L.marker([c.latitude, c.longitude], {
+                    icon: L.divIcon({ html: '<div class="w-10 h-10 bg-green-500 rounded-full flex items-center justify-center shadow-lg"><i class="fas fa-user-friends text-white text-lg"></i></div>', className: 'custom-marker', iconSize: [40, 40] })
+                }).addTo(smartMap);
+                marker.bindPopup(popup);
+                companionMarkersSmart[c.user_id] = marker;
+            });
+        } catch(e) {
+            if (e.name === 'AbortError') {
+                console.warn('Companion lookup timed out');
+                showToast('Companion search timed out. Check your connection and try again.', 'warning');
+            } else {
+                console.error('Companions error:', e);
+                showToast('Could not load companions. Please try again.', 'error');
+            }
+        } finally {
+            isLoadingCompanions = false;
+        }
+    }
+
+    window.connectWith = async (userId, isMock = false, contact = '') => {
+        const token = getToken();
+        if (!token) {
+            showToast('Please login first', 'error');
+            return;
+        }
+
+        if (isMock) {
+            showToast(`Demo companion: ${contact || 'contact unavailable'}`, 'info');
+            return;
+        }
+
+        try {
+            const res = await fetch('/api/companion/request', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({
+                    receiver_id: userId,
+                    message: 'Hi! I found you on Smart Map and would like to connect.'
+                })
+            });
+
+            const data = await res.json();
+            if (res.ok) {
+                showToast(data.message || 'Connection request sent', 'success');
+                loadCompanions();
+            } else {
+                showToast(data.error || 'Could not send request', 'error');
+            }
+        } catch (error) {
+            console.error('Connect error:', error);
+            showToast('Network error while sending request', 'error');
+        }
+    };
+
+    // ========== LOCAL EXPERIENCES ==========
+    async function loadAttractions() {
+        if (isLoadingAttractions) return;
+        const center = smartMap.getCenter();
+        if (!center || !center.lat || !center.lng) {
+            console.warn('Map center not available');
+            return;
+        }
+
+        isLoadingAttractions = true;
+        try {
+            const res = await fetchWithTimeout(`/api/local-experiences?lat=${center.lat}&lng=${center.lng}&radius=3000`, {}, 18000);
+            
+            if (!res.ok) {
+                throw new Error(`HTTP ${res.status}`);
+            }
+            const data = await res.json();
+            
+            Object.values(attractionMarkersSmart).forEach(m => {
+                if (m && smartMap.hasLayer(m)) smartMap.removeLayer(m);
+            });
+            attractionMarkersSmart = {};
+            
+            if (data.experiences && Array.isArray(data.experiences) && data.experiences.length > 0) {
+                data.experiences.forEach((exp, idx) => {
+                    if (exp.lat == null || exp.lon == null) {
+                        console.warn('Invalid coordinates for experience:', exp);
+                        return;
+                    }
+                    
+                    let categoryIcon = 'fa-camera';
+                    let color = '#8b5cf6';
+                    let emojiIcon = '📸';
+                    
+                    if (exp.category === 'street_food') {
+                        categoryIcon = 'fa-utensils';
+                        color = '#f59e0b';
+                        emojiIcon = '🍜';
+                    } else if (exp.category === 'cultural') {
+                        categoryIcon = 'fa-landmark';
+                        color = '#8b5cf6';
+                        emojiIcon = '🏛️';
+                    } else if (exp.category === 'market') {
+                        categoryIcon = 'fa-store';
+                        color = '#10b981';
+                        emojiIcon = '🛍️';
+                    }
+                    
+                    const isMock = exp.is_mock ? ' 🎭' : '';
+                    const directionsAction = exp.is_mock
+                        ? '<span class="text-xs text-gray-500">Demo suggestion; directions unavailable.</span>'
+                        : `<button class="flex-1 bg-blue-500 text-white px-2 py-1 rounded text-xs font-medium hover:bg-blue-600 transition" onclick="routeToPlace(${exp.lat}, ${exp.lon}, '${escapeHtml(exp.name).replace(/'/g, "\\'")}')">🚗 Directions</button>`;
+                    const marker = L.marker([exp.lat, exp.lon], {
+                        icon: L.divIcon({ 
+                            html: `<div class="w-10 h-10 rounded-full flex items-center justify-center shadow-lg text-lg" style="background: ${color}; border: 2px solid white;">${emojiIcon}</div>`, 
+                            className: 'custom-marker', 
+                            iconSize: [40, 40] 
+                        })
+                    }).addTo(smartMap);
+                    
+                    marker.bindPopup(`
+                        <div class="p-2 min-w-[240px]">
+                            <b class="text-sm">${escapeHtml(exp.name)}${isMock}</b><br>
+                            <span class="text-xs text-gray-600">${exp.description || exp.type || exp.category || 'Experience'}</span><br>
+                            <span class="text-xs text-gray-500">📏 ${exp.distance || '?'} km away</span><br>
+                            <span class="inline-block mt-1 px-2 py-0.5 bg-gray-100 rounded text-xs">
+                                <i class="fas ${categoryIcon}"></i> ${exp.category || 'Attraction'}
+                            </span><br>
+                            <div class="mt-2 flex gap-1">
+                                ${directionsAction}
+                                <button class="flex-1 bg-green-500 text-white px-2 py-1 rounded text-xs font-medium hover:bg-green-600 transition" 
+                                        onclick="showInfo('${escapeHtml(exp.name).replace(/'/g, "\\'")}', ${Boolean(exp.is_mock)})">
+                                    ℹ️ Info
+                                </button>
+                            </div>
+                        </div>
+                    `);
+                    
+                    attractionMarkersSmart[exp.id || idx] = marker;
+                });
+                
+                const mockCount = data.experiences.filter(e => e.is_mock).length;
+                const realCount = data.experiences.length - mockCount;
+                const msg = mockCount > 0 && realCount === 0 ? 
+                    `📍 Showing ${data.experiences.length} demo local experiences (demo mode)` :
+                    `🎉 Found ${data.experiences.length} local experiences nearby`;
+                showToast(msg, 'success');
+            } else {
+                showToast('No local experiences found. Showing nearby recommendations instead.', 'info');
+            }
+        } catch(e) {
+            if (e.name === 'AbortError') {
+                console.warn('Local experiences lookup timed out');
+                showToast('⏱️ Local experiences are taking longer than expected. Try Find Near Me once.', 'warning');
+            } else {
+                console.error('Attractions error:', e);
+                showToast('❌ Could not load experiences. Try another location.', 'error');
+            }
+        } finally {
+            isLoadingAttractions = false;
+        }
+    }
+    
+    // Info modal for attractions
+    window.showInfo = function(name, isMock = false) {
+        showToast(isMock ? `${name} is a demo suggestion, not a mapped venue.` : `${name} is mapped nearby.`, 'info');
+    };
+
+    // ========== EMERGENCY SERVICES ==========
+    async function loadEmergency() {
+        if (isLoadingEmergency) return;
+        const center = smartMap.getCenter();
+        if (!center || !center.lat || !center.lng) return;
+
+        isLoadingEmergency = true;
+        try {
+            const res = await fetchWithTimeout(`/api/nearby/search?lat=${center.lat}&lng=${center.lng}&radius=3000&category=emergency`, {}, 18000);
+            
+            const data = await res.json();
+            Object.values(emergencyMarkersSmart).forEach(m => smartMap.removeLayer(m));
+            emergencyMarkersSmart = {};
+            if (data.places && Array.isArray(data.places) && data.places.length > 0) {
+                data.places.forEach((place, idx) => {
+                    const isMock = place.is_mock ? ' 🎭' : '';
+                    const typeIcon = place.type.includes('hospital') || place.type.includes('clinic') ? '🏥' : 
+                                    place.type.includes('police') ? '🚔' : 
+                                    place.type.includes('fire') ? '🚒' : '🆘';
+                    const marker = L.marker([place.lat, place.lon], {
+                        icon: L.divIcon({ 
+                            html: `<div class="w-10 h-10 bg-red-500 rounded-full flex items-center justify-center shadow-lg ${place.is_mock ? 'animate-bounce' : 'animate-pulse'} border-2 border-white text-lg">${typeIcon}</div>`, 
+                            className: 'custom-marker', 
+                            iconSize: [40, 40] 
+                        })
+                    }).addTo(smartMap);
+                    marker.bindPopup(`
+                        <div class="p-2 min-w-[220px]">
+                            <b class="text-sm">${escapeHtml(place.name)}${isMock}</b><br>
+                            <span class="text-xs text-gray-600">${place.address || place.type}</span><br>
+                            <span class="text-xs font-semibold text-red-600">📞 Emergency: ${place.emergency_phone || '112'}</span><br>
+                            <span class="text-xs text-gray-500">📏 ${place.distance || '?'} km away</span><br>
+                            <div class="mt-2 flex gap-1">
+                                <button class="flex-1 bg-red-600 text-white px-2 py-1 rounded text-xs font-medium hover:bg-red-700 transition" 
+                                        onclick="routeToPlace(${place.lat}, ${place.lon}, '${escapeHtml(place.name).replace(/'/g, "\\'")}')">
+                                    📍 Get Route
+                                </button>
+                                <button class="flex-1 bg-blue-600 text-white px-2 py-1 rounded text-xs font-medium hover:bg-blue-700 transition" 
+                                        onclick="callEmergency('${place.emergency_phone || '112'}')">
+                                    ☎️ Call
+                                </button>
+                            </div>
+                        </div>
+                    `);
+                    emergencyMarkersSmart[place.id || idx] = marker;
+                });
+                const mockCount = data.places.filter(p => p.is_mock).length;
+                const realCount = data.places.length - mockCount;
+                const msg = mockCount > 0 && realCount === 0 ? 
+                    `📍 Showing ${data.places.length} emergency services (demo mode)` :
+                    `🚨 Found ${data.places.length} emergency services nearby`;
+                showToast(msg, 'success');
+            } else {
+                showToast('No mapped emergency services found nearby. If urgent, call your local emergency number.', 'warning');
+            }
+        } catch(e) {
+            if (e.name === 'AbortError') {
+                console.info('Emergency services lookup timed out');
+                showToast('Emergency lookup timed out. If urgent, call your local emergency number.', 'warning');
+            } else {
+                console.error('Emergency error:', e);
+                showToast('❌ Could not load emergency services. Try again.', 'error');
+            }
+        } finally {
+            isLoadingEmergency = false;
+        }
+    }
+    
+    // ========== SMART PARKING ==========
+    document.getElementById('toggleParking').addEventListener('change', (e) => {
+        if (e.target.checked) {
+            if (!parkingFormSubmitted) {
+                showParkingForm();
+            } else {
+                loadParking();
+            }
+        } else {
+            Object.values(parkingMarkersSmart).forEach(m => smartMap.removeLayer(m));
+            parkingMarkersSmart = {};
+        }
+    });
+
+    function showParkingForm() {
+        const modalHtml = `
+            <div id="parkingModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center">
+                <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md mx-4 p-6">
+                    <h3 class="text-xl font-semibold mb-4">Parking Assistance</h3>
+                    <form id="parkingForm">
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-sm font-medium mb-1">Vehicle Type</label>
+                                <select id="vehicleType" class="w-full p-2.5 border rounded-xl">
+                                    <option value="car">Car</option>
+                                    <option value="bike">Bike/Motorcycle</option>
+                                    <option value="suv">SUV</option>
+                                    <option value="ev">Electric Vehicle</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium mb-1">Preferred Parking Type</label>
+                                <select id="parkingType" class="w-full p-2.5 border rounded-xl">
+                                    <option value="any">Any</option>
+                                    <option value="street">Street Parking</option>
+                                    <option value="multistory">Multi-story</option>
+                                    <option value="underground">Underground</option>
+                                </select>
+                            </div>
+                            <button type="submit" class="w-full bg-blue-600 text-white py-2.5 rounded-xl font-semibold">Find Parking</button>
+                        </div>
+                    </form>
+                    <button id="closeParkingModal" class="absolute top-2 right-2 text-gray-400">&times;</button>
+                </div>
+            </div>
+        `;
+        document.body.insertAdjacentHTML('beforeend', modalHtml);
+        
+        document.getElementById('parkingForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            parkingPreferences = {
+                vehicleType: document.getElementById('vehicleType').value,
+                type: document.getElementById('parkingType').value
+            };
+            parkingFormSubmitted = true;
+            document.getElementById('parkingModal').remove();
+            loadParking();
+            showToast('Searching for parking spots...', 'info');
+        });
+        document.getElementById('closeParkingModal').addEventListener('click', () => {
+            document.getElementById('parkingModal').remove();
+            document.getElementById('toggleParking').checked = false;
+        });
+    }
+
+    async function loadParking() {
+        if (isLoadingParking) return;
+        const center = smartMap.getCenter();
+        if (!center || !center.lat || !center.lng) return;
+
+        isLoadingParking = true;
+        try {
+            const res = await fetchWithTimeout(`/api/parking/nearby?lat=${center.lat}&lng=${center.lng}&radius=2000`, {}, 15000);
+            const data = await res.json();
+            Object.values(parkingMarkersSmart).forEach(m => smartMap.removeLayer(m));
+            parkingMarkersSmart = {};
+            if (data.parking_spots && Array.isArray(data.parking_spots) && data.parking_spots.length > 0) {
+                const vehicleType = parkingPreferences.vehicleType;
+                let compatibleCount = 0;
+                const mockCount = data.parking_spots.filter(s => s.is_mock).length;
+                const realCount = data.parking_spots.length - mockCount;
+                
+                data.parking_spots.forEach((spot, idx) => {
+                    let compatible = true;
+                    if (vehicleType === 'ev' && spot.has_ev_charging === false) compatible = false;
+                    const parkingTypeAliases = {
+                        street: ['street', 'street_side'],
+                        multistory: ['multi-storey', 'multi_story', 'multistory'],
+                        underground: ['underground']
+                    };
+                    const acceptedTypes = parkingTypeAliases[parkingPreferences.type] || [];
+                    if (acceptedTypes.length && spot.parking_type && !acceptedTypes.includes(spot.parking_type)) compatible = false;
+                    
+                    if (compatible) {
+                        compatibleCount++;
+                        const isMock = spot.is_mock ? ' 🎭' : '';
+                        const hasAvailability = Number.isFinite(spot.available_spots) && Number.isFinite(spot.total_spots) && spot.total_spots > 0;
+                        const availability = hasAvailability ? Math.round(spot.available_spots / spot.total_spots * 100) : null;
+                        const avColor = availability === null ? '#64748b' : availability > 50 ? '#10b981' : availability > 20 ? '#f59e0b' : '#ef4444';
+                        
+                        const marker = L.marker([spot.lat, spot.lon], {
+                            icon: L.divIcon({ 
+                                html: `<div class="w-10 h-10 rounded-full flex items-center justify-center shadow-lg text-lg" style="background: ${avColor}; border: 2px solid white;">🅿️</div>`, 
+                                className: 'custom-marker', 
+                                iconSize: [40, 40] 
+                            })
+                        }).addTo(smartMap);
+                        marker.bindPopup(`
+                            <div class="p-2 min-w-[240px]">
+                                <b class="text-sm">${escapeHtml(spot.name || 'Parking Area')}${isMock}</b><br>
+                                <span class="text-xs text-gray-600">${spot.address || 'Parking Spot'}</span><br>
+                                <span class="text-xs text-gray-500">${spot.description || ''}</span><br>
+                                <div class="mt-2 font-semibold text-sm">🅿️ ${hasAvailability ? `${spot.available_spots}/${spot.total_spots} spots (${availability}% free)` : 'Availability not reported'}</div>
+                                <div class="mt-1 text-xs">
+                                    💰 <span class="font-semibold">${spot.is_free === true ? 'FREE' : Number.isFinite(spot.price_per_hour) ? '₹' + spot.price_per_hour + '/hr' : 'Pricing not reported'}</span>
+                                </div>
+                                ${spot.has_ev_charging === true ? '<div class="mt-1 text-xs">⚡ EV charging listed</div>' : spot.has_ev_charging === false ? '<div class="mt-1 text-xs">EV charging unavailable</div>' : '<div class="mt-1 text-xs">EV charging information unavailable</div>'}
+                                <div class="mt-2">
+                                    <button class="flex-1 bg-blue-600 text-white px-2 py-1 rounded text-xs font-medium hover:bg-blue-700 transition" 
+                                            onclick="routeToPlace(${spot.lat}, ${spot.lon}, '${escapeHtml(spot.name).replace(/'/g, "\\'")}')">
+                                        📍 Navigate
+                                    </button>
+                                </div>
+                            </div>
+                        `);
+                        parkingMarkersSmart[spot.id || idx] = marker;
+                    }
+                });
+                const msg = mockCount > 0 && realCount === 0 ?
+                    `Showing ${compatibleCount} demo parking locations; live availability is not available` :
+                    `Found ${compatibleCount} parking locations; availability and pricing may not be listed`;
+                showToast(msg, 'success');
+            } else {
+                showToast('No mapped parking locations found here. Live capacity and pricing are not available from OpenStreetMap.', 'info');
+            }
+        } catch(e) {
+            if (e.name === 'AbortError') {
+                console.warn('Parking request timed out');
+                showToast('Parking lookup timed out. Move the map and try again.', 'warning');
+            } else {
+                console.error('Parking error:', e);
+                showToast('❌ Parking search failed. Please retry.', 'error');
+            }
+        } finally {
+            isLoadingParking = false;
+        }
+    }
+    
+    // ========== ROUTING FUNCTION ==========
+    function createSmartRoute(waypoints) {
+        const mode = document.getElementById('routeMode')?.value || 'driving';
+        const profile = { driving: 'car', walking: 'foot', cycling: 'bike' }[mode] || 'car';
+        const control = L.Routing.control({
+            router: L.Routing.osrmv1({
+                serviceUrl: `https://routing.openstreetmap.de/routed-${profile}/route/v1`,
+                profile: 'driving'
+            }),
+            waypoints,
+            routeWhileDragging: true,
+            showAlternatives: true,
+            lineOptions: { styles: [{ color: '#3b82f6', weight: 6, opacity: 0.8 }] }
+        });
+        control.on('routesfound', (event) => {
+            const route = event.routes[0];
+            const distanceKm = (route.summary.totalDistance / 1000).toFixed(1);
+            const durationMinutes = Math.round(route.summary.totalTime / 60);
+            document.getElementById('routeInfo').textContent = `${distanceKm} km · about ${durationMinutes} min`;
+        });
+        control.on('routingerror', () => showToast('No route found for this mode and location', 'error'));
+        return control;
+    }
+
+    window.routeToPlace = function(destLat, destLng, name = 'Destination') {
+        if (!window.L || !L.Routing) {
+            showToast('Route planner is unavailable. Please refresh and try again.', 'error');
+            return;
+        }
+        if (!navigator.geolocation) {
+            showToast('Geolocation not supported', 'error');
+            return;
+        }
+        navigator.geolocation.getCurrentPosition(pos => {
+            const start = L.latLng(pos.coords.latitude, pos.coords.longitude);
+            const end = L.latLng(destLat, destLng);
+            if (routingControlSmart) smartMap.removeControl(routingControlSmart);
+            routingControlSmart = createSmartRoute([start, end]).addTo(smartMap);
+            document.getElementById('clearRouteBtn').classList.remove('hidden');
+            showToast(`Route requested to ${name || 'destination'}`, 'info');
+        }, () => showToast('Unable to get your location', 'error'));
+    };
+
+    // ========== LAYER TOGGLES ==========
+    document.getElementById('toggleCrowd').addEventListener('change', (e) => {
+        if (e.target.checked) {
+            const place = document.getElementById('searchInput').value.trim();
+            if (place) {
+                searchCrowdForPlace();
+            } else {
+                loadCrowdHeatmap();
+                showToast('Crowd density layer activated. Search a place for detailed crowd info!', 'info');
+            }
+        } else if (heatLayerSmart) {
+            smartMap.removeLayer(heatLayerSmart);
+        }
+    });
+    
+    document.getElementById('toggleAttractions').addEventListener('change', (e) => {
+        if (e.target.checked) {
+            loadAttractions();
+            trackSmartMapUse('attractions_layer');
+        }
+        else Object.values(attractionMarkersSmart).forEach(m => smartMap.removeLayer(m));
+    });
+    
+    document.getElementById('toggleEmergency').addEventListener('change', (e) => {
+        if (e.target.checked) {
+            loadEmergency();
+            trackSmartMapUse('emergency_layer');
+        }
+        else Object.values(emergencyMarkersSmart).forEach(m => smartMap.removeLayer(m));
+    });
+
+    // ========== SEARCH ==========
+    async function searchPlace() {
+        const query = document.getElementById('searchInput').value.trim();
+        if (!query) return;
+        try {
+            const res = await fetchWithTimeout(`/api/geocode?place=${encodeURIComponent(query)}`, {}, 12000);
+            if (!res.ok) { showToast('Location not found', 'error'); return; }
+            const data = await res.json();
+            if (data.lat != null && data.lng != null) {
+                smartMap.setView([data.lat, data.lng], 14);
+                L.marker([data.lat, data.lng]).addTo(smartMap).bindPopup(query).openPopup();
+                showToast(`Found: ${query}`, 'success');
+                if (document.getElementById('toggleCrowd').checked) {
+                    await loadCrowdHeatmap(data.lat, data.lng);
+                }
+            } else {
+                showToast('Location not found', 'error');
+            }
+        } catch(e) { showToast('Search error', 'error'); }
+    }
+
+    document.getElementById('searchBtn').addEventListener('click', searchPlace);
+    document.getElementById('searchInput').addEventListener('keypress', (e) => { if(e.key === 'Enter') searchPlace(); });
+
+    // ========== ROUTE PLANNER ==========
+    document.getElementById('routePlannerBtn').addEventListener('click', () => {
+        document.getElementById('routeSidebar').classList.toggle('hidden');
+    });
+    document.getElementById('closeRouteBtn').addEventListener('click', () => {
+        document.getElementById('routeSidebar').classList.add('hidden');
+        if (routingControlSmart) smartMap.removeControl(routingControlSmart);
+        document.getElementById('clearRouteBtn').classList.add('hidden');
+    });
+    document.getElementById('getRouteBtn').addEventListener('click', async () => {
+        const start = document.getElementById('routeStart').value;
+        const end = document.getElementById('routeEnd').value;
+        if (!start || !end) { showToast('Enter both start and destination', 'error'); return; }
+        if (!window.L || !L.Routing) { showToast('Route planner is unavailable. Please refresh and try again.', 'error'); return; }
+        try {
+            const startResponse = await fetchWithTimeout(`/api/geocode?place=${encodeURIComponent(start)}`, {}, 10000);
+            if (!startResponse.ok) { showToast('Could not find the start location', 'error'); return; }
+            const startGeo = await startResponse.json();
+            const endResponse = await fetchWithTimeout(`/api/geocode?place=${encodeURIComponent(end)}`, {}, 10000);
+            if (!endResponse.ok) { showToast('Could not find the destination', 'error'); return; }
+            const endGeo = await endResponse.json();
+            if (startGeo.lat == null || startGeo.lng == null || endGeo.lat == null || endGeo.lng == null) { showToast('Could not find locations', 'error'); return; }
+            if (routingControlSmart) smartMap.removeControl(routingControlSmart);
+            routingControlSmart = createSmartRoute([
+                L.latLng(startGeo.lat, startGeo.lng),
+                L.latLng(endGeo.lat, endGeo.lng)
+            ]).addTo(smartMap);
+            document.getElementById('clearRouteBtn').classList.remove('hidden');
+            document.getElementById('routeSidebar').classList.add('hidden');
+            showToast('Route calculated', 'success');
+        } catch(e) { showToast('Route calculation failed', 'error'); }
+    });
+    document.getElementById('clearRouteBtn').addEventListener('click', () => {
+        if (routingControlSmart) smartMap.removeControl(routingControlSmart);
+        document.getElementById('clearRouteBtn').classList.add('hidden');
+        showToast('Route cleared', 'info');
+    });
+
+    // ========== FIND NEAR ME ==========
+    document.getElementById('findNearbyBtn').addEventListener('click', () => {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(pos => {
+                smartMap.setView([pos.coords.latitude, pos.coords.longitude], 14);
+                showToast('Showing places near you', 'success');
+                trackSmartMapUse('find_near_me');
+                if (document.getElementById('toggleAttractions').checked) loadAttractions();
+                if (document.getElementById('toggleEmergency').checked) loadEmergency();
+                if (document.getElementById('toggleParking').checked && parkingFormSubmitted) loadParking();
+                if (document.getElementById('toggleCompanions').checked && isCompanionLayerActive) loadCompanions();
+            }, () => showToast('Location access was denied or unavailable', 'error'), { timeout: 10000, maximumAge: 30000 });
+        } else {
+            showToast('Geolocation is not supported by this browser', 'error');
+        }
+    });
+
+    // ========== LOCATE ME ==========
+    document.getElementById('locateBtn').addEventListener('click', () => {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(pos => {
+                smartMap.setView([pos.coords.latitude, pos.coords.longitude], 14);
+                if (userMarkerSmart) smartMap.removeLayer(userMarkerSmart);
+                userMarkerSmart = L.marker([pos.coords.latitude, pos.coords.longitude], {
+                    icon: L.divIcon({ html: '<div class="w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center shadow-lg"><i class="fas fa-user text-white text-xl"></i></div>', className: 'custom-marker', iconSize: [48, 48] })
+                }).addTo(smartMap);
+                showToast('Centered on your location', 'info');
+            }, () => showToast('Unable to get location', 'error'));
+        }
+    });
+
+    // ========== SOS BUTTON ==========
+    document.getElementById('sosBtn').addEventListener('click', async () => {
+        if (!getToken()) { showToast('Please login first', 'error'); return; }
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(async pos => {
+                try {
+                    const res = await fetch('/api/sos', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${getToken()}` },
+                        body: JSON.stringify({ latitude: pos.coords.latitude, longitude: pos.coords.longitude })
+                    });
+                    const data = await res.json();
+                    if (res.ok && data.success) {
+                        showToast(data.message, 'warning');
+                        L.marker([pos.coords.latitude, pos.coords.longitude], {
+                            icon: L.divIcon({ html: '<div class="w-16 h-16 bg-red-500 rounded-full flex items-center justify-center shadow-2xl animate-pulse"><i class="fas fa-exclamation-triangle text-white text-2xl"></i></div>', className: 'custom-marker', iconSize: [64, 64] })
+                        }).addTo(smartMap).bindPopup(escapeHtml(data.message)).openPopup();
+                    } else {
+                        showToast(data.error || 'SOS could not be sent', 'error');
+                    }
+                } catch(e) { showToast('Failed to send SOS', 'error'); }
+            }, () => showToast('Location access is required to send an SOS alert', 'error'), { enableHighAccuracy: true, timeout: 10000 });
+        } else {
+            showToast('Geolocation is not supported by this browser', 'error');
+        }
+    });
+
+    // ========== LOCATION TRACKING ==========
+    function startLocationTracking() {
+        if (!navigator.geolocation) return;
+        if (watchIdSmart) navigator.geolocation.clearWatch(watchIdSmart);
+        watchIdSmart = navigator.geolocation.watchPosition(pos => {
+            const token = getToken();
+            const now = Date.now();
+            if (!token || now - lastCompanionLocationUpdateSmart < 15000) return;
+            lastCompanionLocationUpdateSmart = now;
+            fetch('/api/companion/profile', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                body: JSON.stringify({ latitude: pos.coords.latitude, longitude: pos.coords.longitude })
+            }).catch(() => console.warn('Companion location sync is unavailable'));
+        }, () => {
+            console.warn('Companion location updates are unavailable');
+        }, { enableHighAccuracy: true, timeout: 15000, maximumAge: 10000 });
+    }
+
+    function startCompanionPolling() {
+        if (companionRefreshIntervalSmart) clearInterval(companionRefreshIntervalSmart);
+        companionRefreshIntervalSmart = setInterval(() => {
+            if (isCompanionLayerActive && document.getElementById('toggleCompanions').checked) {
+                loadCompanions();
+            }
+            if (getToken()) loadCompanionRequests();
+        }, 20000);
+    }
+
+    // ========== WEATHER UPDATE ==========
+    async function updateWeather(lat, lng) {
+        if (isLoadingWeather) return;
+        isLoadingWeather = true;
+        try {
+            const res = await fetchWithTimeout(`/api/weather/map?lat=${lat}&lng=${lng}`, {}, 15000);
+            if (!res.ok) throw new Error(`Weather service returned ${res.status}`);
+            const data = await res.json();
+            if (!Number.isFinite(data.temp)) throw new Error('Weather response did not include a temperature');
+            const weatherDisplay = `${Math.round(data.temp)}°C | ${escapeHtml(data.description || 'Current conditions')}`;
+            document.getElementById('weatherTemp').innerHTML = weatherDisplay;
+            document.getElementById('weatherTemp').title = Number.isFinite(data.feels_like)
+                ? `Feels like ${Math.round(data.feels_like)}°C | Humidity ${data.humidity}% | Wind ${data.wind_speed} km/h`
+                : weatherDisplay;
+        } catch(e) { 
+            console.warn('Weather update unavailable:', e.message || e);
+            document.getElementById('weatherTemp').innerHTML = '--°C'; 
+        } finally {
+            isLoadingWeather = false;
+        }
+    }
+
+    function escapeHtml(text) {
+        if (!text) return '';
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+
+    async function loadCompanionRequests() {
+        const token = getToken();
+        if (!token) return;
+        const list = document.getElementById('requestsList');
+        try {
+            const response = await fetchWithTimeout('/api/companion/requests', {
+                headers: { 'Authorization': `Bearer ${token}` }
+            }, 10000);
+            if (!response.ok) throw new Error(`Request list returned ${response.status}`);
+            const data = await response.json();
+            const requests = Array.isArray(data.requests) ? data.requests : [];
+            document.getElementById('requestCount').textContent = requests.length;
+            if (!requests.length) {
+                list.innerHTML = '<p class="text-sm text-gray-500">No pending requests.</p>';
+                return;
+            }
+            list.innerHTML = requests.map(item => `
+                <div class="request-card">
+                    <p class="font-semibold text-sm">${escapeHtml(item.sender_name)}</p>
+                    <p class="text-xs text-gray-600">${escapeHtml(item.destination || 'Destination not specified')}</p>
+                    <p class="text-sm mt-1">${escapeHtml(item.message || 'Wants to connect with you.')}</p>
+                    <div class="request-actions flex gap-2 mt-2">
+                        <button class="bg-green-600 text-white" data-request-action="accept" data-request-id="${item.id}">Accept</button>
+                        <button class="bg-gray-200 text-gray-700" data-request-action="decline" data-request-id="${item.id}">Decline</button>
+                    </div>
+                </div>
+            `).join('');
+        } catch (error) {
+            console.error('Companion request list error:', error);
+            list.innerHTML = '<p class="text-sm text-red-600">Could not load companion requests.</p>';
+        }
+    }
+
+    document.getElementById('requestsBtn').addEventListener('click', () => {
+        document.getElementById('requestsPanel').classList.remove('hidden');
+        loadCompanionRequests();
+    });
+    document.getElementById('closeRequestsPanel').addEventListener('click', () => {
+        document.getElementById('requestsPanel').classList.add('hidden');
+    });
+    document.getElementById('requestsList').addEventListener('click', async (event) => {
+        const button = event.target.closest('[data-request-action]');
+        if (!button) return;
+        const token = getToken();
+        if (!token) return showToast('Please login first', 'error');
+        button.disabled = true;
+        try {
+            const response = await fetch(`/api/companion/request/${button.dataset.requestId}/${button.dataset.requestAction}`, {
+                method: 'POST',
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            const data = await response.json();
+            if (!response.ok) throw new Error(data.error || 'Could not update request');
+            showToast(data.message, 'success');
+            loadCompanionRequests();
+            loadCompanions();
+        } catch (error) {
+            showToast(error.message || 'Could not update request', 'error');
+            button.disabled = false;
+        }
+    });
+
+    window.callEmergency = function(phone) {
+        const safePhone = String(phone || '').replace(/[^+\d]/g, '');
+        if (safePhone) window.location.href = `tel:${safePhone}`;
+    };
+
+    // ========== INITIALIZE ==========
+    document.addEventListener('DOMContentLoaded', () => {
+        if (!initMap(20.5937, 78.9629)) return;
+        const token = getToken();
+        if (token) {
+            fetch('/api/companion/profile', {
+                headers: { 'Authorization': `Bearer ${token}` }
+            }).then(r => r.json()).then(data => {
+                if (data.exists) {
+                    currentUserProfile = data;
+                    if (data.name) document.getElementById('compName').value = data.name;
+                    if (data.age) document.getElementById('compAge').value = data.age;
+                    if (data.gender) document.getElementById('compGender').value = data.gender;
+                    if (data.destination) document.getElementById('compDestination').value = data.destination;
+                    if (data.bio) document.getElementById('compBio').value = data.bio;
+                    if (data.start_date) document.getElementById('compStartDate').value = data.start_date;
+                    if (data.end_date) document.getElementById('compEndDate').value = data.end_date;
+                }
+            }).catch(err => console.warn('Profile load error:', err));
+        }
+        const today = new Date().toISOString().split('T')[0];
+        document.getElementById('compStartDate').value = today;
+        document.getElementById('compEndDate').value = today;
+        updateWeather(20.5937, 78.9629);
+        if (token) loadCompanionRequests();
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(
+                pos => updateWeather(pos.coords.latitude, pos.coords.longitude),
+                () => {},
+                { timeout: 10000, maximumAge: 30000 }
+            );
+        }
+        smartMap.on('moveend', () => {
+            if (moveEndDebounce) clearTimeout(moveEndDebounce);
+            moveEndDebounce = setTimeout(() => {
+                const center = smartMap.getCenter();
+                updateWeather(center.lat, center.lng);
+                if (document.getElementById('toggleCrowd').checked) loadCrowdHeatmap();
+                if (document.getElementById('toggleAttractions').checked) loadAttractions();
+                if (document.getElementById('toggleEmergency').checked) loadEmergency();
+                if (document.getElementById('toggleParking').checked && parkingFormSubmitted) loadParking();
+                if (document.getElementById('toggleCompanions').checked && isCompanionLayerActive) loadCompanions();
+            }, 700);
+        });
+    });
+</script>
+{% endblock %}

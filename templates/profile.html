@@ -1,0 +1,484 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="bg-white shadow rounded-lg overflow-hidden">
+    <!-- Profile Header with Cover Photo -->
+    <div class="relative">
+        <div class="h-32 bg-gradient-to-r from-blue-500 to-purple-600"></div>
+        <div class="px-6 py-4">
+            <div class="flex flex-col md:flex-row items-center md:items-end -mt-12">
+                <div class="relative">
+                    <div class="w-24 h-24 rounded-full bg-white p-1 shadow-lg">
+                        <div id="avatar-container" class="w-full h-full rounded-full bg-gray-200 flex items-center justify-center overflow-hidden">
+                            <i class="fas fa-user text-gray-400 text-4xl"></i>
+                        </div>
+                    </div>
+                    <button onclick="document.getElementById('avatar-upload').click()" class="absolute bottom-0 right-0 bg-blue-600 text-white p-1 rounded-full text-xs hover:bg-blue-700">
+                        <i class="fas fa-camera"></i>
+                    </button>
+                    <input type="file" id="avatar-upload" accept="image/*" class="hidden" onchange="uploadAvatar(this)">
+                </div>
+                <div class="md:ml-4 mt-4 md:mt-0 text-center md:text-left">
+                    <h1 id="username-display" class="text-2xl font-bold text-gray-900">Loading...</h1>
+                    <p class="text-gray-600" id="email-display">Loading...</p>
+                </div>
+                <div class="md:ml-auto mt-4 md:mt-0">
+                    <button onclick="toggleEditMode()" class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition">
+                        <i class="fas fa-edit mr-2"></i>Edit Profile
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="border-b border-gray-200">
+        <nav class="flex -mb-px px-6">
+            <button onclick="showTab('overview')" class="tab-button py-4 px-6 text-sm font-medium text-blue-600 border-b-2 border-blue-600" id="tab-overview">
+                <i class="fas fa-chart-line mr-2"></i>Overview
+            </button>
+            <button onclick="showTab('edit')" class="tab-button py-4 px-6 text-sm font-medium text-gray-500 hover:text-gray-700 hover:border-gray-300 border-b-2 border-transparent" id="tab-edit">
+                <i class="fas fa-user-edit mr-2"></i>Edit Profile
+            </button>
+            <button onclick="showTab('settings')" class="tab-button py-4 px-6 text-sm font-medium text-gray-500 hover:text-gray-700 hover:border-gray-300 border-b-2 border-transparent" id="tab-settings">
+                <i class="fas fa-cog mr-2"></i>Settings
+            </button>
+            <button onclick="showTab('activity')" class="tab-button py-4 px-6 text-sm font-medium text-gray-500 hover:text-gray-700 hover:border-gray-300 border-b-2 border-transparent" id="tab-activity">
+                <i class="fas fa-history mr-2"></i>Activity
+            </button>
+        </nav>
+    </div>
+
+    <!-- Tab Content -->
+    <div class="p-6">
+        <!-- Overview Tab -->
+        <div id="overview" class="tab-content">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                <div class="bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg p-6 text-center">
+                    <i class="fas fa-plane-departure text-blue-600 text-3xl mb-2"></i>
+                    <h3 class="text-2xl font-bold text-gray-800" id="trips-count">0</h3>
+                    <p class="text-gray-600">Total Trips</p>
+                </div>
+                <div class="bg-gradient-to-br from-green-50 to-green-100 rounded-lg p-6 text-center">
+                    <i class="fas fa-ticket-alt text-green-600 text-3xl mb-2"></i>
+                    <h3 class="text-2xl font-bold text-gray-800" id="bookings-count">0</h3>
+                    <p class="text-gray-600">Total Bookings</p>
+                </div>
+                <div class="bg-gradient-to-br from-purple-50 to-purple-100 rounded-lg p-6 text-center">
+                    <i class="fas fa-star text-purple-600 text-3xl mb-2"></i>
+                    <h3 class="text-2xl font-bold text-gray-800" id="stories-count">0</h3>
+                    <p class="text-gray-600">Travel Stories</p>
+                </div>
+            </div>
+
+            <div class="border-t border-gray-200 pt-6">
+                <h3 class="text-lg font-semibold mb-4">Recent Activity</h3>
+                <div id="recent-activity" class="space-y-3"></div>
+            </div>
+        </div>
+
+        <!-- Edit Profile Tab -->
+        <div id="edit" class="tab-content hidden">
+            <form id="editProfileForm" class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Username</label>
+                    <input type="text" id="edit-username" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Email</label>
+                    <input type="email" id="edit-email" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Bio</label>
+                    <textarea id="edit-bio" rows="3" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2" placeholder="Tell us about yourself..."></textarea>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Phone Number</label>
+                    <input type="tel" id="edit-phone" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
+                </div>
+                <div class="flex justify-end">
+                    <button type="button" onclick="updateProfile()" class="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700">
+                        <i class="fas fa-save mr-2"></i>Save Changes
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Settings Tab -->
+        <div id="settings" class="tab-content hidden">
+            <div class="space-y-6">
+                <div class="border-b border-gray-200 pb-4">
+                    <h3 class="text-lg font-semibold mb-3">Change Password</h3>
+                    <form id="changePasswordForm" class="space-y-3">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Current Password</label>
+                            <input type="password" id="current-password" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2" required>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">New Password</label>
+                            <input type="password" id="new-password" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2" required>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Confirm New Password</label>
+                            <input type="password" id="confirm-password" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2" required>
+                        </div>
+                        <button type="submit" class="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700">
+                            <i class="fas fa-key mr-2"></i>Change Password
+                        </button>
+                    </form>
+                </div>
+
+                <div class="border-b border-gray-200 pb-4">
+                    <h3 class="text-lg font-semibold mb-3">Notification Preferences</h3>
+                    <div class="space-y-2">
+                        <label class="flex items-center">
+                            <input type="checkbox" id="email-notifications" class="rounded border-gray-300 text-blue-600 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50">
+                            <span class="ml-2 text-sm text-gray-700">Email notifications</span>
+                        </label>
+                        <label class="flex items-center">
+                            <input type="checkbox" id="sms-notifications" class="rounded border-gray-300 text-blue-600 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50">
+                            <span class="ml-2 text-sm text-gray-700">SMS notifications</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div>
+                    <h3 class="text-lg font-semibold mb-3 text-red-600">Danger Zone</h3>
+                    <button onclick="deleteAccount()" class="bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700">
+                        <i class="fas fa-trash-alt mr-2"></i>Delete Account
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Activity Tab -->
+        <div id="activity" class="tab-content hidden">
+            <div id="activity-timeline" class="space-y-4"></div>
+        </div>
+    </div>
+</div>
+
+<script>
+    let currentUser = {};
+    let userStats = {};
+
+    const token = localStorage.getItem('access_token');
+    if (!token) window.location.href = '/login';
+
+    // Load user data
+    async function loadUserData() {
+        try {
+            const res = await fetch('/api/me', {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            currentUser = await res.json();
+            
+            document.getElementById('username-display').textContent = currentUser.username;
+            document.getElementById('email-display').textContent = currentUser.email;
+            document.getElementById('edit-username').value = currentUser.username;
+            document.getElementById('edit-email').value = currentUser.email;
+            document.getElementById('edit-bio').value = currentUser.bio || '';
+            document.getElementById('edit-phone').value = currentUser.phone || '';
+
+            // Load stats
+            await loadStats();
+            await loadActivity();
+        } catch (error) {
+            console.error('Error loading user data:', error);
+            window.location.href = '/login';
+        }
+    }
+
+    // Load user statistics
+    async function loadStats() {
+        try {
+            const tripsRes = await fetch('/api/trips', {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            const trips = await tripsRes.json();
+            userStats.trips = trips.length;
+            document.getElementById('trips-count').textContent = trips.length;
+
+            const bookingsRes = await fetch('/api/bookings', {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            const bookings = await bookingsRes.json();
+            userStats.bookings = bookings.length;
+            document.getElementById('bookings-count').textContent = bookings.length;
+
+            const storiesRes = await fetch('/api/stories');
+            const allStories = await storiesRes.json();
+            const userStories = allStories.filter(s => s.user === currentUser.username);
+            userStats.stories = userStories.length;
+            document.getElementById('stories-count').textContent = userStories.length;
+
+            // Recent activity
+            const recentActivity = [];
+            trips.slice(0, 3).forEach(trip => {
+                recentActivity.push({
+                    type: 'trip',
+                    title: `Planned trip to ${trip.destination}`,
+                    date: trip.start_date,
+                    icon: 'fa-plane-departure',
+                    color: 'blue'
+                });
+            });
+            bookings.slice(0, 3).forEach(booking => {
+                recentActivity.push({
+                    type: 'booking',
+                    title: `Booked trip to ${booking.destination}`,
+                    date: booking.travel_date,
+                    icon: 'fa-ticket-alt',
+                    color: 'green'
+                });
+            });
+            userStories.slice(0, 3).forEach(story => {
+                recentActivity.push({
+                    type: 'story',
+                    title: `Shared story: ${story.title}`,
+                    date: story.created_at,
+                    icon: 'fa-book-open',
+                    color: 'purple'
+                });
+            });
+            recentActivity.sort((a, b) => new Date(b.date) - new Date(a.date));
+            
+            const activityHtml = recentActivity.map(activity => `
+                <div class="flex items-center p-3 bg-gray-50 rounded-lg">
+                    <div class="w-10 h-10 rounded-full bg-${activity.color}-100 flex items-center justify-center">
+                        <i class="fas ${activity.icon} text-${activity.color}-600"></i>
+                    </div>
+                    <div class="ml-3 flex-1">
+                        <p class="text-sm font-medium text-gray-900">${activity.title}</p>
+                        <p class="text-xs text-gray-500">${new Date(activity.date).toLocaleDateString()}</p>
+                    </div>
+                </div>
+            `).join('');
+            document.getElementById('recent-activity').innerHTML = activityHtml || '<p class="text-gray-500">No recent activity</p>';
+        } catch (error) {
+            console.error('Error loading stats:', error);
+        }
+    }
+
+    // Load activity timeline
+    async function loadActivity() {
+        try {
+            const tripsRes = await fetch('/api/trips', {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            const trips = await tripsRes.json();
+            
+            const bookingsRes = await fetch('/api/bookings', {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            const bookings = await bookingsRes.json();
+            
+            const storiesRes = await fetch('/api/stories');
+            const allStories = await storiesRes.json();
+            const userStories = allStories.filter(s => s.user === currentUser.username);
+            
+            const allActivities = [];
+            trips.forEach(trip => {
+                allActivities.push({
+                    type: 'trip',
+                    title: `Planned a trip to ${trip.destination}`,
+                    details: `Budget: $${trip.budget} | Duration: ${trip.start_date} to ${trip.end_date}`,
+                    date: trip.created_at || trip.start_date,
+                    icon: 'fa-plane-departure',
+                    color: 'blue'
+                });
+            });
+            bookings.forEach(booking => {
+                allActivities.push({
+                    type: 'booking',
+                    title: `Booked a trip to ${booking.destination}`,
+                    details: `Price: $${booking.price} | Status: ${booking.status}`,
+                    date: booking.booking_date || booking.travel_date,
+                    icon: 'fa-ticket-alt',
+                    color: 'green'
+                });
+            });
+            userStories.forEach(story => {
+                allActivities.push({
+                    type: 'story',
+                    title: `Published story: ${story.title}`,
+                    details: story.content.substring(0, 100) + (story.content.length > 100 ? '...' : ''),
+                    date: story.created_at,
+                    icon: 'fa-book-open',
+                    color: 'purple'
+                });
+            });
+            
+            allActivities.sort((a, b) => new Date(b.date) - new Date(a.date));
+            
+            const timelineHtml = allActivities.map(activity => `
+                <div class="relative pl-8 pb-6 border-l-2 border-gray-200">
+                    <div class="absolute -left-3 w-6 h-6 rounded-full bg-${activity.color}-600 flex items-center justify-center">
+                        <i class="fas ${activity.icon} text-white text-xs"></i>
+                    </div>
+                    <div class="bg-gray-50 rounded-lg p-4">
+                        <h4 class="font-semibold text-gray-900">${activity.title}</h4>
+                        <p class="text-sm text-gray-600 mt-1">${activity.details}</p>
+                        <p class="text-xs text-gray-500 mt-2">${new Date(activity.date).toLocaleString()}</p>
+                    </div>
+                </div>
+            `).join('');
+            
+            document.getElementById('activity-timeline').innerHTML = timelineHtml || '<p class="text-gray-500">No activity yet</p>';
+        } catch (error) {
+            console.error('Error loading activity:', error);
+        }
+    }
+
+    // Update profile
+    async function updateProfile() {
+        const updatedData = {
+            username: document.getElementById('edit-username').value,
+            email: document.getElementById('edit-email').value,
+            bio: document.getElementById('edit-bio').value,
+            phone: document.getElementById('edit-phone').value
+        };
+        
+        try {
+            const res = await fetch('/api/update_profile', {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify(updatedData)
+            });
+            
+            if (res.ok) {
+                showToast('Profile updated successfully!', 'success');
+                await loadUserData();
+                toggleEditMode();
+            } else {
+                const error = await res.json();
+                showToast(error.msg || 'Error updating profile', 'error');
+            }
+        } catch (error) {
+            showToast('Error updating profile', 'error');
+        }
+    }
+
+    // Change password
+    document.getElementById('changePasswordForm')?.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const currentPassword = document.getElementById('current-password').value;
+        const newPassword = document.getElementById('new-password').value;
+        const confirmPassword = document.getElementById('confirm-password').value;
+        
+        if (newPassword !== confirmPassword) {
+            showToast('New passwords do not match', 'error');
+            return;
+        }
+        
+        try {
+            const res = await fetch('/api/change_password', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({ current_password: currentPassword, new_password: newPassword })
+            });
+            
+            if (res.ok) {
+                showToast('Password changed successfully!', 'success');
+                document.getElementById('changePasswordForm').reset();
+            } else {
+                const error = await res.json();
+                showToast(error.msg || 'Error changing password', 'error');
+            }
+        } catch (error) {
+            showToast('Error changing password', 'error');
+        }
+    });
+
+    // Upload avatar
+    async function uploadAvatar(input) {
+        if (input.files && input.files[0]) {
+            const formData = new FormData();
+            formData.append('avatar', input.files[0]);
+            
+            try {
+                const res = await fetch('/api/upload_avatar', {
+                    method: 'POST',
+                    headers: { 'Authorization': `Bearer ${token}` },
+                    body: formData
+                });
+                
+                if (res.ok) {
+                    const data = await res.json();
+                    const avatarContainer = document.getElementById('avatar-container');
+                    avatarContainer.innerHTML = `<img src="/static/${data.avatar_path}" class="w-full h-full object-cover">`;
+                    showToast('Avatar updated!', 'success');
+                } else {
+                    showToast('Error uploading avatar', 'error');
+                }
+            } catch (error) {
+                showToast('Error uploading avatar', 'error');
+            }
+        }
+    }
+
+    // Delete account
+    async function deleteAccount() {
+        if (confirm('Are you sure you want to delete your account? This action cannot be undone.')) {
+            try {
+                const res = await fetch('/api/delete_account', {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                
+                if (res.ok) {
+                    localStorage.removeItem('access_token');
+                    showToast('Account deleted successfully', 'success');
+                    setTimeout(() => {
+                        window.location.href = '/';
+                    }, 2000);
+                } else {
+                    showToast('Error deleting account', 'error');
+                }
+            } catch (error) {
+                showToast('Error deleting account', 'error');
+            }
+        }
+    }
+
+    // Tab switching
+    function showTab(tabName) {
+        document.querySelectorAll('.tab-content').forEach(tab => {
+            tab.classList.add('hidden');
+        });
+        document.getElementById(tabName).classList.remove('hidden');
+        
+        document.querySelectorAll('.tab-button').forEach(btn => {
+            btn.classList.remove('border-blue-600', 'text-blue-600');
+            btn.classList.add('border-transparent', 'text-gray-500');
+        });
+        document.getElementById(`tab-${tabName}`).classList.add('border-blue-600', 'text-blue-600');
+    }
+
+    function toggleEditMode() {
+        showTab('edit');
+    }
+
+    // Initialize
+    loadUserData();
+</script>
+
+<style>
+    /* Custom colors for activity timeline */
+    .bg-blue-600 { background-color: #3B82F6; }
+    .bg-green-600 { background-color: #10B981; }
+    .bg-purple-600 { background-color: #8B5CF6; }
+    .text-blue-600 { color: #3B82F6; }
+    .text-green-600 { color: #10B981; }
+    .text-purple-600 { color: #8B5CF6; }
+    .bg-blue-100 { background-color: #DBEAFE; }
+    .bg-green-100 { background-color: #D1FAE5; }
+    .bg-purple-100 { background-color: #EDE9FE; }
+</style>
+{% endblock %}

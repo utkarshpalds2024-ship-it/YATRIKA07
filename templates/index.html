@@ -1,0 +1,491 @@
+{% extends "base.html" %}
+
+{% block content %}
+<!-- Hero Section with Parallax Effect -->
+<section class="relative bg-gradient-to-br from-blue-600 via-blue-500 to-purple-600 overflow-hidden">
+    <!-- Animated Background Elements -->
+    <div class="absolute inset-0">
+        <div class="absolute top-20 left-10 w-72 h-72 bg-white opacity-5 rounded-full blur-3xl animate-pulse"></div>
+        <div class="absolute bottom-20 right-10 w-96 h-96 bg-purple-400 opacity-10 rounded-full blur-3xl animate-pulse delay-1000"></div>
+        <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-full h-full">
+            <svg class="absolute inset-0 w-full h-full opacity-10" xmlns="http://www.w3.org/2000/svg">
+                <defs>
+                    <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+                        <path d="M 40 0 L 0 0 0 40" fill="none" stroke="white" stroke-width="1"/>
+                    </pattern>
+                </defs>
+                <rect width="100%" height="100%" fill="url(#grid)"/>
+            </svg>
+        </div>
+    </div>
+    
+    <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 md:py-32">
+        <div class="grid lg:grid-cols-2 gap-12 items-center">
+            <div data-aos="fade-up" data-aos-duration="1000">
+                <div class="inline-flex items-center px-4 py-2 bg-white bg-opacity-20 backdrop-blur-sm rounded-full mb-6">
+                    <span class="relative flex h-3 w-3 mr-3">
+                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                        <span class="relative inline-flex rounded-full h-3 w-3 bg-green-500"></span>
+                    </span>
+                    <span class="text-white text-sm font-medium">Trusted by 50,000+ travelers</span>
+                </div>
+                
+                <h1 class="text-4xl md:text-5xl lg:text-6xl font-bold text-white leading-tight mb-6">
+                    Your Ultimate
+                    <span class="block bg-gradient-to-r from-yellow-400 to-orange-500 bg-clip-text text-transparent">
+                        Travel Companion
+                    </span>
+                </h1>
+                
+                <p class="text-lg text-white text-opacity-90 mb-8 leading-relaxed">
+                    Plan, book, and experience travel like never before. Smart itineraries, real-time assistance, and a global community of travelers.
+                </p>
+                
+                <div class="flex flex-col sm:flex-row gap-4">
+                    <a href="/planner" class="group inline-flex items-center justify-center px-8 py-4 bg-white text-blue-600 font-semibold rounded-xl shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300 cursor-pointer border-none">
+                        Start Planning
+                        <i class="fas fa-arrow-right ml-2 group-hover:translate-x-1 transition-transform"></i>
+                    </a>
+                    <a href="/stories" class="inline-flex items-center justify-center px-8 py-4 bg-white bg-opacity-20 backdrop-blur-sm border-2 border-white text-white font-semibold rounded-xl hover:bg-opacity-30 transition-all duration-300">
+                        <i class="fas fa-play-circle mr-2"></i>
+                        Read Stories
+                    </a>
+                </div>
+                
+                <!-- Stats -->
+                <div class="grid grid-cols-3 gap-4 mt-12 pt-8 border-t border-white border-opacity-20">
+                    <div>
+                        <div class="text-2xl font-bold text-white">50K+</div>
+                        <div class="text-sm text-white text-opacity-80">Active Users</div>
+                    </div>
+                    <div>
+                        <div class="text-2xl font-bold text-white">120+</div>
+                        <div class="text-sm text-white text-opacity-80">Countries</div>
+                    </div>
+                    <div>
+                        <div class="text-2xl font-bold text-white">10K+</div>
+                        <div class="text-sm text-white text-opacity-80">Trips Planned</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div data-aos="fade-left" data-aos-duration="1000" class="relative">
+                <div class="relative rounded-2xl overflow-hidden shadow-2xl">
+                    <img src="https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80" 
+                         alt="Travel" 
+                         class="w-full h-auto object-cover transform hover:scale-110 transition-transform duration-700">
+                    <div class="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-60"></div>
+                </div>
+                
+                <!-- Floating Cards -->
+                <div class="absolute -top-8 -left-8 bg-white rounded-xl shadow-xl p-3 animate-bounce" style="animation-duration: 3s;">
+                    <div class="flex items-center space-x-2">
+                        <i class="fas fa-map-marked-alt text-blue-600 text-xl"></i>
+                        <div>
+                            <p class="text-xs text-gray-500">Smart Planning</p>
+                            <p class="text-sm font-semibold">AI-Powered</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="absolute -bottom-8 -right-8 bg-white rounded-xl shadow-xl p-3 animate-pulse">
+                    <div class="flex items-center space-x-2">
+                        <i class="fas fa-users text-purple-600 text-xl"></i>
+                        <div>
+                            <p class="text-xs text-gray-500">Connect with</p>
+                            <p class="text-sm font-semibold">Travelers Nearby</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Wave Divider -->
+    <div class="absolute bottom-0 left-0 w-full">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320">
+            <path fill="#F9FAFB" fill-opacity="1" d="M0,96L48,112C96,128,192,160,288,160C384,160,480,128,576,122.7C672,117,768,139,864,154.7C960,171,1056,181,1152,165.3C1248,149,1344,107,1392,85.3L1440,64L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path>
+        </svg>
+    </div>
+</section>
+
+<!-- Features Section with Cards -->
+<section class="py-20 bg-gray-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center mb-16" data-aos="fade-up">
+            <h2 class="text-base text-blue-600 font-semibold tracking-wide uppercase">Why Choose Us</h2>
+            <p class="mt-2 text-4xl font-extrabold text-gray-900 sm:text-5xl">
+                Everything you need in one place
+            </p>
+            <p class="mt-4 max-w-2xl mx-auto text-xl text-gray-500">
+                Experience seamless travel planning with our comprehensive suite of tools
+            </p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+            <!-- Feature 1 -->
+            <div class="group" data-aos="fade-up" data-aos-delay="100">
+                <div class="bg-white rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2">
+                    <div class="w-14 h-14 bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                        <i class="fas fa-map-marked-alt text-white text-2xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-900 mb-2">Smart Trip Planner</h3>
+                    <p class="text-gray-600">AI-powered itineraries tailored to your preferences, budget, and duration.</p>
+                </div>
+            </div>
+            
+            <!-- Feature 2 -->
+            <div class="group" data-aos="fade-up" data-aos-delay="200">
+                <div class="bg-white rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2">
+                    <div class="w-14 h-14 bg-gradient-to-r from-purple-500 to-purple-600 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                        <i class="fas fa-users text-white text-2xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-900 mb-2">Travel Companion Finder</h3>
+                    <p class="text-gray-600">Connect with nearby travelers and share experiences in real-time.</p>
+                </div>
+            </div>
+            
+            <!-- Feature 3 -->
+            <div class="group" data-aos="fade-up" data-aos-delay="300">
+                <div class="bg-white rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2">
+                    <div class="w-14 h-14 bg-gradient-to-r from-green-500 to-green-600 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                        <i class="fas fa-chart-line text-white text-2xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-900 mb-2">Crowd Density Prediction</h3>
+                    <p class="text-gray-600">Avoid crowds with real-time heatmaps and wait time estimates.</p>
+                </div>
+            </div>
+            
+            <!-- Feature 4 -->
+            <div class="group" data-aos="fade-up" data-aos-delay="400">
+                <div class="bg-white rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2">
+                    <div class="w-14 h-14 bg-gradient-to-r from-orange-500 to-orange-600 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                        <i class="fas fa-credit-card text-white text-2xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-900 mb-2">Seamless Booking</h3>
+                    <p class="text-gray-600">Book flights, hotels, and activities with secure payments.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- How It Works Section -->
+<section class="py-20 bg-white">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center mb-16" data-aos="fade-up">
+            <h2 class="text-base text-blue-600 font-semibold tracking-wide uppercase">Simple Process</h2>
+            <p class="mt-2 text-4xl font-extrabold text-gray-900 sm:text-5xl">
+                How TravelEase Works
+            </p>
+            <p class="mt-4 max-w-2xl mx-auto text-xl text-gray-500">
+                Three simple steps to your perfect journey
+            </p>
+        </div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div class="text-center" data-aos="fade-up" data-aos-delay="100">
+                <div class="relative">
+                    <div class="w-24 h-24 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-map-marked-alt text-blue-600 text-3xl"></i>
+                    </div>
+                    <div class="absolute top-1/2 left-full w-full hidden md:block">
+                        <div class="h-0.5 bg-gradient-to-r from-blue-200 to-purple-200 w-full"></div>
+                    </div>
+                </div>
+                <h3 class="text-xl font-bold text-gray-900 mb-2">1. Plan Your Trip</h3>
+                <p class="text-gray-600">Enter your preferences and let our AI create the perfect itinerary</p>
+            </div>
+            
+            <div class="text-center" data-aos="fade-up" data-aos-delay="200">
+                <div class="relative">
+                    <div class="w-24 h-24 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-ticket-alt text-purple-600 text-3xl"></i>
+                    </div>
+                    <div class="absolute top-1/2 left-full w-full hidden md:block">
+                        <div class="h-0.5 bg-gradient-to-r from-purple-200 to-pink-200 w-full"></div>
+                    </div>
+                </div>
+                <h3 class="text-xl font-bold text-gray-900 mb-2">2. Book & Confirm</h3>
+                <p class="text-gray-600">Secure your bookings with our seamless payment system</p>
+            </div>
+            
+            <div class="text-center" data-aos="fade-up" data-aos-delay="300">
+                <div class="w-24 h-24 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-smile text-green-600 text-3xl"></i>
+                </div>
+                <h3 class="text-xl font-bold text-gray-900 mb-2">3. Enjoy Your Journey</h3>
+                <p class="text-gray-600">Get real-time assistance and connect with fellow travelers</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Weather & Stats Section -->
+<section class="py-20 bg-gradient-to-br from-blue-50 to-purple-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="grid lg:grid-cols-2 gap-12 items-center">
+            <div data-aos="fade-right">
+                <h2 class="text-3xl font-bold text-gray-900 mb-4">Real-Time Weather Updates</h2>
+                <p class="text-lg text-gray-600 mb-6">Stay informed about weather conditions at your destination</p>
+                
+                <div class="bg-white rounded-2xl shadow-xl p-6">
+                    <div class="flex flex-col sm:flex-row gap-4 mb-6">
+                        <div class="flex-1 relative">
+                            <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                            <input type="text" id="city" placeholder="Enter city name..." 
+                                   class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition">
+                        </div>
+                        <button onclick="getWeather()" 
+                                class="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-6 py-3 rounded-xl hover:shadow-lg transform hover:-translate-y-1 transition-all duration-300">
+                            <i class="fas fa-cloud-sun mr-2"></i>Get Weather
+                        </button>
+                    </div>
+                    <div id="weather-result" class="min-h-[200px]"></div>
+                </div>
+            </div>
+            
+            <div class="grid grid-cols-2 gap-6" data-aos="fade-left">
+                <div class="bg-white rounded-2xl p-6 text-center shadow-lg hover:shadow-xl transition">
+                    <i class="fas fa-globe-asia text-4xl text-blue-600 mb-3"></i>
+                    <div class="text-3xl font-bold text-gray-900">120+</div>
+                    <div class="text-gray-600">Countries</div>
+                </div>
+                <div class="bg-white rounded-2xl p-6 text-center shadow-lg hover:shadow-xl transition">
+                    <i class="fas fa-users text-4xl text-purple-600 mb-3"></i>
+                    <div class="text-3xl font-bold text-gray-900">50K+</div>
+                    <div class="text-gray-600">Happy Travelers</div>
+                </div>
+                <div class="bg-white rounded-2xl p-6 text-center shadow-lg hover:shadow-xl transition">
+                    <i class="fas fa-calendar-check text-4xl text-green-600 mb-3"></i>
+                    <div class="text-3xl font-bold text-gray-900">10K+</div>
+                    <div class="text-gray-600">Trips Planned</div>
+                </div>
+                <div class="bg-white rounded-2xl p-6 text-center shadow-lg hover:shadow-xl transition">
+                    <i class="fas fa-star text-4xl text-yellow-600 mb-3"></i>
+                    <div class="text-3xl font-bold text-gray-900">4.9</div>
+                    <div class="text-gray-600">User Rating</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Testimonials Section -->
+<section class="py-20 bg-white">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center mb-16" data-aos="fade-up">
+            <h2 class="text-base text-blue-600 font-semibold tracking-wide uppercase">Testimonials</h2>
+            <p class="mt-2 text-4xl font-extrabold text-gray-900 sm:text-5xl">
+                What Our Travelers Say
+            </p>
+        </div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div class="bg-gray-50 rounded-2xl p-6 hover:shadow-xl transition-all duration-300" data-aos="fade-up" data-aos-delay="100">
+                <div class="flex items-center mb-4">
+                    <img src="https://randomuser.me/api/portraits/women/1.jpg" alt="User" class="w-12 h-12 rounded-full mr-4">
+                    <div>
+                        <h4 class="font-semibold text-gray-900">Sarah Johnson</h4>
+                        <div class="flex text-yellow-400">
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                        </div>
+                    </div>
+                </div>
+                <p class="text-gray-600">"TravelEase made my Europe trip unforgettable! The AI itinerary was spot on, and the companion finder helped me meet amazing people."</p>
+            </div>
+            
+            <div class="bg-gray-50 rounded-2xl p-6 hover:shadow-xl transition-all duration-300" data-aos="fade-up" data-aos-delay="200">
+                <div class="flex items-center mb-4">
+                    <img src="https://randomuser.me/api/portraits/men/2.jpg" alt="User" class="w-12 h-12 rounded-full mr-4">
+                    <div>
+                        <h4 class="font-semibold text-gray-900">Michael Chen</h4>
+                        <div class="flex text-yellow-400">
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                        </div>
+                    </div>
+                </div>
+                <p class="text-gray-600">"The crowd density map saved me hours of waiting in lines. Best travel app I've ever used!"</p>
+            </div>
+            
+            <div class="bg-gray-50 rounded-2xl p-6 hover:shadow-xl transition-all duration-300" data-aos="fade-up" data-aos-delay="300">
+                <div class="flex items-center mb-4">
+                    <img src="https://randomuser.me/api/portraits/women/3.jpg" alt="User" class="w-12 h-12 rounded-full mr-4">
+                    <div>
+                        <h4 class="font-semibold text-gray-900">Emma Williams</h4>
+                        <div class="flex text-yellow-400">
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star-half-alt"></i>
+                        </div>
+                    </div>
+                </div>
+                <p class="text-gray-600">"Seamless booking experience and great customer support. Will definitely use again for my next adventure!"</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- CTA Section -->
+<section class="py-20 bg-gradient-to-r from-blue-600 to-purple-600">
+    <div class="max-w-4xl mx-auto text-center px-4 sm:px-6 lg:px-8">
+        <h2 class="text-3xl md:text-4xl font-bold text-white mb-4" data-aos="fade-up">
+            Ready to Start Your Journey?
+        </h2>
+        <p class="text-xl text-white text-opacity-90 mb-8" data-aos="fade-up" data-aos-delay="100">
+            Join thousands of travelers who have discovered the joy of seamless travel planning
+        </p>
+        <a href="/register" class="inline-flex items-center px-8 py-4 bg-white text-blue-600 font-semibold rounded-xl shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300" data-aos="fade-up" data-aos-delay="200">
+            Get Started for Free
+            <i class="fas fa-arrow-right ml-2"></i>
+        </a>
+    </div>
+</section>
+
+<script>
+function showLoading(element) {
+    element.innerHTML = `
+        <div class="flex justify-center items-center py-8">
+            <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+            <span class="ml-3 text-gray-600">Loading weather data...</span>
+        </div>
+    `;
+}
+
+function hideLoading(element) {
+    // Function to remove loading state
+}
+
+function getWeather() {
+    const city = document.getElementById('city').value;
+    if (!city) {
+        showToast('Please enter a city name', 'error');
+        return;
+    }
+    
+    const resultDiv = document.getElementById('weather-result');
+    showLoading(resultDiv);
+    
+    fetch(`/api/weather?city=${encodeURIComponent(city)}`)
+        .then(res => res.json())
+        .then(data => {
+            hideLoading(resultDiv);
+            if (data.error) {
+                resultDiv.innerHTML = `
+                    <div class="bg-red-50 border border-red-200 rounded-xl p-4 text-center">
+                        <i class="fas fa-exclamation-circle text-red-500 text-3xl mb-2"></i>
+                        <p class="text-red-600">${data.error}</p>
+                    </div>
+                `;
+                showToast(data.error, 'error');
+            } else {
+                // Build alerts HTML
+                let alertsHTML = '';
+                if (data.alerts && data.alerts.length > 0) {
+                    alertsHTML = '<div class="mt-4 space-y-2">';
+                    data.alerts.forEach(alert => {
+                        const bgColor = alert.severity === 'danger' 
+                            ? 'bg-red-50 border-red-200' 
+                            : 'bg-yellow-50 border-yellow-200';
+                        const textColor = alert.severity === 'danger' 
+                            ? 'text-red-600' 
+                            : 'text-yellow-600';
+                        
+                        alertsHTML += `
+                            <div class="border rounded-lg p-3 ${bgColor}">
+                                <p class="${textColor} font-semibold flex items-center gap-2">
+                                    <span>${alert.icon}</span>
+                                    ${alert.message}
+                                </p>
+                            </div>
+                        `;
+                    });
+                    alertsHTML += '</div>';
+                } else {
+                    alertsHTML = `
+                        <div class="mt-4 bg-green-50 border border-green-200 rounded-lg p-3">
+                            <p class="text-green-600 font-semibold flex items-center gap-2">
+                                <i class="fas fa-check-circle"></i>
+                                Good weather conditions for travel
+                            </p>
+                        </div>
+                    `;
+                }
+                
+                resultDiv.innerHTML = `
+                    <div class="bg-gradient-to-r from-blue-50 to-purple-50 rounded-xl p-6">
+                        <div class="flex items-center justify-between flex-wrap gap-4 mb-4">
+                            <div class="flex items-center space-x-4">
+                                <img src="https://openweathermap.org/img/wn/${data.icon}@2x.png" alt="weather icon" class="w-20 h-20">
+                                <div>
+                                    <div class="text-4xl font-bold text-gray-900">${Math.round(data.temperature)}°C</div>
+                                    <p class="text-gray-600 capitalize">${data.description}</p>
+                                    <p class="text-sm text-gray-500 mt-1">${data.city}, ${data.country}</p>
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-2 gap-4 text-sm">
+                                <div class="text-center">
+                                    <div class="text-gray-500 text-xs">Feels Like</div>
+                                    <div class="font-semibold text-gray-900">${Math.round(data.feels_like)}°C</div>
+                                </div>
+                                <div class="text-center">
+                                    <div class="text-gray-500 text-xs">Humidity</div>
+                                    <div class="font-semibold text-gray-900">${data.humidity}%</div>
+                                </div>
+                                <div class="text-center">
+                                    <div class="text-gray-500 text-xs">Wind</div>
+                                    <div class="font-semibold text-gray-900">${data.wind_speed} km/h</div>
+                                </div>
+                                <div class="text-center">
+                                    <div class="text-gray-500 text-xs">Visibility</div>
+                                    <div class="font-semibold text-gray-900">${data.visibility} km</div>
+                                </div>
+                            </div>
+                        </div>
+                        ${alertsHTML}
+                    </div>
+                `;
+                showToast(`Weather updated for ${data.city}`, 'success');
+            }
+        })
+        .catch((e) => {
+            hideLoading(resultDiv);
+            console.error('Weather error:', e);
+            resultDiv.innerHTML = `
+                <div class="bg-red-50 border border-red-200 rounded-xl p-4 text-center">
+                    <i class="fas fa-exclamation-circle text-red-500 text-3xl mb-2"></i>
+                    <p class="text-red-600">Error fetching weather data</p>
+                </div>
+            `;
+            showToast('Error fetching weather data', 'error');
+        });
+}
+
+// Initialize any interactive elements
+document.addEventListener('DOMContentLoaded', () => {
+    // Add enter key support for weather search
+    const cityInput = document.getElementById('city');
+    if (cityInput) {
+        cityInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                getWeather();
+            }
+        });
+    }
+});
+
+function navigateToPlanner() {
+    window.location.href = '/planner';
+}
+</script>
+{% endblock %}
